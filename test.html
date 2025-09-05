@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YETI Kelime Oyunu - Test Modu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        .hidden { display: none; }
+        .player-slot { 
+            transition: all 0.3s ease;
+            border: 2px solid #4b5563;
+            min-height: 80px;
+        }
+        .player-slot.active {
+            border-color: #818cf8;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #818cf8;
+        }
+        .player-slot.correct {
+            border-color: #22c55e;
+            background-color: #166534;
+            transform: scale(1.1);
+            box-shadow: 0 0 25px #22c55e;
+        }
+        .player-slot.wrong {
+             border-color: #ef4444;
+             background-color: #991b1b;
+             transform: scale(1.05);
+             box-shadow: 0 0 25px #ef4444;
+        }
+        .player-slot.eliminated {
+            opacity: 0.5;
+            background-color: #374151;
+            border-color: #1f2937;
+            transform: scale(0.95);
+        }
+        @keyframes pulse-white-to-red {
+            0% { color: #ffffff; }
+            100% { color: #dc2626; transform: scale(1.1); }
+        }
+        .animate-pulse-white-to-red {
+            animation: pulse-white-to-red 1s ease-out forwards;
+        }
+        
+        .slot-container {
+            height: 80px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 0.75rem;
+            background-color: #1f2937;
+            border: 2px solid #4b5563;
+        }
+        .slot-reel {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .slot-item {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            background-color: #1f2937;
+            backface-visibility: hidden;
+            padding: 0 10px;
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+        @keyframes modern-shine {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+        .game-title {
+            background: linear-gradient( 90deg, #a5b4fc, #6366f1, #a5b4fc );
+            background-size: 200% auto;
+            color: transparent;
+            background-clip: text;
+            -webkit-background-clip: text;
+            animation: modern-shine 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+
+    <div id="initial-screen" class="w-full max-w-sm">
+        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
+            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center">YETI - Test Modu</h1>
+            <input id="nameInput" type="text" placeholder="İsminizi Girin" maxlength="15" value="Test" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button id="joinGameButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition">Teste Başla</button>
+             <a href="/" class="block text-center mt-4 text-gray-400 hover:text-white">Normal Oyuna Dön</a>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden w-full max-w-4xl flex flex-col">
+        <h1 class="game-title text-6xl font-black text-center my-4">YETİ Test Modu</h1>
+        <div class=" text-center p-8 bg-gray-800 rounded-2xl shadow-2xl flex flex-col justify-between">
+            <div>
+                 <div id="task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div id="letter-slot-container" class="slot-container">
+                            <div class="slot-reel"></div>
+                        </div>
+                        <div id="category-slot-container" class="slot-container">
+                            <div class="slot-reel"></div>
+                        </div>
+                    </div>
+                </div>
+                 <div id="player-slots" class="grid grid-cols-1 gap-4 mb-6"></div>
+            </div>
+            <div>
+                <div id="countdown" class="text-8xl font-mono font-bold my-6 text-white h-24"></div>
+                <p id="status-text" class="text-lg text-gray-400 mb-6 h-8 flex items-center justify-center"></p>
+                <div id="game-buttons" class="h-14 flex justify-center items-center space-x-4">
+                    <div id="initial-start-button-wrapper">
+                        <button id="startButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">
+                            🎲 Yeni Zar At
+                        </button>
+                    </div>
+                    <div id="post-decision-buttons" class="hidden space-x-4">
+                         <button id="continueButton" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
+                            ↪️ Kaldığım Yerden Devam Et
+                        </button>
+                        <button id="restartButton" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
+                            🎲 Yeni Zar At
+                        </button>
+                    </div>
+                    <div id="confirmation-buttons" class="hidden space-x-4">
+                        <button id="confirmAddDbButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
+                            👍 Evet, Ekle
+                        </button>
+                        <button id="rejectAddDbButton" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg transition text-lg">
+                            👎 Hayır
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.body.innerHTML = `<div class="bg-red-900 border border-red-700 text-white p-8 rounded-lg shadow-xl max-w-lg mx-auto"><h1 class="text-3xl font-bold mb-4">Hata: Yanlış Çalıştırma Yöntemi</h1><p class="mb-2 text-lg">Bu dosyayı doğrudan çift tıklayarak açtınız. Bu oyunun çalışması için bir sunucu üzerinden açılması gerekir.</p><p class="mt-4">Lütfen <strong>node server.js</strong> komutunu çalıştırdıktan sonra tarayıcınızın adres çubuğuna şunu yazın:</p><p class="text-2xl font-mono bg-gray-900 p-3 rounded my-4 text-center select-all">http://localhost:3000/test.html</p></div>`;
+        } else {
+            const initialScreen = document.getElementById('initial-screen');
+            const gameContainer = document.getElementById('game-container');
+            const nameInput = document.getElementById('nameInput');
+            const joinGameButton = document.getElementById('joinGameButton');
+            const statusText = document.getElementById('status-text');
+            const playerSlotsDiv = document.getElementById('player-slots');
+            const countdownEl = document.getElementById('countdown');
+            const letterSlotContainer = document.getElementById('letter-slot-container');
+            const categorySlotContainer = document.getElementById('category-slot-container');
+            
+            const initialStartButtonWrapper = document.getElementById('initial-start-button-wrapper');
+            const startButton = document.getElementById('startButton');
+            const postDecisionButtons = document.getElementById('post-decision-buttons');
+            const continueButton = document.getElementById('continueButton');
+            const restartButton = document.getElementById('restartButton');
+            const confirmationButtons = document.getElementById('confirmation-buttons');
+            const confirmAddDbButton = document.getElementById('confirmAddDbButton');
+            const rejectAddDbButton = document.getElementById('rejectAddDbButton');
+
+            let synth = null;
+            let myDetails = null;
+            let wordToAddInfo = null;
+            const socket = io();
+            const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
+            const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'tr-TR';
+                recognition.continuous = false;
+            }
+
+            function hideAllButtons() {
+                initialStartButtonWrapper.classList.add('hidden');
+                postDecisionButtons.classList.add('hidden');
+                confirmationButtons.classList.add('hidden');
+            }
+
+            function populateReel(reelContainer, items, clones = 5) {
+                const reel = reelContainer.querySelector('.slot-reel');
+                reel.innerHTML = '';
+                const itemContainer = document.createElement('div');
+                for (let i = 0; i < clones; i++) {
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = `slot-item`;
+                        div.textContent = item;
+                        itemContainer.appendChild(div);
+                    });
+                }
+                reel.appendChild(itemContainer);
+            }
+            populateReel(letterSlotContainer, alphabet);
+            populateReel(categorySlotContainer, categories);
+            
+            function spinReel(reelContainer, items, finalIndex) {
+                const reel = reelContainer.querySelector('.slot-reel');
+                const itemHeight = 80;
+                const singleSetHeight = items.length * itemHeight;
+                reel.style.transition = 'none';
+                reel.style.top = `0px`;
+                reel.offsetHeight;
+                const spinCount = 4;
+                const finalPosition = (spinCount * singleSetHeight) + (finalIndex * itemHeight);
+                reel.style.transition = 'top 2.5s cubic-bezier(0.25, 1, 0.5, 1)';
+                reel.style.top = `-${finalPosition}px`;
+                setTimeout(() => {
+                    reel.style.transition = 'none';
+                    const resetPosition = finalIndex * itemHeight;
+                    reel.style.top = `-${resetPosition}px`;
+                }, 2550);
+            }
+
+            function updatePlayerSlots(players = []) {
+                playerSlotsDiv.innerHTML = '';
+                const player = players[0];
+                const slot = document.createElement('div');
+                slot.className = 'player-slot p-4 rounded-lg flex flex-col justify-center items-center';
+                if (player) {
+                    slot.id = `player-slot-${player.playerNumber}`;
+                    slot.innerHTML = `<div id="player-name-${player.id}" class="font-bold text-xl">${player.name}</div><div class="text-sm text-gray-400">Test Oyuncusu</div>`;
+                }
+                playerSlotsDiv.appendChild(slot);
+            }
+            
+            function initializeAudio() {
+                if(synth) return;
+                if (Tone.context.state !== 'running') {
+                    Tone.context.resume();
+                }
+                synth = new Tone.Synth().toDestination();
+            }
+            
+            joinGameButton.addEventListener('click', () => {
+                const name = nameInput.value.trim();
+                if (!name) return alert('Lütfen bir isim girin.');
+                initializeAudio();
+                socket.emit('joinGame', { name, isTestMode: true });
+            });
+            
+            function startNewDiceRoll() {
+                hideAllButtons();
+                socket.emit('startDiceRoll');
+            }
+
+            startButton.addEventListener('click', startNewDiceRoll);
+            restartButton.addEventListener('click', startNewDiceRoll);
+
+            continueButton.addEventListener('click', () => {
+                hideAllButtons();
+                socket.emit('continueTestLoop');
+            });
+
+            confirmAddDbButton.addEventListener('click', () => {
+                if (wordToAddInfo) {
+                    socket.emit('addWordToDb', wordToAddInfo);
+                }
+                confirmationButtons.classList.add('hidden');
+                postDecisionButtons.classList.remove('hidden');
+            });
+
+            rejectAddDbButton.addEventListener('click', () => {
+                wordToAddInfo = null;
+                confirmationButtons.classList.add('hidden');
+                postDecisionButtons.classList.remove('hidden');
+                statusText.textContent = "Kelime eklenmedi. Şimdi ne yapmak istersin?";
+            });
+
+            recognition.onresult = (event) => socket.emit('wordSpoken', event.results[0][0].transcript);
+            recognition.onerror = (event) => console.error('Ses tanıma hatası:', event.error);
+
+            socket.on('joined', ({ playerDetails }) => {
+                myDetails = playerDetails;
+                initialScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                updatePlayerSlots([myDetails]);
+                initialStartButtonWrapper.classList.remove('hidden');
+                statusText.textContent = "Başlamak için zar atın.";
+            });
+
+            socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex }) => {
+                hideAllButtons();
+                statusText.textContent = 'Zar atılıyor...';
+                populateReel(letterSlotContainer, alphabet);
+                populateReel(categorySlotContainer, categories);
+                spinReel(letterSlotContainer, alphabet, finalLetterIndex);
+                spinReel(categorySlotContainer, categories, finalCategoryIndex);
+            });
+            
+            socket.on('testTurnUpdate', ({ player, timeLeft }) => {
+                countdownEl.textContent = timeLeft;
+                countdownEl.classList.remove('animate-pulse-white-to-red');
+                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active', 'correct', 'wrong'));
+                const activeSlot = document.querySelector(`#player-name-${player.id}`)?.closest('.player-slot');
+                if(activeSlot) activeSlot.classList.add('active');
+
+                statusText.textContent = 'Test modu: Kelimeyi söyleyin!';
+                hideAllButtons();
+
+                try { 
+                    recognition.start(); 
+                } catch(e) { 
+                    console.error("Ses tanıma başlatılamadı!", e);
+                    statusText.textContent = "Mikrofon kullanılamıyor!";
+                }
+            });
+
+            socket.on('testFeedback', ({ message, correct, word, category, letter, timedOut }) => {
+                if (recognition) recognition.stop();
+                if (correct && synth) synth.triggerAttackRelease("C5", "8n");
+                else if (!correct && synth) synth.triggerAttackRelease("C3", "8n");
+
+                statusText.textContent = message;
+                const playerSlot = document.querySelector('.player-slot');
+                if (playerSlot) {
+                    playerSlot.classList.remove('active');
+                    if (!timedOut) {
+                       playerSlot.classList.add(correct ? 'correct' : 'wrong');
+                    }
+                }
+                
+                hideAllButtons();
+
+                if (!correct && !timedOut) {
+                    wordToAddInfo = { word, category, letter };
+                    confirmationButtons.classList.remove('hidden');
+                }
+            });
+            
+            socket.on('countdown', (timeLeft) => {
+                countdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
+                if (timeLeft === 0) {
+                    countdownEl.classList.add('animate-pulse-white-to-red');
+                }
+            });
+
+            socket.on('dbUpdateSuccess', (message) => {
+                const originalText = statusText.textContent;
+                statusText.textContent = message;
+                setTimeout(() => {
+                   statusText.textContent = "Şimdi ne yapmak istersin?";
+                }, 2000);
+            });
+            socket.on('dbUpdateError', (message) => alert(message));
+            socket.on('gameError', (message) => alert(message));
+        }
+    </script>
+</body>
+</html>
+
