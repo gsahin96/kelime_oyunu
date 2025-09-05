@@ -99,6 +99,17 @@
             <input id="nameInput" type="text" placeholder="İsminizi Girin" maxlength="15" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             <button id="joinGameButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition">Oyuna Katıl</button>
         </div>
+        <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-2xl">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-400 text-center">Nasıl Oynanır?</h2>
+            <ul class="space-y-3 text-gray-300 list-disc list-inside">
+                <li>Oyuna katılmak için bir isim girin.</li>
+                <li>Oyun kurucusu zarı atar ve bir harf ile kategori belirlenir.</li>
+                <li>Sırası gelen oyuncu, belirlenen harf ile başlayan ve kategoriye uygun bir kelime söyler.</li>
+                <li>Kelimeyi söylemek için 5 saniyeniz var. Süre bitmeden kelime söyleyemeyen veya yanlış kelime söyleyen oyuncu elenir.</li>
+                <li>Turdaki son oyuncu 1 puan kazanır.</li>
+                <li>Belirlenen hedef puana ilk ulaşan oyuncu oyunu kazanır.</li>
+            </ul>
+        </div>
     </div>
 
     <div id="game-container" class="hidden w-full max-w-6xl flex flex-col">
