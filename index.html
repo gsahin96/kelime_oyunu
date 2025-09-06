@@ -64,6 +64,7 @@
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
+            transition: top 2.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .slot-item {
             height: 80px;
@@ -97,33 +98,47 @@
         <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
             <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center">YETI Kelime Oyunu</h1>
             <input id="nameInput" type="text" placeholder="İsminizi Girin" maxlength="15" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button id="joinGameButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition">Oyuna Katıl</button>
-        </div>
-        <div class="mt-8 p-6 bg-gray-800 rounded-2xl shadow-2xl">
-            <h2 class="text-2xl font-bold mb-4 text-indigo-400 text-center">Nasıl Oynanır?</h2>
-            <ul class="space-y-3 text-gray-300 list-disc list-inside">
-                <li>Oyuna katılmak için bir isim girin.</li>
-                <li>Oyun kurucusu zarı atar ve bir harf ile kategori belirlenir.</li>
-                <li>Sırası gelen oyuncu, belirlenen harf ile başlayan ve kategoriye uygun bir kelime söyler.</li>
-                <li>Kelimeyi söylemek için 5 saniyeniz var. Süre bitmeden kelime söyleyemeyen veya yanlış kelime söyleyen oyuncu elenir.</li>
-                <li>Turdaki son oyuncu 1 puan kazanır.</li>
-                <li>Belirlenen hedef puana ilk ulaşan oyuncu oyunu kazanır.</li>
-            </ul>
+            
+            <div id="join-options">
+                <button id="createRoomButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Oda Oluştur</button>
+                <button id="showJoinFormButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">Odaya Katıl</button>
+                <div class="my-4 border-t border-gray-700"></div>
+                <button id="startSinglePlayerButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">Tek Başına Oyna</button>
+            </div>
+
+            <div id="join-form" class="hidden">
+                <input id="roomInput" type="text" placeholder="Oda Kodunu Gir" maxlength="6" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
+                <button id="joinRoomButton" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition">Katıl</button>
+                <button id="backToOptionsButton" class="w-full mt-2 text-gray-400 hover:text-white transition">Geri</button>
+            </div>
         </div>
     </div>
 
-    <div id="game-container" class="hidden w-full max-w-6xl flex flex-col">
-        <h1 class="game-title text-4xl md:text-6xl font-black text-center my-4">YETİ Kelime Oyunu</h1>
+    <div id="lobby-screen" class="hidden w-full max-w-lg text-center">
+        <h2 class="text-3xl font-bold text-indigo-400 mb-4">Oyun Lobisi</h2>
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl">
+            <p class="text-gray-400 mb-2">Arkadaşlarını davet et:</p>
+            <div class="flex items-center justify-center space-x-2">
+                <input id="roomLinkInput" type="text" readonly class="w-full p-3 bg-gray-700 rounded-lg text-white text-center font-mono select-all">
+                <button id="copyLinkButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold p-3 rounded-lg transition">Kopyala</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="game-container" class="hidden w-full max-w-6xl flex-col">
+        <div id="invite-link-ingame" class="w-full max-w-md mx-auto mb-4 text-center"></div>
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="md:col-span-2 text-center p-8 bg-gray-800 rounded-2xl shadow-2xl flex flex-col justify-between">
                 <div>
                      <div id="task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
                         <div class="grid grid-cols-2 gap-4">
                             <div id="letter-slot-container" class="slot-container">
-                                <div class="slot-reel"></div>
+                                <div class="slot-reel"><div class="slot-item"></div></div>
                             </div>
                             <div id="category-slot-container" class="slot-container">
-                                <div class="slot-reel"></div>
+                                <div class="slot-reel"><div class="slot-item"></div></div>
                             </div>
                         </div>
                     </div>
@@ -144,27 +159,70 @@
                              <button id="addWordNo" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👎 Hayır</button>
                         </div>
                     </div>
+                     <div id="word-input-area" class="hidden mt-4">
+                        <form id="word-form" class="flex justify-center space-x-2">
+                            <input type="text" id="wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="submit" id="sendWordButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">Gönder</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <div class="p-6 bg-gray-800 rounded-2xl shadow-2xl">
-                <h3 class="text-2xl font-bold mb-1 text-center">🏆 Puan Tablosu</h3>
-                <div class="text-center bg-gray-900/50 py-2 px-4 rounded-lg mb-4">
-                    Hedef: <span id="score-goal-display" class="font-bold text-xl text-yellow-300">10</span> Puan
+            <div id="sidebar" class="p-6 bg-gray-800 rounded-2xl shadow-2xl">
+                <h3 class="text-2xl font-bold mb-1 text-center">🏆 Puan Tablosu & Ayarlar</h3>
+                <div class="text-center bg-gray-900/50 py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4">
+                    <div>Hedef: <span id="score-goal-display" class="font-bold text-xl text-yellow-300">10</span></div>
+                    <div>Süre: <span id="turn-duration-display" class="font-bold text-xl text-yellow-300">5</span>sn</div>
                 </div>
-                <div id="host-options" class="hidden">
-                     <label for="scoreGoalSelect" class="block mb-2 text-sm text-gray-300">Hedef Skoru Değiştir:</label>
-                     <select id="scoreGoalSelect" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                         <option value="5">5 Puan</option>
-                         <option value="10" selected>10 Puan</option>
-                         <option value="15">15 Puan</option>
-                         <option value="20">20 Puan</option>
-                     </select>
+                <div id="host-options" class="hidden space-y-4">
+                     <div>
+                        <label for="scoreGoalSelect" class="block mb-2 text-sm text-gray-300">Hedef Skoru Değiştir:</label>
+                        <select id="scoreGoalSelect" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="5">5 Puan</option>
+                            <option value="10" selected>10 Puan</option>
+                            <option value="15">15 Puan</option>
+                            <option value="20">20 Puan</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label for="turnDurationSelect" class="block mb-2 text-sm text-gray-300">Tur Süresini Değiştir:</label>
+                        <select id="turnDurationSelect" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="5" selected>5 Saniye</option>
+                            <option value="10">10 Saniye</option>
+                            <option value="15">15 Saniye</option>
+                        </select>
+                     </div>
                 </div>
-                <div id="scoreboard" class="space-y-2"></div>
+                <div id="scoreboard" class="space-y-2 mt-4"></div>
                 <button id="resetScoreButton" class="hidden w-full mt-6 bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition">
                     Skorları Sıfırla
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tek Oyunculu Mod Arayüzü -->
+    <div id="single-player-container" class="hidden w-full max-w-2xl flex flex-col text-center">
+        <h1 class="game-title text-4xl md:text-6xl font-black text-center my-4">Tek Başına Oyna</h1>
+        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
+             <div id="sp-task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
+                 <div class="text-3xl"><span id="sp-letter" class="font-bold text-indigo-300">A</span> harfi ile başlayan <span id="sp-category" class="font-bold text-indigo-300">İsim</span></div>
+            </div>
+            <div id="sp-score" class="text-5xl font-bold mb-4">Puan: <span class="text-yellow-300">0</span></div>
+            <div id="sp-countdown" class="text-8xl font-mono font-bold my-6 text-white h-28"></div>
+            <p id="sp-status-text" class="text-lg text-gray-400 mb-6 h-8"></p>
+            <div id="sp-word-input-area" class="mt-4">
+                <form id="sp-word-form" class="flex justify-center space-x-2">
+                    <input type="text" id="sp-wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">Gönder</button>
+                </form>
+            </div>
+
+            <div id="sp-game-over" class="hidden">
+                 <h2 class="text-4xl font-bold text-red-500 mb-4">Oyun Bitti!</h2>
+                 <p class="text-2xl mb-6">Toplam Puanın: <span id="sp-final-score" class="font-bold text-yellow-300">0</span></p>
+                 <button id="sp-replay-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl mr-2">Yeniden Oyna</button>
+                 <button id="sp-main-menu-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">Ana Menü</button>
             </div>
         </div>
     </div>
@@ -174,10 +232,23 @@
         if (window.location.protocol === 'file:') {
             document.body.innerHTML = `<div class="bg-red-900 border border-red-700 text-white p-8 rounded-lg shadow-xl max-w-lg mx-auto"><h1 class="text-3xl font-bold mb-4">Hata: Yanlış Çalıştırma Yöntemi</h1><p class="mb-2 text-lg">Bu dosyayı doğrudan çift tıklayarak açtınız. Bu oyunun çalışması için bir sunucu üzerinden açılması gerekir.</p><p class="mt-4">Lütfen <strong>node server.js</strong> komutunu çalıştırdıktan sonra tarayıcınızın adres çubuğuna şunu yazın:</p><p class="text-2xl font-mono bg-gray-900 p-3 rounded my-4 text-center select-all">http://localhost:3000</p></div>`;
         } else {
+            // Element Tanımlamaları
             const initialScreen = document.getElementById('initial-screen');
             const gameContainer = document.getElementById('game-container');
+            const singlePlayerContainer = document.getElementById('single-player-container');
             const nameInput = document.getElementById('nameInput');
-            const joinGameButton = document.getElementById('joinGameButton');
+            const createRoomButton = document.getElementById('createRoomButton');
+            const showJoinFormButton = document.getElementById('showJoinFormButton');
+            const joinOptions = document.getElementById('join-options');
+            const joinForm = document.getElementById('join-form');
+            const roomInput = document.getElementById('roomInput');
+            const joinRoomButton = document.getElementById('joinRoomButton');
+            const backToOptionsButton = document.getElementById('backToOptionsButton');
+            const startSinglePlayerButton = document.getElementById('startSinglePlayerButton');
+            const lobbyScreen = document.getElementById('lobby-screen');
+            const roomLinkInput = document.getElementById('roomLinkInput');
+            const copyLinkButton = document.getElementById('copyLinkButton');
+            const inviteLinkInGame = document.getElementById('invite-link-ingame');
             const statusText = document.getElementById('status-text');
             const playerSlotsDiv = document.getElementById('player-slots');
             const countdownEl = document.getElementById('countdown');
@@ -193,10 +264,29 @@
             const hostDecisionButtons = document.getElementById('host-decision-buttons');
             const addWordYesButton = document.getElementById('addWordYes');
             const addWordNoButton = document.getElementById('addWordNo');
+            const wordInputArea = document.getElementById('word-input-area');
+            const wordInput = document.getElementById('wordInput');
+            const wordForm = document.getElementById('word-form');
+            const turnDurationSelect = document.getElementById('turnDurationSelect');
+            const turnDurationDisplay = document.getElementById('turn-duration-display');
+            const spTaskArea = document.getElementById('sp-task-area');
+            const spScoreEl = document.getElementById('sp-score').querySelector('span');
+            const spCountdownEl = document.getElementById('sp-countdown');
+            const spStatusText = document.getElementById('sp-status-text');
+            const spWordInputArea = document.getElementById('sp-word-input-area');
+            const spWordForm = document.getElementById('sp-word-form');
+            const spWordInput = document.getElementById('sp-wordInput');
+            const spGameOverScreen = document.getElementById('sp-game-over');
+            const spFinalScoreEl = document.getElementById('sp-final-score');
+            const spReplayButton = document.getElementById('sp-replay-button');
+            const spMainMenuButton = document.getElementById('sp-main-menu-button');
+            const spLetterEl = document.getElementById('sp-letter');
+            const spCategoryEl = document.getElementById('sp-category');
 
             let synth = null;
             let myDetails = null;
             let currentHostId = null;
+            let currentRoomId = null;
             let wordToAddInfo = null;
             const socket = io();
             const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
@@ -209,7 +299,356 @@
                 recognition.lang = 'tr-TR';
                 recognition.continuous = false;
             }
+            
+            showJoinFormButton.addEventListener('click', () => {
+                joinOptions.classList.add('hidden');
+                joinForm.classList.remove('hidden');
+            });
+            backToOptionsButton.addEventListener('click', () => {
+                joinForm.classList.add('hidden');
+                joinOptions.classList.remove('hidden');
+            });
+             const validateInputs = () => {
+                const name = nameInput.value.trim();
+                if (!name) {
+                    alert('Lütfen bir isim girin.');
+                    return false;
+                }
+                return { name };
+            };
+            createRoomButton.addEventListener('click', () => {
+                const { name } = validateInputs();
+                if (name) {
+                    initializeAudio();
+                    socket.emit('createRoom', { name });
+                }
+            });
+            joinRoomButton.addEventListener('click', () => {
+                const { name } = validateInputs();
+                const roomId = roomInput.value.trim().toUpperCase();
+                if (!roomId) {
+                    alert('Lütfen bir oda kodu girin.');
+                    return;
+                }
+                if (name) {
+                    initializeAudio();
+                    socket.emit('joinRoom', { name, roomId });
+                }
+            });
 
+            startSinglePlayerButton.addEventListener('click', () => {
+                const { name } = validateInputs();
+                if(name) {
+                    initializeAudio();
+                    socket.emit('startSinglePlayer', { name });
+                }
+            });
+
+            spReplayButton.addEventListener('click', () => {
+                const { name } = validateInputs();
+                if (name) socket.emit('startSinglePlayer', { name });
+            });
+            spMainMenuButton.addEventListener('click', () => window.location.reload());
+            
+            copyLinkButton.addEventListener('click', () => {
+                roomLinkInput.select();
+                document.execCommand('copy');
+                copyLinkButton.textContent = 'Kopyalandı!';
+                setTimeout(() => { copyLinkButton.textContent = 'Kopyala'; }, 1500);
+            });
+             startButton.addEventListener('click', () => socket.emit('startDiceRoll'));
+             newGameButton.addEventListener('click', () => socket.emit('newGame'));
+             resetScoreButton.addEventListener('click', () => {
+                 if (confirm('Tüm skorları sıfırlamak istediğinizden emin misiniz?')) {
+                     socket.emit('resetScores');
+                 }
+             });
+             function sendSettingsUpdate() {
+                 if (myDetails && myDetails.id === currentHostId) {
+                    socket.emit('gameSettingsChanged', { 
+                        scoreGoal: parseInt(scoreGoalSelect.value, 10),
+                        turnDuration: parseInt(turnDurationSelect.value, 10)
+                    });
+                }
+             }
+             scoreGoalSelect.addEventListener('change', sendSettingsUpdate);
+             turnDurationSelect.addEventListener('change', sendSettingsUpdate);
+             addWordYesButton.addEventListener('click', () => {
+                if(wordToAddInfo) {
+                    socket.emit('hostDecisionOnWord', { add: true, wordInfo: wordToAddInfo });
+                    hostDecisionButtons.classList.add('hidden');
+                }
+             });
+             addWordNoButton.addEventListener('click', () => {
+                 if(wordToAddInfo) {
+                    socket.emit('hostDecisionOnWord', { add: false, wordInfo: wordToAddInfo });
+                    hostDecisionButtons.classList.add('hidden');
+                }
+             });
+
+            window.addEventListener('load', () => {
+                const params = new URLSearchParams(window.location.search);
+                const roomIdFromUrl = params.get('oda');
+                if (roomIdFromUrl) {
+                    roomInput.value = roomIdFromUrl.toUpperCase();
+                    showJoinFormButton.click();
+                }
+            });
+            
+            function submitWord(word) {
+                if (word && word.trim()) {
+                    socket.emit('submitWord', word.trim());
+                    wordInput.value = '';
+                    wordInputArea.classList.add('hidden');
+                    if (recognition) recognition.stop();
+                }
+            }
+
+            wordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitWord(wordInput.value);
+            });
+            
+            spWordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitWord(spWordInput.value);
+                spWordInput.value = '';
+            });
+
+            if(recognition) {
+                recognition.onresult = (event) => submitWord(event.results[0][0].transcript);
+                recognition.onerror = (event) => console.error('Ses tanıma hatası:', event.error);
+            }
+            
+            socket.on('roomCreated', ({ roomId, playerDetails }) => {
+                myDetails = playerDetails;
+                currentRoomId = roomId;
+                initialScreen.classList.add('hidden');
+                lobbyScreen.classList.remove('hidden');
+                gameContainer.classList.remove('hidden');
+                
+                const link = `${window.location.origin}?oda=${roomId}`;
+                roomLinkInput.value = link;
+                inviteLinkInGame.innerHTML = lobbyScreen.innerHTML;
+                lobbyScreen.classList.add('hidden');
+            });
+            socket.on('joined', ({ playerDetails, roomId }) => {
+                myDetails = playerDetails;
+                currentRoomId = roomId;
+                initialScreen.classList.add('hidden');
+                lobbyScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+            });
+            socket.on('lobbyUpdate', ({ players, gameHostId, settings }) => {
+                currentHostId = gameHostId;
+                updatePlayerSlots(players);
+                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated', 'active', 'correct'));
+                statusText.textContent = `${players.length} / 8 oyuncu bekleniyor...`;
+                countdownEl.textContent = '';
+                
+                scoreGoalDisplay.textContent = settings.scoreGoal;
+                scoreGoalSelect.value = settings.scoreGoal;
+                turnDurationDisplay.textContent = settings.turnDuration;
+                turnDurationSelect.value = settings.turnDuration;
+
+                const isHost = myDetails && myDetails.id === gameHostId;
+                
+                const linkDiv = document.querySelector('#invite-link-ingame');
+                if(linkDiv) linkDiv.classList.toggle('hidden', !isHost || players.length === 8);
+                if (isHost) {
+                    const linkInput = document.querySelector('#invite-link-ingame input');
+                    const copyButton = document.querySelector('#invite-link-ingame button');
+                    if(linkInput) linkInput.value = `${window.location.origin}?oda=${currentRoomId}`;
+                    if(copyButton) copyButton.onclick = () => {
+                        linkInput.select();
+                        document.execCommand('copy');
+                        copyButton.textContent = 'Kopyalandı!';
+                        setTimeout(() => { copyButton.textContent = 'Kopyala'; }, 1500);
+                    };
+                }
+
+                hostOptions.classList.toggle('hidden', !isHost);
+                startButton.classList.toggle('hidden', !(isHost && players.length >= 1));
+                newGameButton.classList.add('hidden');
+                hostDecisionButtons.classList.add('hidden');
+                resetScoreButton.classList.toggle('hidden', !isHost);
+            });
+
+            function updateTaskDisplay(letter, category) {
+                const letterReel = letterSlotContainer.querySelector('.slot-reel');
+                const categoryReel = categorySlotContainer.querySelector('.slot-reel');
+                letterReel.style.transition = 'none';
+                categoryReel.style.transition = 'none';
+
+                const letterIndex = alphabet.indexOf(letter);
+                if (letterIndex > -1) {
+                    letterReel.style.top = `-${letterIndex * 80}px`;
+                }
+
+                const categoryIndex = categories.indexOf(category);
+                if (categoryIndex > -1) {
+                    categoryReel.style.top = `-${categoryIndex * 80}px`;
+                }
+            }
+            
+            socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver));
+            socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex, letter, category }) => {
+                startButton.classList.add('hidden');
+                newGameButton.classList.add('hidden');
+                statusText.textContent = 'Zar atılıyor...';
+                populateReel(letterSlotContainer, alphabet);
+                populateReel(categorySlotContainer, categories);
+                spinReel(letterSlotContainer, alphabet, finalLetterIndex);
+                spinReel(categorySlotContainer, categories, finalCategoryIndex);
+            });
+            socket.on('gameStart', () => {
+                statusText.textContent = '';
+                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated'));
+            });
+            socket.on('playerEliminated', ({ loserId, loserName, reason, word }) => {
+                 if (synth) synth.triggerAttackRelease("C3", "8n");
+                 const playerSlot = document.querySelector(`#player-slot-${loserId}`);
+                 if(playerSlot) {
+                    playerSlot.classList.add('eliminated');
+                 }
+                 let statusMessage = `${loserName}, "${reason}" nedeniyle elendi.`;
+                 if (word) {
+                    statusMessage += ` (Söylenen: "${word}")`;
+                 }
+                 statusText.textContent = statusMessage;
+                 if (myDetails && myDetails.id === loserId) {
+                    wordInputArea.classList.add('hidden');
+                 }
+            });
+            socket.on('askHostAboutWord', (wordInfo) => {
+                wordToAddInfo = wordInfo;
+                statusText.textContent = `'${wordInfo.word}' kelimesi DB'ye eklensin mi?`;
+                hostDecisionButtons.classList.remove('hidden');
+                countdownEl.textContent = '';
+            });
+            socket.on('turnUpdate', ({ player, timeLeft, activePlayersCount, letter, category }) => {
+                updateTaskDisplay(letter, category);
+                hostDecisionButtons.classList.add('hidden');
+                if (activePlayersCount >= 3 && synth) {
+                     synth.triggerAttackRelease("G4", "16n");
+                }
+                
+                statusText.textContent = '';
+                countdownEl.textContent = timeLeft;
+                countdownEl.classList.remove('animate-pulse-white-to-red');
+                
+                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active'));
+                const activeSlot = document.querySelector(`#player-slot-${player.id}`);
+                if(activeSlot) activeSlot.classList.add('active');
+
+                const isMyTurn = myDetails && myDetails.id === player.id;
+                wordInputArea.classList.toggle('hidden', !isMyTurn);
+
+                if (isMyTurn) {
+                    wordInput.focus();
+                    if (recognition) {
+                        try { 
+                            recognition.start(); 
+                        } catch(e) { 
+                            console.error("Ses tanıma başlatılamadı!", e);
+                            statusText.textContent = "Mikrofon kullanılamıyor, yazarak cevap verin.";
+                        }
+                    }
+                } else {
+                     if (recognition) recognition.stop();
+                }
+            });
+            socket.on('countdown', (timeLeft) => {
+                countdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
+                if (timeLeft === 0) {
+                    countdownEl.classList.add('animate-pulse-white-to-red');
+                }
+            });
+            socket.on('wordAccepted', ({ playerNumber, word }) => {
+                if (synth) synth.triggerAttackRelease("C5", "8n");
+                const correctSlot = document.querySelector(`.player-slot:nth-child(${playerNumber})`);
+                if (correctSlot) {
+                    correctSlot.classList.add('correct');
+                    setTimeout(() => correctSlot.classList.remove('correct'), 600);
+                }
+            });
+            socket.on('roundOver', ({ reason, winner }) => {
+                wordInputArea.classList.add('hidden');
+                hostDecisionButtons.classList.add('hidden');
+                if (winner && synth) {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "16n", now);
+                    synth.triggerAttackRelease("E5", "16n", now + 0.1);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                } else if (synth) {
+                    synth.triggerAttackRelease("E3", "8n");
+                }
+                if (recognition) recognition.stop();
+                statusText.textContent = winner ? `${reason} | Turun galibi: ${winner}` : reason;
+                countdownEl.textContent = '';
+                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active', 'eliminated'));
+                const isHost = myDetails && myDetails.id === currentHostId;
+                startButton.classList.toggle('hidden', !isHost);
+            });
+            socket.on('finalWinner', ({winner, scores}) => {
+                wordInputArea.classList.add('hidden');
+                if (recognition) recognition.stop();
+                updateScoreboard(scores, true);
+                countdownEl.textContent = '';
+                statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black">${winner}</span> 🏆</div>`;
+                const isHost = myDetails && myDetails.id === currentHostId;
+                newGameButton.classList.toggle('hidden', !isHost);
+                startButton.classList.add('hidden');
+                hostDecisionButtons.classList.add('hidden');
+            });
+            
+            socket.on('singlePlayerStarted', () => {
+                initialScreen.classList.add('hidden');
+                gameContainer.classList.add('hidden');
+                singlePlayerContainer.classList.remove('hidden');
+                spGameOverScreen.classList.add('hidden');
+                spWordInputArea.classList.remove('hidden');
+                spTaskArea.classList.remove('hidden');
+            });
+
+            socket.on('singlePlayerTurnUpdate', ({ letter, category, score, timeLeft }) => {
+                spLetterEl.textContent = letter;
+                spCategoryEl.textContent = category;
+                spScoreEl.textContent = score;
+                spCountdownEl.textContent = timeLeft;
+                spCountdownEl.classList.remove('animate-pulse-white-to-red');
+                spWordInput.focus();
+            });
+
+            socket.on('singlePlayerCountdown', (timeLeft) => {
+                spCountdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
+                if (timeLeft === 0) {
+                    spCountdownEl.classList.add('animate-pulse-white-to-red');
+                }
+            });
+
+            socket.on('singlePlayerGameOver', ({ score }) => {
+                spWordInputArea.classList.add('hidden');
+                spGameOverScreen.classList.remove('hidden');
+                spFinalScoreEl.textContent = score;
+                spTaskArea.classList.add('hidden');
+                spCountdownEl.textContent = '';
+            });
+
+            socket.on('gameError', (message) => alert(message));
+            socket.on('dbUpdateSuccess', (message) => {
+                statusText.textContent = message;
+                setTimeout(() => statusText.textContent = 'Oyun devam ediyor...', 2000);
+            });
+            socket.on('dbUpdateError', (message) => alert(message));
+
+            function initializeAudio() {
+                if(synth) return;
+                if (Tone.context.state !== 'running') {
+                    Tone.context.resume();
+                }
+                synth = new Tone.Synth().toDestination();
+            }
             function populateReel(reelContainer, items, clones = 5) {
                 const reel = reelContainer.querySelector('.slot-reel');
                 reel.innerHTML = '';
@@ -224,31 +663,18 @@
                 }
                 reel.appendChild(itemContainer);
             }
-            populateReel(letterSlotContainer, alphabet);
-            populateReel(categorySlotContainer, categories);
-            
             function spinReel(reelContainer, items, finalIndex) {
                 const reel = reelContainer.querySelector('.slot-reel');
                 const itemHeight = 80;
                 const singleSetHeight = items.length * itemHeight;
-
                 reel.style.transition = 'none';
                 reel.style.top = `0px`;
                 reel.offsetHeight;
-
                 const spinCount = 4;
                 const finalPosition = (spinCount * singleSetHeight) + (finalIndex * itemHeight);
-                
                 reel.style.transition = 'top 2.5s cubic-bezier(0.25, 1, 0.5, 1)';
                 reel.style.top = `-${finalPosition}px`;
-                
-                setTimeout(() => {
-                    reel.style.transition = 'none';
-                    const resetPosition = finalIndex * itemHeight;
-                    reel.style.top = `-${resetPosition}px`;
-                }, 2550);
             }
-
             function updatePlayerSlots(players = []) {
                 playerSlotsDiv.innerHTML = '';
                 for (let i = 1; i <= 8; i++) {
@@ -264,8 +690,7 @@
                     playerSlotsDiv.appendChild(slot);
                 }
             }
-            
-            function updateScoreboard(scores = {}, isGameOver = false) {
+             function updateScoreboard(scores = {}, isGameOver = false) {
                 scoreboardDiv.innerHTML = '';
                 const sortedScores = Object.entries(scores).sort(([,a],[,b]) => b-a);
                 if (sortedScores.length === 0) {
@@ -286,188 +711,6 @@
                     });
                 }
             }
-
-            function initializeAudio() {
-                if(synth) return;
-                if (Tone.context.state !== 'running') {
-                    Tone.context.resume();
-                }
-                synth = new Tone.Synth().toDestination();
-            }
-            
-            joinGameButton.addEventListener('click', () => {
-                const name = nameInput.value.trim();
-                if (!name) return alert('Lütfen bir isim girin.');
-                initializeAudio();
-                socket.emit('joinGame', { name });
-            });
-            
-            scoreGoalSelect.addEventListener('change', () => {
-                if (myDetails && myDetails.id === currentHostId) {
-                    socket.emit('scoreGoalChanged', parseInt(scoreGoalSelect.value, 10));
-                }
-            });
-            
-            startButton.addEventListener('click', () => socket.emit('startDiceRoll'));
-            newGameButton.addEventListener('click', () => socket.emit('newGame'));
-            resetScoreButton.addEventListener('click', () => {
-                if (confirm('Tüm skorları sıfırlamak istediğinizden emin misiniz?')) {
-                    socket.emit('resetScores');
-                }
-            });
-
-            addWordYesButton.addEventListener('click', () => {
-                if(wordToAddInfo) {
-                    socket.emit('hostDecisionOnWord', { add: true, wordInfo: wordToAddInfo });
-                    hostDecisionButtons.classList.add('hidden');
-                }
-            });
-            addWordNoButton.addEventListener('click', () => {
-                 if(wordToAddInfo) {
-                    socket.emit('hostDecisionOnWord', { add: false, wordInfo: wordToAddInfo });
-                    hostDecisionButtons.classList.add('hidden');
-                }
-            });
-
-            recognition.onresult = (event) => socket.emit('wordSpoken', event.results[0][0].transcript);
-            recognition.onerror = (event) => console.error('Ses tanıma hatası:', event.error);
-
-            socket.on('joined', ({ playerDetails }) => {
-                myDetails = playerDetails;
-                initialScreen.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-            });
-
-            socket.on('lobbyUpdate', ({ players, gameHostId, scoreGoal }) => {
-                currentHostId = gameHostId;
-                updatePlayerSlots(players);
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated', 'active', 'correct'));
-                statusText.textContent = `${players.length} / 8 oyuncu bekleniyor...`;
-                countdownEl.textContent = '';
-                scoreGoalDisplay.textContent = scoreGoal;
-                scoreGoalSelect.value = scoreGoal;
-                
-                const isHost = myDetails && myDetails.id === gameHostId;
-                hostOptions.classList.toggle('hidden', !isHost);
-                startButton.classList.toggle('hidden', !(isHost && players.length >= 1)); // 2'den 1'e düşürüldü test için.
-                newGameButton.classList.add('hidden');
-                hostDecisionButtons.classList.add('hidden');
-                resetScoreButton.classList.toggle('hidden', !isHost);
-            });
-
-            socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver));
-
-            socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex, letter, category }) => {
-                startButton.classList.add('hidden');
-                newGameButton.classList.add('hidden');
-                statusText.textContent = 'Zar atılıyor...';
-                populateReel(letterSlotContainer, alphabet);
-                populateReel(categorySlotContainer, categories);
-                spinReel(letterSlotContainer, alphabet, finalLetterIndex);
-                spinReel(categorySlotContainer, categories, finalCategoryIndex);
-            });
-
-            socket.on('gameStart', () => {
-                statusText.textContent = '';
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated'));
-            });
-
-            socket.on('playerEliminated', ({ loserId, loserName, reason, word }) => {
-                 if (synth) synth.triggerAttackRelease("C3", "8n");
-                 const playerSlot = document.querySelector(`#player-slot-${loserId}`);
-                 if(playerSlot) {
-                    playerSlot.classList.add('eliminated');
-                 }
-                 let statusMessage = `${loserName}, "${reason}" nedeniyle elendi.`;
-                 if (word) {
-                    statusMessage += ` (Söylenen: "${word}")`;
-                 }
-                 statusText.textContent = statusMessage;
-            });
-
-            socket.on('askHostAboutWord', (wordInfo) => {
-                wordToAddInfo = wordInfo;
-                statusText.textContent = `'${wordInfo.word}' kelimesi DB'ye eklensin mi?`;
-                hostDecisionButtons.classList.remove('hidden');
-                countdownEl.textContent = '';
-            });
-
-            socket.on('turnUpdate', ({ player, timeLeft, activePlayersCount }) => {
-                hostDecisionButtons.classList.add('hidden');
-                if (activePlayersCount >= 3 && synth) {
-                     synth.triggerAttackRelease("G4", "16n");
-                }
-                
-                statusText.textContent = '';
-                countdownEl.textContent = timeLeft;
-                countdownEl.classList.remove('animate-pulse-white-to-red');
-                
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active'));
-                const activeSlot = document.querySelector(`#player-slot-${player.id}`);
-                if(activeSlot) activeSlot.classList.add('active');
-
-                if (myDetails && myDetails.id === player.id) {
-                    try { 
-                        recognition.start(); 
-                    } catch(e) { 
-                        console.error("Ses tanıma başlatılamadı!", e);
-                        statusText.textContent = "Mikrofon kullanılamıyor!";
-                    }
-                }
-            });
-            
-            socket.on('countdown', (timeLeft) => {
-                countdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
-                if (timeLeft === 0) {
-                    countdownEl.classList.add('animate-pulse-white-to-red');
-                }
-            });
-
-            socket.on('wordAccepted', ({ playerNumber, word }) => {
-                if (synth) synth.triggerAttackRelease("C5", "8n");
-                const correctSlot = document.querySelector(`.player-slot:nth-child(${playerNumber})`);
-                if (correctSlot) {
-                    correctSlot.classList.add('correct');
-                    setTimeout(() => correctSlot.classList.remove('correct'), 600);
-                }
-            });
-
-            socket.on('roundOver', ({ reason, winner }) => {
-                hostDecisionButtons.classList.add('hidden');
-                if (winner && synth) {
-                    const now = Tone.now();
-                    synth.triggerAttackRelease("C5", "16n", now);
-                    synth.triggerAttackRelease("E5", "16n", now + 0.1);
-                    synth.triggerAttackRelease("G5", "8n", now + 0.2);
-                } else if (synth) {
-                    synth.triggerAttackRelease("E3", "8n");
-                }
-                if (recognition) recognition.stop();
-                statusText.textContent = winner ? `${reason} | Turun galibi: ${winner}` : reason;
-                countdownEl.textContent = '';
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active', 'eliminated'));
-                const isHost = myDetails && myDetails.id === currentHostId;
-                startButton.classList.toggle('hidden', !isHost);
-            });
-
-            socket.on('finalWinner', ({winner, scores}) => {
-                if (recognition) recognition.stop();
-                updateScoreboard(scores, true);
-                countdownEl.textContent = '';
-                statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black">${winner}</span> 🏆</div>`;
-                const isHost = myDetails && myDetails.id === currentHostId;
-                newGameButton.classList.toggle('hidden', !isHost);
-                startButton.classList.add('hidden');
-                hostDecisionButtons.classList.add('hidden');
-            });
-            
-            socket.on('gameError', (message) => alert(message));
-            socket.on('dbUpdateSuccess', (message) => {
-                const originalText = statusText.textContent;
-                statusText.textContent = message;
-                setTimeout(() => statusText.textContent = 'Oyun devam ediyor...', 2000);
-            });
-            socket.on('dbUpdateError', (message) => alert(message));
         }
     </script>
 </body>

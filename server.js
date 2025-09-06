@@ -15,7 +15,6 @@ app.use(express.static(__dirname));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-
 app.get('/test.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'test.html'));
 });
@@ -30,7 +29,9 @@ try {
     process.exit(1);
 }
 
-let gameState = {
+let rooms = {};
+
+const createInitialGameState = () => ({
     players: [],
     hostId: null,
     gameInProgress: false,
@@ -41,11 +42,15 @@ let gameState = {
     currentCategory: '',
     usedWords: [],
     scores: {},
-    scoreGoal: 10,
+    settings: {
+        scoreGoal: 10,
+        turnDuration: 5,
+    },
     countdownInterval: null,
     turnResolved: false,
     usedLettersThisGame: [],
-};
+    isSinglePlayer: false,
+});
 
 const normalizeWord = (word) => {
     if (!word) return '';
@@ -56,37 +61,87 @@ const normalizeWord = (word) => {
 
 io.on('connection', (socket) => {
 
-    socket.on('joinGame', ({ name, isTestMode = false }) => {
-        if (gameState.players.length >= 8) {
-            return socket.emit('gameError', 'Oyun dolu.');
-        }
-        const playerNumber = gameState.players.length + 1;
-        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, isTestMode };
+    const getRoomIdFromSocket = () => {
+        return Array.from(socket.rooms).find(r => r !== socket.id);
+    };
+    
+    socket.on('createRoom', ({ name }) => {
+        let roomId;
+        do {
+            roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        } while (rooms[roomId]);
 
-        if (!gameState.hostId) {
-            gameState.hostId = socket.id;
+        socket.join(roomId);
+
+        rooms[roomId] = createInitialGameState();
+        const gameState = rooms[roomId];
+
+        const newPlayer = { id: socket.id, name: name, playerNumber: 1 };
+        gameState.hostId = socket.id;
+        gameState.players.push(newPlayer);
+        gameState.scores[newPlayer.name] = 0;
+        
+        socket.emit('roomCreated', { roomId, playerDetails: newPlayer });
+        broadcastLobbyUpdate(roomId);
+        broadcastScoreUpdate(roomId);
+    });
+
+    socket.on('joinRoom', ({ name, roomId }) => {
+        const room = rooms[roomId];
+        if (!room) {
+            return socket.emit('gameError', 'Oda bulunamadı.');
         }
+        if (room.players.length >= 8) {
+            return socket.emit('gameError', 'Oda dolu.');
+        }
+        if (room.gameInProgress) {
+            return socket.emit('gameError', 'Oyun çoktan başladı.');
+        }
+        
+        socket.join(roomId);
+        const gameState = room;
+        const playerNumber = gameState.players.length + 1;
+        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber };
 
         gameState.players.push(newPlayer);
-        if (!isTestMode) {
-            gameState.scores[newPlayer.name] = 0;
-        }
-        socket.join('gameLobby');
-        socket.emit('joined', { playerDetails: newPlayer });
-        broadcastLobbyUpdate();
-        if (!isTestMode) broadcastScoreUpdate();
+        gameState.scores[newPlayer.name] = 0;
+        
+        socket.emit('joined', { playerDetails: newPlayer, roomId });
+        broadcastLobbyUpdate(roomId);
+        broadcastScoreUpdate(roomId);
     });
 
-    socket.on('scoreGoalChanged', (newGoal) => {
-        if (socket.id === gameState.hostId && !gameState.gameInProgress) {
-            gameState.scoreGoal = newGoal;
-            broadcastLobbyUpdate();
-        }
+    socket.on('startSinglePlayer', ({ name }) => {
+        const roomId = `SOLO_${socket.id}`;
+        socket.join(roomId);
+        rooms[roomId] = createInitialGameState();
+        const gameState = rooms[roomId];
+        
+        gameState.isSinglePlayer = true;
+        const player = { id: socket.id, name, playerNumber: 1 };
+        gameState.players.push(player);
+        gameState.scores[name] = 0;
+        gameState.gameInProgress = true;
+        
+        socket.emit('singlePlayerStarted');
+        startSinglePlayerTurn(roomId);
     });
 
+
+    socket.on('gameSettingsChanged', (settings) => {
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (gameState && socket.id === gameState.hostId && !gameState.gameInProgress) {
+            gameState.settings.scoreGoal = settings.scoreGoal;
+            gameState.settings.turnDuration = settings.turnDuration;
+            broadcastLobbyUpdate(roomId);
+        }
+    });
+    
     socket.on('startDiceRoll', () => {
-        const player = gameState.players.find(p => p.id === socket.id);
-        if (!player || socket.id !== gameState.hostId) return;
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (!gameState || socket.id !== gameState.hostId) return;
 
         gameState.gameInProgress = true;
         gameState.roundInProgress = true;
@@ -113,9 +168,9 @@ io.on('connection', (socket) => {
         }
         gameState.currentLetter = letter;
         gameState.currentCategory = category;
-        if(!player.isTestMode) gameState.usedLettersThisGame.push(letter);
+        gameState.usedLettersThisGame.push(letter);
 
-        io.to('gameLobby').emit('diceRolling', {
+        io.to(roomId).emit('diceRolling', {
             finalLetterIndex: alphabet.indexOf(letter),
             finalCategoryIndex: categories.indexOf(category),
             letter: letter,
@@ -123,53 +178,69 @@ io.on('connection', (socket) => {
         });
 
         setTimeout(() => {
-            if (player.isTestMode) {
-                gameState.currentPlayerIndex = 0;
-                startTestLoop();
-            } else {
-                io.to('gameLobby').emit('gameStart');
-                gameState.currentPlayerIndex = Math.floor(Math.random() * gameState.activePlayersInRound.length);
-                startTurn();
-            }
+            io.to(roomId).emit('gameStart');
+            gameState.currentPlayerIndex = Math.floor(Math.random() * gameState.activePlayersInRound.length);
+            startTurn(roomId);
         }, 3000);
     });
 
-    socket.on('wordSpoken', (word) => {
+    socket.on('submitWord', (word) => {
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (!gameState || !gameState.roundInProgress) return;
+
+        if (gameState.isSinglePlayer) {
+            handleSinglePlayerWord(roomId, word);
+        } else {
+            handleMultiplayerWord(roomId, word);
+        }
+    });
+
+    function handleMultiplayerWord(roomId, word) {
+        const gameState = rooms[roomId];
         const currentPlayer = gameState.activePlayersInRound[gameState.currentPlayerIndex];
-        if (!currentPlayer || socket.id !== currentPlayer.id || !gameState.roundInProgress) return;
+        if (!currentPlayer || socket.id !== currentPlayer.id) return;
 
         clearInterval(gameState.countdownInterval);
         gameState.turnResolved = true;
 
-        const normalizedSpokenWord = normalizeWord(word);
+        const normalizedSubmittedWord = normalizeWord(word);
         const normalizedLetter = normalizeWord(gameState.currentLetter);
         const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
-        const isCorrect = normalizedSpokenWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSpokenWord) && !gameState.usedWords.includes(normalizedSpokenWord);
-
-        if(currentPlayer.isTestMode){
-             if (isCorrect) {
-                io.to(currentPlayer.id).emit('testFeedback', { message: 'Doğru! Yeni tur başlıyor...', correct: true });
-                setTimeout(startTestLoop, 1500);
-            } else {
-                 io.to(currentPlayer.id).emit('testFeedback', {
-                    message: `Yanlış! ("${word}") Kelimeyi eklemek ister misin?`,
-                    correct: false, word, category: gameState.currentCategory, letter: gameState.currentLetter
-                });
-            }
-            return;
-        }
+        const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSubmittedWord) && !gameState.usedWords.includes(normalizedSubmittedWord);
         
         if (isCorrect) {
-            gameState.usedWords.push(normalizedSpokenWord);
-            io.to('gameLobby').emit('wordAccepted', { playerNumber: currentPlayer.playerNumber, word: normalizedSpokenWord });
-            setTimeout(nextTurn, 700);
+            gameState.usedWords.push(normalizedSubmittedWord);
+            io.to(roomId).emit('wordAccepted', { playerNumber: currentPlayer.playerNumber, word: normalizedSubmittedWord });
+            setTimeout(() => nextTurn(roomId), 700);
         } else {
-            handlePlayerElimination(currentPlayer, 'Yanlış veya tekrar edilmiş kelime', normalizedSpokenWord);
+            handlePlayerElimination(roomId, currentPlayer, 'Yanlış veya tekrar edilmiş kelime', normalizedSubmittedWord);
         }
-    });
+    }
+
+    function handleSinglePlayerWord(roomId, word) {
+        const gameState = rooms[roomId];
+        clearInterval(gameState.countdownInterval);
+
+        const normalizedSubmittedWord = normalizeWord(word);
+        const normalizedLetter = normalizeWord(gameState.currentLetter);
+        const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
+        const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSubmittedWord) && !gameState.usedWords.includes(normalizedSubmittedWord);
+
+        if (isCorrect) {
+            const playerName = gameState.players[0].name;
+            gameState.scores[playerName]++;
+            gameState.usedWords.push(normalizedSubmittedWord);
+            startSinglePlayerTurn(roomId);
+        } else {
+            handleSinglePlayerGameOver(roomId);
+        }
+    }
 
     socket.on('hostDecisionOnWord', ({ add, wordInfo }) => {
-        if (socket.id !== gameState.hostId) return;
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (!gameState || socket.id !== gameState.hostId) return;
 
         if (add) {
             try {
@@ -189,30 +260,46 @@ io.on('connection', (socket) => {
             }
         }
         
-        // Oyunu devam ettir
-        setTimeout(resumeGameAfterDecision, 1000);
+        setTimeout(() => resumeGameAfterDecision(roomId), 1000);
     });
 
-    socket.on('continueTestLoop', () => {
-        if(socket.id === gameState.hostId) startTestLoop();
-    });
-    
     socket.on('resetScores', () => {
-        if (socket.id === gameState.hostId) {
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (gameState && socket.id === gameState.hostId) {
             Object.keys(gameState.scores).forEach(name => gameState.scores[name] = 0);
-            broadcastScoreUpdate();
+            broadcastScoreUpdate(roomId);
         }
     });
 
     socket.on('newGame', () => {
-        if (socket.id === gameState.hostId) {
-            resetGame(true); // Lobiye dönmek için tam sıfırlama
-            broadcastLobbyUpdate();
-            broadcastScoreUpdate();
+        const roomId = getRoomIdFromSocket();
+        const gameState = rooms[roomId];
+        if (gameState && socket.id === gameState.hostId) {
+            rooms[roomId] = {
+                ...createInitialGameState(),
+                players: gameState.players,
+                hostId: gameState.hostId,
+                scores: Object.fromEntries(gameState.players.map(p => [p.name, 0])),
+                settings: gameState.settings 
+            };
+            broadcastLobbyUpdate(roomId);
+            broadcastScoreUpdate(roomId);
         }
     });
-
+    
     socket.on('disconnect', () => {
+        const roomId = getRoomIdFromSocket();
+        if (!roomId || !rooms[roomId]) return;
+
+        const gameState = rooms[roomId];
+        if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
+
+        if (gameState.isSinglePlayer) {
+            delete rooms[roomId];
+            return;
+        }
+        
         const disconnectedPlayer = gameState.players.find(p => p.id === socket.id);
         if (!disconnectedPlayer) return;
 
@@ -220,10 +307,14 @@ io.on('connection', (socket) => {
         
         gameState.players = gameState.players.filter(p => p.id !== socket.id);
         
-        if (wasHost && gameState.players.length > 0) {
+        if (gameState.players.length === 0) {
+            console.log(`Oda ${roomId} kapatıldı.`);
+            delete rooms[roomId];
+            return;
+        }
+
+        if (wasHost) {
             gameState.hostId = gameState.players[0].id;
-        } else if (gameState.players.length === 0) {
-            gameState.hostId = null;
         }
 
         if (gameState.roundInProgress) {
@@ -233,47 +324,51 @@ io.on('connection', (socket) => {
                 gameState.activePlayersInRound.splice(activePlayerIndex, 1);
                 
                 if (gameState.activePlayersInRound.length <= 1) {
-                    clearInterval(gameState.countdownInterval);
-                    handleRoundOver();
+                    handleRoundOver(roomId);
                 } else if (wasCurrentPlayer) {
-                    clearInterval(gameState.countdownInterval);
-                    startTurn(); // Sıradaki oyuncuyla devam et
+                    startTurn(roomId);
                 } else if (gameState.currentPlayerIndex > activePlayerIndex) {
-                    gameState.currentPlayerIndex--; // İndeksi ayarla
+                    gameState.currentPlayerIndex--;
                 }
             }
         }
 
-        if (gameState.players.length === 0) {
-            resetGame(false);
-        } else {
-             broadcastLobbyUpdate();
-             broadcastScoreUpdate();
-        }
+        broadcastLobbyUpdate(roomId);
+        broadcastScoreUpdate(roomId);
     });
-
-    function broadcastLobbyUpdate() {
-        io.to('gameLobby').emit('lobbyUpdate', {
+    
+    function broadcastLobbyUpdate(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        io.to(roomId).emit('lobbyUpdate', {
             players: gameState.players,
             gameHostId: gameState.hostId,
-            scoreGoal: gameState.scoreGoal
+            settings: gameState.settings,
+            gameInProgress: gameState.gameInProgress
         });
     }
 
-    function broadcastScoreUpdate(isGameOver = false) {
-        io.to('gameLobby').emit('scoreUpdate', { scores: gameState.scores, isGameOver });
+    function broadcastScoreUpdate(roomId, isGameOver = false) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        io.to(roomId).emit('scoreUpdate', { scores: gameState.scores, isGameOver });
     }
     
-    function resumeGameAfterDecision() {
+    function resumeGameAfterDecision(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
         if (gameState.activePlayersInRound.length <= 1) {
-            handleRoundOver();
+            handleRoundOver(roomId);
         } else {
-            startTurn();
+            nextTurn(roomId);
         }
     }
 
-    function startTurn() {
-        if (gameState.activePlayersInRound.length < 1) return handleRoundOver('Oyuncu kalmadı');
+    function startTurn(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        
+        if (gameState.activePlayersInRound.length < 1) return handleRoundOver(roomId, 'Oyuncu kalmadı');
         
         gameState.roundInProgress = true;
         gameState.turnResolved = false;
@@ -283,66 +378,102 @@ io.on('connection', (socket) => {
         }
 
         const currentPlayer = gameState.activePlayersInRound[gameState.currentPlayerIndex];
-        if (!currentPlayer) return handleRoundOver('Hata: Oyuncu bulunamadı');
+        if (!currentPlayer) return handleRoundOver(roomId, 'Hata: Oyuncu bulunamadı');
 
-        let timeLeft = 5;
-        io.to('gameLobby').emit('turnUpdate', {
+        let timeLeft = gameState.settings.turnDuration;
+        io.to(roomId).emit('turnUpdate', {
             player: currentPlayer,
             timeLeft,
-            activePlayersCount: gameState.activePlayersInRound.length
+            activePlayersCount: gameState.activePlayersInRound.length,
+            letter: gameState.currentLetter,
+            category: gameState.currentCategory
         });
 
         clearInterval(gameState.countdownInterval);
         gameState.countdownInterval = setInterval(() => {
             timeLeft--;
-            io.to('gameLobby').emit('countdown', timeLeft);
+            io.to(roomId).emit('countdown', timeLeft);
             if (timeLeft <= 0) {
                 clearInterval(gameState.countdownInterval);
                 setTimeout(() => {
                     if (!gameState.turnResolved) {
-                        handlePlayerElimination(currentPlayer, 'Süre doldu');
+                        handlePlayerElimination(roomId, currentPlayer, 'Süre doldu');
                     }
                 }, 500);
             }
         }, 1000);
     }
     
-    function startTestLoop() {
-        const currentPlayer = gameState.players.find(p => p.isTestMode);
-        if (!currentPlayer) return;
+    function startSinglePlayerTurn(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState || !gameState.gameInProgress) return;
         
-        gameState.activePlayersInRound = [currentPlayer];
         gameState.roundInProgress = true;
+        const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
+        const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
+        
+        let letter, category, validCombo = false;
+        while (!validCombo) {
+            letter = alphabet[Math.floor(Math.random() * alphabet.length)];
+            category = categories[Math.floor(Math.random() * categories.length)];
+            const normalizedLetter = letter.toLocaleLowerCase('tr-TR');
+            if (database[category]?.[normalizedLetter] && database[category][normalizedLetter].length > 0) {
+                validCombo = true;
+            }
+        }
+        gameState.currentLetter = letter;
+        gameState.currentCategory = category;
+
+        const playerName = gameState.players[0].name;
         let timeLeft = 5;
-        io.to(currentPlayer.id).emit('testTurnUpdate', { player: currentPlayer, timeLeft });
+        io.to(roomId).emit('singlePlayerTurnUpdate', {
+            letter,
+            category,
+            score: gameState.scores[playerName],
+            timeLeft
+        });
 
         clearInterval(gameState.countdownInterval);
         gameState.countdownInterval = setInterval(() => {
             timeLeft--;
-            io.to(currentPlayer.id).emit('countdown', timeLeft);
+            io.to(roomId).emit('singlePlayerCountdown', timeLeft);
             if (timeLeft <= 0) {
                 clearInterval(gameState.countdownInterval);
-                io.to(currentPlayer.id).emit('testFeedback', { message: 'Süre doldu! Yeni tur başlıyor...', correct: false, timedOut: true });
-                setTimeout(startTestLoop, 1500);
+                handleSinglePlayerGameOver(roomId);
             }
         }, 1000);
     }
 
-    function nextTurn() {
-        if (gameState.activePlayersInRound.length <= 1) {
-            return handleRoundOver();
-        }
-        gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.activePlayersInRound.length;
-        startTurn();
+    function handleSinglePlayerGameOver(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        
+        clearInterval(gameState.countdownInterval);
+        gameState.gameInProgress = false;
+        const score = gameState.scores[gameState.players[0].name];
+        io.to(roomId).emit('singlePlayerGameOver', { score });
     }
 
-    function handlePlayerElimination(player, reason, spokenWord = null) {
+    function nextTurn(roomId) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        if (gameState.activePlayersInRound.length <= 1) {
+            return handleRoundOver(roomId);
+        }
+        gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.activePlayersInRound.length;
+        startTurn(roomId);
+    }
+
+    function handlePlayerElimination(roomId, player, reason, spokenWord = null) {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+        
         const eliminatedPlayerIndex = gameState.activePlayersInRound.findIndex(p => p.id === player.id);
         if (eliminatedPlayerIndex === -1) return;
 
         gameState.activePlayersInRound.splice(eliminatedPlayerIndex, 1);
         
-        io.to('gameLobby').emit('playerEliminated', {
+        io.to(roomId).emit('playerEliminated', {
             loserId: player.id,
             loserName: player.name,
             reason: reason,
@@ -356,11 +487,14 @@ io.on('connection', (socket) => {
                 letter: gameState.currentLetter
             });
         } else {
-            setTimeout(resumeGameAfterDecision, 2500);
+            setTimeout(() => resumeGameAfterDecision(roomId), 2500);
         }
     }
 
-    function handleRoundOver(reason = 'Tur bitti') {
+    function handleRoundOver(roomId, reason = 'Tur bitti') {
+        const gameState = rooms[roomId];
+        if (!gameState) return;
+
         clearInterval(gameState.countdownInterval);
         gameState.roundInProgress = false;
 
@@ -369,32 +503,19 @@ io.on('connection', (socket) => {
             gameState.scores[winner.name]++;
         }
 
-        io.to('gameLobby').emit('roundOver', { reason, winner: winner ? winner.name : null });
-        broadcastScoreUpdate();
+        io.to(roomId).emit('roundOver', { reason, winner: winner ? winner.name : null });
+        broadcastScoreUpdate(roomId);
 
         setTimeout(() => {
-            const finalWinner = Object.entries(gameState.scores).find(([, score]) => score >= gameState.scoreGoal);
+            const finalWinner = Object.entries(gameState.scores).find(([, score]) => score >= gameState.settings.scoreGoal);
             if (finalWinner) {
-                io.to('gameLobby').emit('finalWinner', { winner: finalWinner[0], scores: gameState.scores });
-                broadcastScoreUpdate(true);
+                io.to(roomId).emit('finalWinner', { winner: finalWinner[0], scores: gameState.scores });
+                broadcastScoreUpdate(roomId, true);
                 gameState.gameInProgress = false;
             } else {
-                broadcastLobbyUpdate();
+                broadcastLobbyUpdate(roomId);
             }
         }, 3000);
-    }
-
-    function resetGame(fullReset = false) {
-        clearInterval(gameState.countdownInterval);
-        gameState.roundInProgress = false;
-        gameState.gameInProgress = fullReset ? false : gameState.gameInProgress;
-        
-        if (fullReset) {
-            gameState.players = [];
-            gameState.hostId = null;
-            gameState.scores = {};
-            gameState.usedLettersThisGame = [];
-        }
     }
 });
 
