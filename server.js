@@ -116,14 +116,28 @@ const createUser = async (email, username, password) => {
             // Create user ID
             const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
             
-            // Create user object
+            // Create user object with enhanced data structure
             users[userId] = {
                 id: userId,
                 email: normalizedEmail,
                 username: username,
                 hashedPassword: hashedPassword,
                 createdAt: new Date().toISOString(),
-                lastLogin: null
+                lastLogin: null,
+                preferences: {
+                    avatar: 1, // Default avatar
+                    theme: 'dark',
+                    soundEnabled: true,
+                    backgroundType: 'particles'
+                },
+                gameStats: {
+                    totalGames: 0,
+                    totalWins: 0,
+                    totalCorrectWords: 0,
+                    favoriteCategory: '',
+                    longestWinStreak: 0,
+                    currentWinStreak: 0
+                }
             };
             
             saveUsers();
@@ -372,9 +386,20 @@ io.on('connection', (socket) => {
         
         const result = await authenticateUser(email, password);
         if (result.success) {
+            // PROFESSIONAL ENHANCEMENT: Include user preferences in login response
+            const userWithPreferences = {
+                ...result.user,
+                preferences: result.user.preferences || { 
+                    avatar: 1, 
+                    theme: 'dark', 
+                    soundEnabled: true, 
+                    backgroundType: 'particles' 
+                }
+            };
+            
             socket.emit('loginSuccess', { 
                 token: result.token, 
-                user: result.user, 
+                user: userWithPreferences, 
                 message: result.message 
             });
         } else {
@@ -385,7 +410,17 @@ io.on('connection', (socket) => {
     socket.on('verifyAuth', ({ token }) => {
         const result = verifyToken(token);
         if (result.success) {
-            socket.emit('authVerified', { user: result.user });
+            // PROFESSIONAL ENHANCEMENT: Include user preferences in auth verification
+            const userWithPreferences = {
+                ...result.user,
+                preferences: result.user.preferences || { 
+                    avatar: 1, 
+                    theme: 'dark', 
+                    soundEnabled: true, 
+                    backgroundType: 'particles' 
+                }
+            };
+            socket.emit('authVerified', { user: userWithPreferences });
         } else {
             socket.emit('authError', result.message);
         }
@@ -402,7 +437,11 @@ io.on('connection', (socket) => {
         rooms[roomId] = createInitialGameState();
         const gameState = rooms[roomId];
 
-        const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: 1 };
+        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar
+        const user = Object.values(users).find(u => u.username === name);
+        const userAvatar = user?.preferences?.avatar || 1;
+
+        const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: userAvatar };
         gameState.hostId = socket.id;
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -427,7 +466,12 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         const gameState = room;
         const playerNumber = gameState.players.length + 1;
-        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: 1 };
+        
+        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar
+        const user = Object.values(users).find(u => u.username === name);
+        const userAvatar = user?.preferences?.avatar || 1;
+        
+        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: userAvatar };
 
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -464,6 +508,17 @@ io.on('connection', (socket) => {
         
         if (player && avatar >= 1 && avatar <= 16) {
             player.avatar = avatar;
+            
+            // PROFESSIONAL ENHANCEMENT: Save avatar to user's persistent preferences
+            const user = Object.values(users).find(u => u.username === player.name);
+            if (user) {
+                if (!user.preferences) {
+                    user.preferences = { avatar: 1, theme: 'dark', soundEnabled: true, backgroundType: 'particles' };
+                }
+                user.preferences.avatar = avatar;
+                saveUsers(); // Persist to database
+            }
+            
             // Emit lobby update to sync avatar changes
             io.to(roomId).emit('lobbyUpdate', { 
                 players: gameState.players, 
