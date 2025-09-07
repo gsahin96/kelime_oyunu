@@ -410,7 +410,7 @@ io.on('connection', (socket) => {
         }
     });
     
-    socket.on('createRoom', ({ name }) => {
+    socket.on('createRoom', async ({ name }) => {
         let roomId;
         do {
             roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -421,9 +421,16 @@ io.on('connection', (socket) => {
         rooms[roomId] = createInitialGameState();
         const gameState = rooms[roomId];
 
-        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar
-        const user = Object.values(users).find(u => u.username === name);
-        const userAvatar = user?.preferences?.avatar || 1;
+        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar from database
+        let userAvatar = 1; // Default avatar
+        try {
+            const user = await getUserByUsername(name);
+            if (user && user.preferences && user.preferences.avatar) {
+                userAvatar = user.preferences.avatar;
+            }
+        } catch (error) {
+            console.error('Error loading user avatar:', error);
+        }
 
         const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: userAvatar };
         gameState.hostId = socket.id;
