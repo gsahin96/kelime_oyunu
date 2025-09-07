@@ -365,11 +365,11 @@
 
     <!-- Background Controls -->
     <div class="bg-controls">
-        <button class="bg-btn active" onclick="changeBackground('particles')" style="background: rgba(30, 27, 75, 0.8); color: #60a5fa;">Particles</button>
-        <button class="bg-btn" onclick="changeBackground('waves')" style="background: rgba(102, 126, 234, 0.8); color: white;">Waves</button>
-        <button class="bg-btn" onclick="changeBackground('geometric')" style="background: rgba(15, 23, 42, 0.8); color: #334155;">Geometric</button>
-        <button class="bg-btn" onclick="changeBackground('neon')" style="background: rgba(0, 0, 0, 0.8); color: cyan;">Neon</button>
-        <button class="bg-btn" onclick="changeBackground('bokeh')" style="background: rgba(26, 26, 46, 0.8); color: #ff6b6b;">Bokeh</button>
+        <button class="bg-btn active" onclick="changeBackground('particles', event)" style="background: rgba(30, 27, 75, 0.8); color: #60a5fa;">Particles</button>
+        <button class="bg-btn" onclick="changeBackground('waves', event)" style="background: rgba(102, 126, 234, 0.8); color: white;">Waves</button>
+        <button class="bg-btn" onclick="changeBackground('geometric', event)" style="background: rgba(15, 23, 42, 0.8); color: #334155;">Geometric</button>
+        <button class="bg-btn" onclick="changeBackground('neon', event)" style="background: rgba(0, 0, 0, 0.8); color: cyan;">Neon</button>
+        <button class="bg-btn" onclick="changeBackground('bokeh', event)" style="background: rgba(26, 26, 46, 0.8); color: #ff6b6b;">Bokeh</button>
     </div>
 
     <!-- Avatar Selection Modal -->
@@ -528,7 +528,7 @@
                 <button id="copyLinkButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold p-3 rounded-lg transition">Kopyala</button>
             </div>
         </div>
-        <button id="lobby-main-menu-button" class="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-base shadow-lg z-50 border-2 border-white">Ana Menü</button>
+        <button id="lobby-main-menu-button" onclick="goToMainMenu()" class="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-base shadow-lg z-50 border-2 border-white">Ana Menü</button>
     </div>
 
 
@@ -652,6 +652,34 @@
     
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
+        // Global function for Ana Menü button - accessible from anywhere
+        window.goToMainMenu = function() {
+            console.log('goToMainMenu called globally');
+            
+            // Hide all game screens
+            const gameContainer = document.getElementById('game-container');
+            const singlePlayerContainer = document.getElementById('single-player-container');
+            const statsScreen = document.getElementById('stats-screen');
+            const initialScreen = document.getElementById('initial-screen');
+            const authScreen = document.getElementById('auth-screen');
+            
+            if (gameContainer) gameContainer.classList.add('hidden');
+            if (singlePlayerContainer) singlePlayerContainer.classList.add('hidden');
+            if (statsScreen) statsScreen.classList.add('hidden');
+            
+            // Check if user is logged in via localStorage
+            const token = localStorage.getItem('yeti-auth-token');
+            if (token) {
+                console.log('Token found, showing main menu');
+                if (authScreen) authScreen.classList.add('hidden');
+                if (initialScreen) initialScreen.classList.remove('hidden');
+            } else {
+                console.log('No token found, showing login screen');
+                if (initialScreen) initialScreen.classList.add('hidden');
+                if (authScreen) authScreen.classList.remove('hidden');
+            }
+        };
+        
         if (window.location.protocol === 'file:') {
             document.body.innerHTML = `<div class="bg-red-900 border border-red-700 text-white p-8 rounded-lg shadow-xl max-w-lg mx-auto"><h1 class="text-3xl font-bold mb-4">Hata: Yanlış Çalıştırma Yöntemi</h1><p class="mb-2 text-lg">Bu dosyayı doğrudan çift tıklayarak açtınız. Bu oyunun çalışması için bir sunucu üzerinden açılması gerekir.</p><p class="mt-4">Lütfen <strong>node server.js</strong> komutunu çalıştırdıktan sonra tarayıcınızın adres çubuğuna şunu yazın:</p><p class="text-2xl font-mono bg-gray-900 p-3 rounded my-4 text-center select-all">http://localhost:3000</p></div>`;
         } else {
@@ -876,6 +904,9 @@
             };
             
             const returnToMainMenu = () => {
+                console.log('returnToMainMenu called');
+                console.log('currentUser:', currentUser);
+                
                 // Hide all game screens
                 gameContainer.classList.add('hidden');
                 singlePlayerContainer.classList.add('hidden');
@@ -883,10 +914,12 @@
                 
                 // Show main menu if user is authenticated
                 if (currentUser) {
+                    console.log('Showing main menu for user:', currentUser.username);
                     showMainMenu(currentUser);
                 } else {
+                    console.log('No current user, checking auth token');
                     // If no current user, try to check for saved token
-                    checkAuthToken();
+                    loadAuthToken();
                 }
             };
             
@@ -1078,7 +1111,6 @@
                 if (name) socket.emit('startSinglePlayer', { name });
             });
             spMainMenuButton.addEventListener('click', () => returnToMainMenu());
-            lobbyMainMenuButton.addEventListener('click', () => returnToMainMenu());
             
             copyLinkButton.addEventListener('click', () => {
                 roomLinkInput.select();
@@ -1562,18 +1594,28 @@
         }
 
         // Animated Background Control
-        function changeBackground(type) {
+        function changeBackground(type, event) {
             const backgroundElement = document.getElementById('animated-background');
             const buttons = document.querySelectorAll('.bg-btn');
             
             // Remove active class from all buttons
             buttons.forEach(btn => btn.classList.remove('active'));
             
-            // Add active class to clicked button
-            event.target.classList.add('active');
+            // Add active class to clicked button (only if event exists)
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // If no event, find the button for this type and make it active
+                const activeButton = document.querySelector(`.bg-btn[onclick*="${type}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+            }
             
             // Remove all background classes
-            backgroundElement.className = 'animated-bg';
+            if (backgroundElement) {
+                backgroundElement.className = 'animated-bg';
+            }
             
             // Add new background class
             switch(type) {
@@ -1604,11 +1646,6 @@
             
             // Initialize avatar system
             initializeAvatarSystem();
-            
-            // Also setup avatar button when DOM is loaded
-            setTimeout(() => {
-                setupAvatarButton();
-            }, 500);
         });
 
         // Avatar System Functions
