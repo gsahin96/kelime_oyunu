@@ -3,6 +3,8 @@ const http = require('http');
 const { Server } = require("socket.io");
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,6 +12,8 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 const dbPath = path.join(__dirname, 'database.json');
 const statsPath = path.join(__dirname, 'player_stats.json');
+const usersPath = path.join(__dirname, 'users.json');
+const JWT_SECRET = process.env.JWT_SECRET || 'yeti-kelime-oyunu-secret-key-2024';
 
 app.use(express.static(__dirname));
 
@@ -40,7 +44,150 @@ try {
     playerStats = {};
 }
 
+let users = {};
+try {
+    const usersData = fs.readFileSync(usersPath, 'utf8');
+    users = JSON.parse(usersData);
+    console.log("Kullanıcı hesapları başarıyla yüklendi.");
+} catch (error) {
+    console.log("Kullanıcı hesapları dosyası bulunamadı, yeni dosya oluşturulacak.");
+    users = {};
+}
+
 let rooms = {};
+
+// User Authentication Functions
+const saveUsers = () => {
+    try {
+        fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf8');
+    } catch (error) {
+        console.error("Kullanıcı kaydetme hatası:", error);
+    }
+};
+
+const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
+const validateUsername = (username) => {
+    return username && username.length >= 3 && username.length <= 20 && /^[a-zA-Z0-9_çğıöşüÇĞIİÖŞÜ]+$/.test(username);
+};
+
+const validatePassword = (password) => {
+    return password && password.length >= 6;
+};
+
+const createUser = async (email, username, password) => {
+    try {
+        // Check if email or username already exists
+        const existingUser = Object.values(users).find(user => 
+            user.email.toLowerCase() === email.toLowerCase() || 
+            user.username.toLowerCase() === username.toLowerCase()
+        );
+        
+        if (existingUser) {
+            if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+                return { success: false, message: 'Bu e-posta adresi zaten kullanılıyor.' };
+            }
+            if (existingUser.username.toLowerCase() === username.toLowerCase()) {
+                return { success: false, message: 'Bu kullanıcı adı zaten alınmış.' };
+            }
+        }
+
+        // Hash password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        
+        // Create user ID
+        const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        
+        // Create user object
+        users[userId] = {
+            id: userId,
+            email: email.toLowerCase(),
+            username: username,
+            hashedPassword: hashedPassword,
+            createdAt: new Date().toISOString(),
+            lastLogin: null
+        };
+        
+        saveUsers();
+        
+        // Initialize player statistics for new user
+        initializePlayerStats(username);
+        
+        return { success: true, userId: userId, message: 'Hesap başarıyla oluşturuldu!' };
+    } catch (error) {
+        console.error('Kullanıcı oluşturma hatası:', error);
+        return { success: false, message: 'Hesap oluşturulurken bir hata oluştu.' };
+    }
+};
+
+const authenticateUser = async (email, password) => {
+    try {
+        const user = Object.values(users).find(user => 
+            user.email.toLowerCase() === email.toLowerCase()
+        );
+        
+        if (!user) {
+            return { success: false, message: 'E-posta veya şifre hatalı.' };
+        }
+        
+        const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
+        
+        if (!passwordMatch) {
+            return { success: false, message: 'E-posta veya şifre hatalı.' };
+        }
+        
+        // Update last login
+        user.lastLogin = new Date().toISOString();
+        saveUsers();
+        
+        // Generate JWT token
+        const token = jwt.sign(
+            { userId: user.id, username: user.username },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        
+        return { 
+            success: true, 
+            token: token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                createdAt: user.createdAt,
+                lastLogin: user.lastLogin
+            },
+            message: 'Giriş başarılı!' 
+        };
+    } catch (error) {
+        console.error('Kimlik doğrulama hatası:', error);
+        return { success: false, message: 'Giriş yapılırken bir hata oluştu.' };
+    }
+};
+
+const verifyToken = (token) => {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = users[decoded.userId];
+        if (user) {
+            return { 
+                success: true, 
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email
+                }
+            };
+        }
+        return { success: false, message: 'Kullanıcı bulunamadı.' };
+    } catch (error) {
+        return { success: false, message: 'Geçersiz token.' };
+    }
+};
 
 // Player Statistics Functions
 const savePlayerStats = () => {
@@ -179,6 +326,52 @@ io.on('connection', (socket) => {
     const getRoomIdFromSocket = () => {
         return Array.from(socket.rooms).find(r => r !== socket.id);
     };
+    
+    // Authentication handlers
+    socket.on('register', async ({ email, username, password }) => {
+        if (!validateEmail(email)) {
+            return socket.emit('authError', 'Geçerli bir e-posta adresi girin.');
+        }
+        if (!validateUsername(username)) {
+            return socket.emit('authError', 'Kullanıcı adı 3-20 karakter olmalı ve sadece harf, rakam ve _ içermelidir.');
+        }
+        if (!validatePassword(password)) {
+            return socket.emit('authError', 'Şifre en az 6 karakter olmalıdır.');
+        }
+        
+        const result = await createUser(email, username, password);
+        if (result.success) {
+            socket.emit('registerSuccess', result.message);
+        } else {
+            socket.emit('authError', result.message);
+        }
+    });
+    
+    socket.on('login', async ({ email, password }) => {
+        if (!email || !password) {
+            return socket.emit('authError', 'E-posta ve şifre gereklidir.');
+        }
+        
+        const result = await authenticateUser(email, password);
+        if (result.success) {
+            socket.emit('loginSuccess', { 
+                token: result.token, 
+                user: result.user, 
+                message: result.message 
+            });
+        } else {
+            socket.emit('authError', result.message);
+        }
+    });
+    
+    socket.on('verifyAuth', ({ token }) => {
+        const result = verifyToken(token);
+        if (result.success) {
+            socket.emit('authVerified', { user: result.user });
+        } else {
+            socket.emit('authError', result.message);
+        }
+    });
     
     socket.on('createRoom', ({ name }) => {
         let roomId;

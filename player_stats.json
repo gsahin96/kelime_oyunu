@@ -1,0 +1,19 @@
+{
+  "Görkem": {
+    "gamesPlayed": 0,
+    "gamesWon": 0,
+    "totalCorrectWords": 1,
+    "totalResponseTime": 1.99,
+    "responseCount": 1,
+    "longestWinStreak": 0,
+    "currentWinStreak": 0,
+    "categoriesPlayed": {
+      "İsim": 1
+    },
+    "wordsUsed": {
+      "ismail": 1
+    },
+    "lastPlayed": "2025-09-07T10:49:03.905Z",
+    "achievements": []
+  }
+}
