@@ -1,18 +1,15 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
-const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { query } = require('./database'); // PostgreSQL database functions
+const dbFunctions = require('./dbFunctions'); // Additional DB helper functions
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
-const dbPath = path.join(__dirname, 'database.json');
-const statsPath = path.join(__dirname, 'player_stats.json');
-const usersPath = path.join(__dirname, 'users.json');
 const JWT_SECRET = process.env.JWT_SECRET || 'yeti-kelime-oyunu-secret-key-2024';
 
 app.use(express.static(__dirname));
@@ -24,47 +21,14 @@ app.get('/test.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'test.html'));
 });
 
+// PostgreSQL database - no more JSON files!
 let database = {};
-try {
-    const dbData = fs.readFileSync(dbPath, 'utf8');
-    database = JSON.parse(dbData);
-    console.log("Veritabanı başarıyla yüklendi.");
-} catch (error) {
-    console.error("Veritabanı (database.json) yüklenirken hata oluştu:", error);
-    process.exit(1);
-}
-
-let playerStats = {};
-try {
-    const statsData = fs.readFileSync(statsPath, 'utf8');
-    playerStats = JSON.parse(statsData);
-    console.log("Oyuncu istatistikleri başarıyla yüklendi.");
-} catch (error) {
-    console.log("Oyuncu istatistikleri dosyası bulunamadı, yeni dosya oluşturulacak.");
-    playerStats = {};
-}
-
-let users = {};
-try {
-    const usersData = fs.readFileSync(usersPath, 'utf8');
-    users = JSON.parse(usersData);
-    console.log("Kullanıcı hesapları başarıyla yüklendi.");
-} catch (error) {
-    console.log("Kullanıcı hesapları dosyası bulunamadı, yeni dosya oluşturulacak.");
-    users = {};
-}
+console.log("✅ PostgreSQL veritabanı kullanılıyor - JSON dosyaları artık gerekmiyor!");
 
 let rooms = {};
 let pendingRegistrations = new Set(); // Track pending registrations to prevent duplicates
 
-// User Authentication Functions
-const saveUsers = () => {
-    try {
-        fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf8');
-    } catch (error) {
-        console.error("Kullanıcı kaydetme hatası:", error);
-    }
-};
+// PostgreSQL User Authentication Functions - No more JSON saving!
 
 const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,13 +58,12 @@ const createUser = async (email, username, password) => {
         pendingRegistrations.add(registrationKey);
         
         try {
-            // Check if email or username already exists
-            const existingUser = Object.values(users).find(user => 
-                user.email.toLowerCase() === normalizedEmail || 
-                user.username.toLowerCase() === normalizedUsername
-            );
+            // Check if email or username already exists in PostgreSQL
+            const existingUserQuery = 'SELECT id, email, username FROM users WHERE LOWER(email) = $1 OR LOWER(username) = $2';
+            const existingResult = await query(existingUserQuery, [normalizedEmail, normalizedUsername]);
             
-            if (existingUser) {
+            if (existingResult.rows.length > 0) {
+                const existingUser = existingResult.rows[0];
                 if (existingUser.email.toLowerCase() === normalizedEmail) {
                     return { success: false, message: 'Bu e-posta adresi zaten kullanılıyor.' };
                 }
@@ -116,34 +79,33 @@ const createUser = async (email, username, password) => {
             // Create user ID
             const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
             
-            // Create user object with enhanced data structure
-            users[userId] = {
-                id: userId,
-                email: normalizedEmail,
-                username: username,
-                hashedPassword: hashedPassword,
-                createdAt: new Date().toISOString(),
-                lastLogin: null,
-                preferences: {
-                    avatar: 1, // Default avatar
-                    theme: 'dark',
-                    soundEnabled: true,
-                    backgroundType: 'particles'
-                },
-                gameStats: {
-                    totalGames: 0,
-                    totalWins: 0,
-                    totalCorrectWords: 0,
-                    favoriteCategory: '',
-                    longestWinStreak: 0,
-                    currentWinStreak: 0
-                }
+            // Insert user into PostgreSQL
+            const insertUserQuery = `
+                INSERT INTO users (id, email, username, hashed_password, created_at, preferences, game_stats)
+                VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5, $6)
+                RETURNING id
+            `;
+            
+            const preferences = {
+                avatar: 1,
+                theme: 'dark',
+                soundEnabled: true,
+                backgroundType: 'particles'
             };
             
-            saveUsers();
+            const gameStats = {
+                totalGames: 0,
+                totalWins: 0,
+                totalCorrectWords: 0,
+                favoriteCategory: '',
+                longestWinStreak: 0,
+                currentWinStreak: 0
+            };
             
-            // Initialize player statistics for new user
-            initializePlayerStats(username);
+            await query(insertUserQuery, [userId, normalizedEmail, username, hashedPassword, JSON.stringify(preferences), JSON.stringify(gameStats)]);
+            
+            // Initialize player statistics in PostgreSQL
+            await initializePlayerStatsPostgres(username);
             
             return { success: true, userId: userId, message: 'Hesap başarıyla oluşturuldu!' };
         } finally {
@@ -151,30 +113,45 @@ const createUser = async (email, username, password) => {
             pendingRegistrations.delete(registrationKey);
         }
     } catch (error) {
-        console.error('Kullanıcı oluşturma hatası:', error);
+        console.error('PostgreSQL kullanıcı oluşturma hatası:', error);
         return { success: false, message: 'Hesap oluşturulurken bir hata oluştu.' };
+    }
+};
+
+// PostgreSQL helper function for player stats initialization
+const initializePlayerStatsPostgres = async (username) => {
+    try {
+        const insertStatsQuery = `
+            INSERT INTO player_stats (username, games_played, games_won, win_rate, longest_win_streak, current_win_streak, total_correct_words, avg_response_time, favorite_category, last_played, most_used_words)
+            VALUES ($1, 0, 0, 0.00, 0, 0, 0, 0.00, '', CURRENT_TIMESTAMP, '[]'::jsonb)
+            ON CONFLICT (username) DO NOTHING
+        `;
+        await query(insertStatsQuery, [username]);
+    } catch (error) {
+        console.error('Player stats PostgreSQL hatası:', error);
     }
 };
 
 const authenticateUser = async (email, password) => {
     try {
-        const user = Object.values(users).find(user => 
-            user.email.toLowerCase() === email.toLowerCase()
-        );
+        // Find user in PostgreSQL
+        const userQuery = 'SELECT * FROM users WHERE LOWER(email) = $1';
+        const userResult = await query(userQuery, [email.toLowerCase()]);
         
-        if (!user) {
+        if (userResult.rows.length === 0) {
             return { success: false, message: 'E-posta veya şifre hatalı.' };
         }
         
-        const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
+        const user = userResult.rows[0];
+        const passwordMatch = await bcrypt.compare(password, user.hashed_password);
         
         if (!passwordMatch) {
             return { success: false, message: 'E-posta veya şifre hatalı.' };
         }
         
-        // Update last login
-        user.lastLogin = new Date().toISOString();
-        saveUsers();
+        // Update last login in PostgreSQL
+        const updateLoginQuery = 'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1';
+        await query(updateLoginQuery, [user.id]);
         
         // Generate JWT token
         const token = jwt.sign(
@@ -190,28 +167,37 @@ const authenticateUser = async (email, password) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                createdAt: user.createdAt,
-                lastLogin: user.lastLogin
+                createdAt: user.created_at,
+                lastLogin: new Date(),
+                preferences: user.preferences,
+                gameStats: user.game_stats
             },
             message: 'Giriş başarılı!' 
         };
     } catch (error) {
-        console.error('Kimlik doğrulama hatası:', error);
-        return { success: false, message: 'Giriş yapılırken bir hata oluştu.' };
+        console.error('PostgreSQL authentication hatası:', error);
+        return { success: false, message: 'Giriş işleminde hata oluştu.' };
     }
 };
 
-const verifyToken = (token) => {
+const verifyToken = async (token) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        const user = users[decoded.userId];
-        if (user) {
+        
+        // Get user from PostgreSQL
+        const userQuery = 'SELECT id, username, email, preferences, game_stats FROM users WHERE id = $1';
+        const userResult = await query(userQuery, [decoded.userId]);
+        
+        if (userResult.rows.length > 0) {
+            const user = userResult.rows[0];
             return { 
                 success: true, 
                 user: {
                     id: user.id,
                     username: user.username,
-                    email: user.email
+                    email: user.email,
+                    preferences: user.preferences,
+                    gameStats: user.game_stats
                 }
             };
         }
@@ -221,107 +207,105 @@ const verifyToken = (token) => {
     }
 };
 
-// Player Statistics Functions
-const savePlayerStats = () => {
-    try {
-        fs.writeFileSync(statsPath, JSON.stringify(playerStats, null, 2), 'utf8');
-    } catch (error) {
-        console.error("İstatistik kaydetme hatası:", error);
-    }
-};
+// PostgreSQL Player Statistics Functions - No more JSON saving!
 
-const initializePlayerStats = (playerName) => {
-    if (!playerStats[playerName]) {
-        playerStats[playerName] = {
+const getPlayerStatsPostgres = async (playerName) => {
+    try {
+        const statsQuery = 'SELECT * FROM player_stats WHERE username = $1';
+        const result = await query(statsQuery, [playerName]);
+        
+        if (result.rows.length === 0) {
+            // Initialize if doesn't exist
+            await initializePlayerStatsPostgres(playerName);
+            return await getPlayerStatsPostgres(playerName);
+        }
+        
+        const stats = result.rows[0];
+        return {
+            gamesPlayed: stats.games_played,
+            gamesWon: stats.games_won,
+            winRate: parseFloat(stats.win_rate),
+            totalCorrectWords: stats.total_correct_words,
+            avgResponseTime: parseFloat(stats.avg_response_time),
+            longestWinStreak: stats.longest_win_streak,
+            currentWinStreak: stats.current_win_streak,
+            favoriteCategory: stats.favorite_category || 'Henüz yok',
+            lastPlayed: stats.last_played,
+            mostUsedWords: stats.most_used_words || []
+        };
+    } catch (error) {
+        console.error('PostgreSQL stats getirme hatası:', error);
+        return {
             gamesPlayed: 0,
             gamesWon: 0,
+            winRate: 0,
             totalCorrectWords: 0,
-            totalResponseTime: 0,
-            responseCount: 0,
+            avgResponseTime: 0,
             longestWinStreak: 0,
             currentWinStreak: 0,
-            categoriesPlayed: {},
-            wordsUsed: {},
-            lastPlayed: new Date().toISOString(),
-            achievements: []
+            favoriteCategory: 'Henüz yok',
+            lastPlayed: new Date(),
+            mostUsedWords: []
         };
     }
-    return playerStats[playerName];
 };
 
-const updatePlayerWordStat = (playerName, word, category, responseTime) => {
-    const stats = initializePlayerStats(playerName);
-    stats.totalCorrectWords++;
-    stats.totalResponseTime += responseTime;
-    stats.responseCount++;
-    stats.lastPlayed = new Date().toISOString();
-    
-    // Track categories
-    if (!stats.categoriesPlayed[category]) {
-        stats.categoriesPlayed[category] = 0;
+const updatePlayerWordStatPostgres = async (playerName, word, category, responseTime) => {
+    try {
+        const updateQuery = `
+            UPDATE player_stats 
+            SET total_correct_words = total_correct_words + 1,
+                avg_response_time = (avg_response_time * total_correct_words + $3) / (total_correct_words + 1),
+                favorite_category = CASE 
+                    WHEN favorite_category = '' OR favorite_category IS NULL THEN $2
+                    ELSE favorite_category
+                END,
+                last_played = CURRENT_TIMESTAMP,
+                most_used_words = CASE 
+                    WHEN most_used_words ? $4 THEN 
+                        jsonb_set(most_used_words, ARRAY[$4], to_jsonb((most_used_words->>$4)::int + 1))
+                    ELSE 
+                        jsonb_set(most_used_words, ARRAY[$4], '1')
+                END
+            WHERE username = $1
+        `;
+        await query(updateQuery, [playerName, category, responseTime, word]);
+    } catch (error) {
+        console.error('PostgreSQL word stat güncelleme hatası:', error);
     }
-    stats.categoriesPlayed[category]++;
-    
-    // Track words used
-    if (!stats.wordsUsed[word]) {
-        stats.wordsUsed[word] = 0;
-    }
-    stats.wordsUsed[word]++;
-    
-    savePlayerStats();
 };
 
-const updatePlayerGameResult = (playerName, won) => {
-    const stats = initializePlayerStats(playerName);
-    stats.gamesPlayed++;
-    stats.lastPlayed = new Date().toISOString();
-    
-    if (won) {
-        stats.gamesWon++;
-        stats.currentWinStreak++;
-        if (stats.currentWinStreak > stats.longestWinStreak) {
-            stats.longestWinStreak = stats.currentWinStreak;
+const updatePlayerGameResultPostgres = async (playerName, won) => {
+    try {
+        if (won) {
+            const updateWinQuery = `
+                UPDATE player_stats 
+                SET games_played = games_played + 1,
+                    games_won = games_won + 1,
+                    win_rate = ((games_won + 1)::decimal / (games_played + 1)) * 100,
+                    current_win_streak = current_win_streak + 1,
+                    longest_win_streak = CASE 
+                        WHEN current_win_streak + 1 > longest_win_streak THEN current_win_streak + 1
+                        ELSE longest_win_streak
+                    END,
+                    last_played = CURRENT_TIMESTAMP
+                WHERE username = $1
+            `;
+            await query(updateWinQuery, [playerName]);
+        } else {
+            const updateLossQuery = `
+                UPDATE player_stats 
+                SET games_played = games_played + 1,
+                    win_rate = (games_won::decimal / (games_played + 1)) * 100,
+                    current_win_streak = 0,
+                    last_played = CURRENT_TIMESTAMP
+                WHERE username = $1
+            `;
+            await query(updateLossQuery, [playerName]);
         }
-    } else {
-        stats.currentWinStreak = 0;
+    } catch (error) {
+        console.error('PostgreSQL game result güncelleme hatası:', error);
     }
-    
-    savePlayerStats();
-};
-
-const getPlayerStats = (playerName) => {
-    const stats = initializePlayerStats(playerName);
-    const winRate = stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed * 100).toFixed(1) : 0;
-    const avgResponseTime = stats.responseCount > 0 ? (stats.totalResponseTime / stats.responseCount).toFixed(1) : 0;
-    
-    // Get favorite category
-    let favoriteCategory = 'Henüz yok';
-    let maxCategoryCount = 0;
-    for (const [category, count] of Object.entries(stats.categoriesPlayed)) {
-        if (count > maxCategoryCount) {
-            maxCategoryCount = count;
-            favoriteCategory = category;
-        }
-    }
-    
-    // Get most used words (top 5)
-    const mostUsedWords = Object.entries(stats.wordsUsed)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 5)
-        .map(([word, count]) => ({ word, count }));
-    
-    return {
-        gamesPlayed: stats.gamesPlayed,
-        gamesWon: stats.gamesWon,
-        winRate: winRate + '%',
-        totalCorrectWords: stats.totalCorrectWords,
-        avgResponseTime: avgResponseTime + 's',
-        longestWinStreak: stats.longestWinStreak,
-        currentWinStreak: stats.currentWinStreak,
-        favoriteCategory,
-        mostUsedWords,
-        lastPlayed: new Date(stats.lastPlayed).toLocaleDateString('tr-TR')
-    };
 };
 
 const createInitialGameState = () => ({
@@ -451,7 +435,7 @@ io.on('connection', (socket) => {
         broadcastScoreUpdate(roomId);
     });
 
-    socket.on('joinRoom', ({ name, roomId }) => {
+    socket.on('joinRoom', async ({ name, roomId }) => {
         const room = rooms[roomId];
         if (!room) {
             return socket.emit('gameError', 'Oda bulunamadı.');
@@ -467,9 +451,17 @@ io.on('connection', (socket) => {
         const gameState = room;
         const playerNumber = gameState.players.length + 1;
         
-        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar
-        const user = Object.values(users).find(u => u.username === name);
-        const userAvatar = user?.preferences?.avatar || 1;
+        // PROFESSIONAL ENHANCEMENT: Load user's saved avatar from PostgreSQL
+        let userAvatar = 1; // Default avatar
+        try {
+            const userQuery = 'SELECT preferences FROM users WHERE username = $1';
+            const userResult = await query(userQuery, [name]);
+            if (userResult.rows.length > 0) {
+                userAvatar = userResult.rows[0].preferences?.avatar || 1;
+            }
+        } catch (error) {
+            console.error('PostgreSQL avatar yükleme hatası:', error);
+        }
         
         const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: userAvatar };
 
@@ -499,7 +491,7 @@ io.on('connection', (socket) => {
         startSinglePlayerTurn(roomId);
     });
 
-    socket.on('changeAvatar', ({ avatar }) => {
+    socket.on('changeAvatar', async ({ avatar }) => {
         const roomId = getRoomIdFromSocket();
         if (!rooms[roomId]) return;
         
@@ -509,14 +501,17 @@ io.on('connection', (socket) => {
         if (player && avatar >= 1 && avatar <= 16) {
             player.avatar = avatar;
             
-            // PROFESSIONAL ENHANCEMENT: Save avatar to user's persistent preferences
-            const user = Object.values(users).find(u => u.username === player.name);
-            if (user) {
-                if (!user.preferences) {
-                    user.preferences = { avatar: 1, theme: 'dark', soundEnabled: true, backgroundType: 'particles' };
-                }
-                user.preferences.avatar = avatar;
-                saveUsers(); // Persist to database
+            // PROFESSIONAL ENHANCEMENT: Save avatar to PostgreSQL user preferences
+            try {
+                const updateAvatarQuery = `
+                    UPDATE users 
+                    SET preferences = jsonb_set(preferences, '{avatar}', $1::jsonb)
+                    WHERE username = $2
+                `;
+                await query(updateAvatarQuery, [avatar, player.name]);
+                console.log(`✅ Avatar updated in PostgreSQL for ${player.name}: ${avatar}`);
+            } catch (error) {
+                console.error('❌ PostgreSQL avatar update hatası:', error);
             }
             
             // Emit lobby update to sync avatar changes
@@ -615,7 +610,7 @@ io.on('connection', (socket) => {
         
         if (isCorrect) {
             // Update player statistics
-            updatePlayerWordStat(currentPlayer.name, normalizedSubmittedWord, gameState.currentCategory, responseTime);
+            updatePlayerWordStatPostgres(currentPlayer.name, normalizedSubmittedWord, gameState.currentCategory, responseTime);
             
             gameState.usedWords.push(normalizedSubmittedWord);
             io.to(roomId).emit('wordAccepted', { playerNumber: currentPlayer.playerNumber, word: normalizedSubmittedWord });
@@ -642,7 +637,7 @@ io.on('connection', (socket) => {
             const playerName = gameState.players[0].name;
             
             // Update player statistics
-            updatePlayerWordStat(playerName, normalizedSubmittedWord, gameState.currentCategory, responseTime);
+            updatePlayerWordStatPostgres(playerName, normalizedSubmittedWord, gameState.currentCategory, responseTime);
             
             gameState.scores[playerName]++;
             gameState.usedWords.push(normalizedSubmittedWord);
@@ -704,8 +699,8 @@ io.on('connection', (socket) => {
         }
     });
     
-    socket.on('requestPlayerStats', ({ playerName }) => {
-        const stats = getPlayerStats(playerName);
+    socket.on('requestPlayerStats', async ({ playerName }) => {
+        const stats = await getPlayerStatsPostgres(playerName);
         socket.emit('playerStatsUpdate', { playerName, stats });
     });
     
@@ -929,7 +924,7 @@ io.on('connection', (socket) => {
         const playerName = gameState.players[0].name;
         
         // Update single player game statistics (treat any score > 0 as a "win")
-        updatePlayerGameResult(playerName, score > 0);
+        updatePlayerGameResultPostgres(playerName, score > 0);
         
         io.to(roomId).emit('singlePlayerGameOver', { score });
     }
@@ -992,7 +987,7 @@ io.on('connection', (socket) => {
                 // Update statistics for all players
                 gameState.players.forEach(player => {
                     const won = player.name === finalWinner[0];
-                    updatePlayerGameResult(player.name, won);
+                    updatePlayerGameResultPostgres(player.name, won);
                 });
                 
                 io.to(roomId).emit('finalWinner', { winner: finalWinner[0], scores: gameState.scores });
