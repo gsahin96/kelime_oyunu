@@ -1,4 +1,15 @@
 {
+  "name": "kelime-oyunu",
+  "version": "1.0.0",
+  "description": "Turkish Word Game with Socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.1.0",
