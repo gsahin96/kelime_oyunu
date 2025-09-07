@@ -9,6 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 const dbPath = path.join(__dirname, 'database.json');
+const statsPath = path.join(__dirname, 'player_stats.json');
 
 app.use(express.static(__dirname));
 
@@ -29,7 +30,120 @@ try {
     process.exit(1);
 }
 
+let playerStats = {};
+try {
+    const statsData = fs.readFileSync(statsPath, 'utf8');
+    playerStats = JSON.parse(statsData);
+    console.log("Oyuncu istatistikleri başarıyla yüklendi.");
+} catch (error) {
+    console.log("Oyuncu istatistikleri dosyası bulunamadı, yeni dosya oluşturulacak.");
+    playerStats = {};
+}
+
 let rooms = {};
+
+// Player Statistics Functions
+const savePlayerStats = () => {
+    try {
+        fs.writeFileSync(statsPath, JSON.stringify(playerStats, null, 2), 'utf8');
+    } catch (error) {
+        console.error("İstatistik kaydetme hatası:", error);
+    }
+};
+
+const initializePlayerStats = (playerName) => {
+    if (!playerStats[playerName]) {
+        playerStats[playerName] = {
+            gamesPlayed: 0,
+            gamesWon: 0,
+            totalCorrectWords: 0,
+            totalResponseTime: 0,
+            responseCount: 0,
+            longestWinStreak: 0,
+            currentWinStreak: 0,
+            categoriesPlayed: {},
+            wordsUsed: {},
+            lastPlayed: new Date().toISOString(),
+            achievements: []
+        };
+    }
+    return playerStats[playerName];
+};
+
+const updatePlayerWordStat = (playerName, word, category, responseTime) => {
+    const stats = initializePlayerStats(playerName);
+    stats.totalCorrectWords++;
+    stats.totalResponseTime += responseTime;
+    stats.responseCount++;
+    stats.lastPlayed = new Date().toISOString();
+    
+    // Track categories
+    if (!stats.categoriesPlayed[category]) {
+        stats.categoriesPlayed[category] = 0;
+    }
+    stats.categoriesPlayed[category]++;
+    
+    // Track words used
+    if (!stats.wordsUsed[word]) {
+        stats.wordsUsed[word] = 0;
+    }
+    stats.wordsUsed[word]++;
+    
+    savePlayerStats();
+};
+
+const updatePlayerGameResult = (playerName, won) => {
+    const stats = initializePlayerStats(playerName);
+    stats.gamesPlayed++;
+    stats.lastPlayed = new Date().toISOString();
+    
+    if (won) {
+        stats.gamesWon++;
+        stats.currentWinStreak++;
+        if (stats.currentWinStreak > stats.longestWinStreak) {
+            stats.longestWinStreak = stats.currentWinStreak;
+        }
+    } else {
+        stats.currentWinStreak = 0;
+    }
+    
+    savePlayerStats();
+};
+
+const getPlayerStats = (playerName) => {
+    const stats = initializePlayerStats(playerName);
+    const winRate = stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed * 100).toFixed(1) : 0;
+    const avgResponseTime = stats.responseCount > 0 ? (stats.totalResponseTime / stats.responseCount).toFixed(1) : 0;
+    
+    // Get favorite category
+    let favoriteCategory = 'Henüz yok';
+    let maxCategoryCount = 0;
+    for (const [category, count] of Object.entries(stats.categoriesPlayed)) {
+        if (count > maxCategoryCount) {
+            maxCategoryCount = count;
+            favoriteCategory = category;
+        }
+    }
+    
+    // Get most used words (top 5)
+    const mostUsedWords = Object.entries(stats.wordsUsed)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([word, count]) => ({ word, count }));
+    
+    return {
+        gamesPlayed: stats.gamesPlayed,
+        gamesWon: stats.gamesWon,
+        winRate: winRate + '%',
+        totalCorrectWords: stats.totalCorrectWords,
+        avgResponseTime: avgResponseTime + 's',
+        longestWinStreak: stats.longestWinStreak,
+        currentWinStreak: stats.currentWinStreak,
+        favoriteCategory,
+        mostUsedWords,
+        lastPlayed: new Date(stats.lastPlayed).toLocaleDateString('tr-TR')
+    };
+};
 
 const createInitialGameState = () => ({
     players: [],
@@ -49,6 +163,7 @@ const createInitialGameState = () => ({
     countdownInterval: null,
     turnResolved: false,
     usedLettersThisGame: [],
+    turnStartTime: null,
     isSinglePlayer: false,
 });
 
@@ -122,8 +237,10 @@ io.on('connection', (socket) => {
         gameState.players.push(player);
         gameState.scores[name] = 0;
         gameState.gameInProgress = true;
+        gameState.usedWords = [];
         
         socket.emit('singlePlayerStarted');
+        socket.emit('usedWordsUpdate', { usedWords: gameState.usedWords });
         startSinglePlayerTurn(roomId);
     });
 
@@ -146,6 +263,7 @@ io.on('connection', (socket) => {
         gameState.gameInProgress = true;
         gameState.roundInProgress = true;
         gameState.usedWords = [];
+        io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
         gameState.activePlayersInRound = [...gameState.players];
 
         const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
@@ -204,14 +322,21 @@ io.on('connection', (socket) => {
         clearInterval(gameState.countdownInterval);
         gameState.turnResolved = true;
 
+        // Calculate response time
+        const responseTime = gameState.turnStartTime ? (Date.now() - gameState.turnStartTime) / 1000 : 0;
+
         const normalizedSubmittedWord = normalizeWord(word);
         const normalizedLetter = normalizeWord(gameState.currentLetter);
         const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
         const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSubmittedWord) && !gameState.usedWords.includes(normalizedSubmittedWord);
         
         if (isCorrect) {
+            // Update player statistics
+            updatePlayerWordStat(currentPlayer.name, normalizedSubmittedWord, gameState.currentCategory, responseTime);
+            
             gameState.usedWords.push(normalizedSubmittedWord);
             io.to(roomId).emit('wordAccepted', { playerNumber: currentPlayer.playerNumber, word: normalizedSubmittedWord });
+            io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
             setTimeout(() => nextTurn(roomId), 700);
         } else {
             handlePlayerElimination(roomId, currentPlayer, 'Yanlış veya tekrar edilmiş kelime', normalizedSubmittedWord);
@@ -222,6 +347,9 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         clearInterval(gameState.countdownInterval);
 
+        // Calculate response time
+        const responseTime = gameState.turnStartTime ? (Date.now() - gameState.turnStartTime) / 1000 : 0;
+
         const normalizedSubmittedWord = normalizeWord(word);
         const normalizedLetter = normalizeWord(gameState.currentLetter);
         const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
@@ -229,8 +357,13 @@ io.on('connection', (socket) => {
 
         if (isCorrect) {
             const playerName = gameState.players[0].name;
+            
+            // Update player statistics
+            updatePlayerWordStat(playerName, normalizedSubmittedWord, gameState.currentCategory, responseTime);
+            
             gameState.scores[playerName]++;
             gameState.usedWords.push(normalizedSubmittedWord);
+            io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
             startSinglePlayerTurn(roomId);
         } else {
             handleSinglePlayerGameOver(roomId);
@@ -286,6 +419,11 @@ io.on('connection', (socket) => {
             broadcastLobbyUpdate(roomId);
             broadcastScoreUpdate(roomId);
         }
+    });
+    
+    socket.on('requestPlayerStats', ({ playerName }) => {
+        const stats = getPlayerStats(playerName);
+        socket.emit('playerStatsUpdate', { playerName, stats });
     });
     
     socket.on('disconnect', () => {
@@ -372,6 +510,7 @@ io.on('connection', (socket) => {
         
         gameState.roundInProgress = true;
         gameState.turnResolved = false;
+        gameState.turnStartTime = Date.now(); // Record turn start time for statistics
         
         if (gameState.currentPlayerIndex >= gameState.activePlayersInRound.length) {
             gameState.currentPlayerIndex = 0;
@@ -409,6 +548,7 @@ io.on('connection', (socket) => {
         if (!gameState || !gameState.gameInProgress) return;
         
         gameState.roundInProgress = true;
+        gameState.turnStartTime = Date.now(); // Record turn start time for statistics
         const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
         const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
         
@@ -451,6 +591,11 @@ io.on('connection', (socket) => {
         clearInterval(gameState.countdownInterval);
         gameState.gameInProgress = false;
         const score = gameState.scores[gameState.players[0].name];
+        const playerName = gameState.players[0].name;
+        
+        // Update single player game statistics (treat any score > 0 as a "win")
+        updatePlayerGameResult(playerName, score > 0);
+        
         io.to(roomId).emit('singlePlayerGameOver', { score });
     }
 
@@ -509,6 +654,12 @@ io.on('connection', (socket) => {
         setTimeout(() => {
             const finalWinner = Object.entries(gameState.scores).find(([, score]) => score >= gameState.settings.scoreGoal);
             if (finalWinner) {
+                // Update statistics for all players
+                gameState.players.forEach(player => {
+                    const won = player.name === finalWinner[0];
+                    updatePlayerGameResult(player.name, won);
+                });
+                
                 io.to(roomId).emit('finalWinner', { winner: finalWinner[0], scores: gameState.scores });
                 broadcastScoreUpdate(roomId, true);
                 gameState.gameInProgress = false;

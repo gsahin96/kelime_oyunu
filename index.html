@@ -101,7 +101,8 @@
             
             <div id="join-options">
                 <button id="createRoomButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Oda Oluştur</button>
-                <button id="showJoinFormButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">Odaya Katıl</button>
+                <button id="showJoinFormButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Odaya Katıl</button>
+                <button id="showStatsButton" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">📊 İstatistiklerim</button>
                 <div class="my-4 border-t border-gray-700"></div>
                 <button id="startSinglePlayerButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">Tek Başına Oyna</button>
             </div>
@@ -110,6 +111,79 @@
                 <input id="roomInput" type="text" placeholder="Oda Kodunu Gir" maxlength="6" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
                 <button id="joinRoomButton" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition">Katıl</button>
                 <button id="backToOptionsButton" class="w-full mt-2 text-gray-400 hover:text-white transition">Geri</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Statistics Screen -->
+    <div id="stats-screen" class="hidden w-full max-w-4xl">
+        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Oyuncu İstatistikleri</h2>
+            
+            <div id="stats-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Game Statistics -->
+                <div class="bg-gray-900/50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-indigo-400">🎮 Oyun İstatistikleri</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Oynanan Oyun:</span>
+                            <span class="font-bold text-white" id="stat-games-played">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Kazanılan Oyun:</span>
+                            <span class="font-bold text-green-400" id="stat-games-won">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Kazanma Oranı:</span>
+                            <span class="font-bold text-yellow-400" id="stat-win-rate">0%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">En Uzun Galibiyet Serisi:</span>
+                            <span class="font-bold text-purple-400" id="stat-longest-streak">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Mevcut Seri:</span>
+                            <span class="font-bold text-blue-400" id="stat-current-streak">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Word Statistics -->
+                <div class="bg-gray-900/50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">📝 Kelime İstatistikleri</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Toplam Doğru Kelime:</span>
+                            <span class="font-bold text-white" id="stat-total-words">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Ortalama Cevap Süresi:</span>
+                            <span class="font-bold text-cyan-400" id="stat-avg-time">0s</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">En Sevilen Kategori:</span>
+                            <span class="font-bold text-pink-400" id="stat-fav-category">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Son Oyun:</span>
+                            <span class="font-bold text-gray-400" id="stat-last-played">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Most Used Words -->
+                <div class="bg-gray-900/50 p-6 rounded-lg md:col-span-2">
+                    <h3 class="text-xl font-bold mb-4 text-orange-400">🔤 En Çok Kullanılan Kelimeler</h3>
+                    <div id="most-used-words" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <p class="text-gray-500 col-span-full text-center">Henüz kelime verisi yok</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <button id="closeStatsButton" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">
+                    Geri Dön
+                </button>
             </div>
         </div>
     </div>
@@ -194,6 +268,15 @@
                      </div>
                 </div>
                 <div id="scoreboard" class="space-y-2 mt-4"></div>
+                
+                <!-- Used Words Section -->
+                <div id="used-words-section" class="mt-6">
+                    <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Kullanılan Kelimeler</h4>
+                    <div id="used-words-list" class="bg-gray-900/50 rounded-lg p-3 max-h-40 overflow-y-auto">
+                        <p class="text-gray-500 text-sm text-center" id="no-words-text">Henüz kelime girilmedi</p>
+                    </div>
+                </div>
+                
                 <button id="resetScoreButton" class="hidden w-full mt-6 bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition">
                     Skorları Sıfırla
                 </button>
@@ -224,6 +307,14 @@
                  <button id="sp-replay-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl mr-2">Yeniden Oyna</button>
                  <button id="sp-main-menu-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">Ana Menü</button>
             </div>
+            
+            <!-- Single Player Used Words Section -->
+            <div id="sp-used-words-section" class="mt-6">
+                <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Kullanılan Kelimeler</h4>
+                <div id="sp-used-words-list" class="bg-gray-900/50 rounded-lg p-3 max-h-40 overflow-y-auto">
+                    <p class="text-gray-500 text-sm text-center" id="sp-no-words-text">Henüz kelime girilmedi</p>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -239,6 +330,7 @@
             const nameInput = document.getElementById('nameInput');
             const createRoomButton = document.getElementById('createRoomButton');
             const showJoinFormButton = document.getElementById('showJoinFormButton');
+            const showStatsButton = document.getElementById('showStatsButton');
             const joinOptions = document.getElementById('join-options');
             const joinForm = document.getElementById('join-form');
             const roomInput = document.getElementById('roomInput');
@@ -282,6 +374,16 @@
             const spMainMenuButton = document.getElementById('sp-main-menu-button');
             const spLetterEl = document.getElementById('sp-letter');
             const spCategoryEl = document.getElementById('sp-category');
+            
+            // Used Words Elements
+            const usedWordsList = document.getElementById('used-words-list');
+            const noWordsText = document.getElementById('no-words-text');
+            const spUsedWordsList = document.getElementById('sp-used-words-list');
+            const spNoWordsText = document.getElementById('sp-no-words-text');
+            
+            // Statistics Elements
+            const statsScreen = document.getElementById('stats-screen');
+            const closeStatsButton = document.getElementById('closeStatsButton');
 
             let synth = null;
             let myDetails = null;
@@ -445,6 +547,7 @@
                 document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated', 'active', 'correct'));
                 statusText.textContent = `${players.length} / 8 oyuncu bekleniyor...`;
                 countdownEl.textContent = '';
+                updateUsedWords([], false); // Clear used words when returning to lobby
                 
                 scoreGoalDisplay.textContent = settings.scoreGoal;
                 scoreGoalSelect.value = settings.scoreGoal;
@@ -492,6 +595,10 @@
             }
             
             socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver));
+            socket.on('usedWordsUpdate', ({ usedWords }) => {
+                updateUsedWords(usedWords, false);
+                updateUsedWords(usedWords, true); // Update both displays
+            });
             socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex, letter, category }) => {
                 startButton.classList.add('hidden');
                 newGameButton.classList.add('hidden');
@@ -504,6 +611,7 @@
             socket.on('gameStart', () => {
                 statusText.textContent = '';
                 document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated'));
+                updateUsedWords([], false); // Initialize empty used words for multiplayer
             });
             socket.on('playerEliminated', ({ loserId, loserName, reason, word }) => {
                  if (synth) synth.triggerAttackRelease("C3", "8n");
@@ -609,6 +717,7 @@
                 spGameOverScreen.classList.add('hidden');
                 spWordInputArea.classList.remove('hidden');
                 spTaskArea.classList.remove('hidden');
+                updateUsedWords([], true); // Initialize empty used words for single player
             });
 
             socket.on('singlePlayerTurnUpdate', ({ letter, category, score, timeLeft }) => {
@@ -711,6 +820,82 @@
                     });
                 }
             }
+            
+            function updateUsedWords(usedWords = [], isSinglePlayer = false) {
+                const wordsList = isSinglePlayer ? spUsedWordsList : usedWordsList;
+                const noWords = isSinglePlayer ? spNoWordsText : noWordsText;
+                
+                if (usedWords.length === 0) {
+                    noWords.style.display = 'block';
+                    wordsList.innerHTML = '<p class="text-gray-500 text-sm text-center">Henüz kelime girilmedi</p>';
+                } else {
+                    noWords.style.display = 'none';
+                    wordsList.innerHTML = '';
+                    
+                    usedWords.forEach((word, index) => {
+                        const wordElement = document.createElement('div');
+                        wordElement.className = 'flex justify-between items-center py-1 px-2 mb-1 bg-gray-800 rounded text-sm';
+                        wordElement.innerHTML = `
+                            <span class="text-white font-medium">${word}</span>
+                            <span class="text-green-400 text-xs">#${index + 1}</span>
+                        `;
+                        wordsList.appendChild(wordElement);
+                    });
+                    
+                    // Auto scroll to bottom to show latest word
+                    wordsList.scrollTop = wordsList.scrollHeight;
+                }
+            }
+            
+            function updatePlayerStatsDisplay(stats) {
+                document.getElementById('stat-games-played').textContent = stats.gamesPlayed;
+                document.getElementById('stat-games-won').textContent = stats.gamesWon;
+                document.getElementById('stat-win-rate').textContent = stats.winRate;
+                document.getElementById('stat-longest-streak').textContent = stats.longestWinStreak;
+                document.getElementById('stat-current-streak').textContent = stats.currentWinStreak;
+                document.getElementById('stat-total-words').textContent = stats.totalCorrectWords;
+                document.getElementById('stat-avg-time').textContent = stats.avgResponseTime;
+                document.getElementById('stat-fav-category').textContent = stats.favoriteCategory;
+                document.getElementById('stat-last-played').textContent = stats.lastPlayed;
+                
+                // Update most used words
+                const mostUsedContainer = document.getElementById('most-used-words');
+                if (stats.mostUsedWords.length === 0) {
+                    mostUsedContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center">Henüz kelime verisi yok</p>';
+                } else {
+                    mostUsedContainer.innerHTML = '';
+                    stats.mostUsedWords.forEach(({ word, count }) => {
+                        const wordElement = document.createElement('div');
+                        wordElement.className = 'bg-gray-800 p-3 rounded-lg text-center';
+                        wordElement.innerHTML = `
+                            <div class="font-bold text-white">${word}</div>
+                            <div class="text-sm text-gray-400">${count} kez</div>
+                        `;
+                        mostUsedContainer.appendChild(wordElement);
+                    });
+                }
+            }
+            
+            // Statistics Event Handlers
+            showStatsButton.addEventListener('click', () => {
+                const playerName = nameInput.value.trim();
+                if (!playerName) {
+                    alert('İstatistikleri görmek için önce isminizi girin!');
+                    return;
+                }
+                socket.emit('requestPlayerStats', { playerName });
+                initialScreen.classList.add('hidden');
+                statsScreen.classList.remove('hidden');
+            });
+            
+            closeStatsButton.addEventListener('click', () => {
+                statsScreen.classList.add('hidden');
+                initialScreen.classList.remove('hidden');
+            });
+            
+            socket.on('playerStatsUpdate', ({ playerName, stats }) => {
+                updatePlayerStatsDisplay(stats);
+            });
         }
     </script>
 </body>
