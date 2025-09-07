@@ -424,7 +424,7 @@ io.on('connection', (socket) => {
         // PROFESSIONAL ENHANCEMENT: Load user's saved avatar from database
         let userAvatar = 1; // Default avatar
         try {
-            const user = await getUserByUsername(name);
+            const user = await dbFunctions.userDB.getUserByUsername(name);
             if (user && user.preferences && user.preferences.avatar) {
                 userAvatar = user.preferences.avatar;
             }
