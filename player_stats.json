@@ -1,19 +1,15 @@
+{
   "co4erol": {
-    "gamesPlayed": 2,
-    "gamesWon": 1,
-    "totalCorrectWords": 2,
-    "totalResponseTime": 5.5489999999999995,
-    "responseCount": 2,
-    "longestWinStreak": 1,
-    "currentWinStreak": 1,
-    "categoriesPlayed": {
-      "Eşya": 2
-    },
-    "wordsUsed": {
-      "bez": 1,
-      "tarak": 1
-    },
-    "lastPlayed": "2025-09-07T10:58:50.264Z",
+    "gamesPlayed": 1,
+    "gamesWon": 0,
+    "totalCorrectWords": 0,
+    "totalResponseTime": 0,
+    "responseCount": 0,
+    "longestWinStreak": 0,
+    "currentWinStreak": 0,
+    "categoriesPlayed": {},
+    "wordsUsed": {},
+    "lastPlayed": "2025-09-07T11:48:03.298Z",
     "achievements": []
   }
 }
