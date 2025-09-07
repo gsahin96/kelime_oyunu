@@ -48,6 +48,256 @@
         }
         .gold { background-image: linear-gradient(to right, #fde047, #eab308); color: #422006; border-color: #fde047 !important;}
         .silver { background-image: linear-gradient(to right, #e5e7eb, #a1a1aa); color: #1f2937; border-color: #e5e7eb !important;}
+
+        /* Animated Background Styles */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        /* Floating Particles Background */
+        .bg-particles {
+            background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #1e40af 100%);
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { width: 20px; height: 20px; background: #60a5fa; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 15px; height: 15px; background: #a78bfa; left: 20%; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 25px; height: 25px; background: #34d399; left: 35%; animation-delay: 4s; }
+        .particle:nth-child(4) { width: 18px; height: 18px; background: #fbbf24; left: 50%; animation-delay: 1s; }
+        .particle:nth-child(5) { width: 22px; height: 22px; background: #f87171; left: 65%; animation-delay: 3s; }
+        .particle:nth-child(6) { width: 16px; height: 16px; background: #06d6a0; left: 80%; animation-delay: 5s; }
+        .particle:nth-child(7) { width: 30px; height: 30px; background: #8b5cf6; left: 95%; animation-delay: 2.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Gradient Wave Background */
+        .bg-waves {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientWave 15s ease infinite;
+        }
+
+        @keyframes gradientWave {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Geometric Pattern Background */
+        .bg-geometric {
+            background: #0f172a;
+            background-image: 
+                radial-gradient(circle at 25px 25px, #1e293b 2px, transparent 2px),
+                radial-gradient(circle at 75px 75px, #334155 2px, transparent 2px);
+            background-size: 100px 100px;
+            animation: geometricMove 20s linear infinite;
+        }
+
+        @keyframes geometricMove {
+            0% { background-position: 0 0, 50px 50px; }
+            100% { background-position: 100px 100px, 150px 150px; }
+        }
+
+        /* Neon Grid Background */
+        .bg-neon {
+            background: #000;
+            background-image: 
+                linear-gradient(cyan 1px, transparent 1px),
+                linear-gradient(90deg, cyan 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: neonPulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            0% { 
+                background-image: 
+                    linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px);
+            }
+            100% { 
+                background-image: 
+                    linear-gradient(rgba(0, 255, 255, 0.8) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 255, 255, 0.8) 1px, transparent 1px);
+            }
+        }
+
+        /* Bokeh Lights Background */
+        .bg-bokeh {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .bokeh-light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: bokehFloat 8s infinite ease-in-out;
+        }
+
+        .bokeh-light:nth-child(1) { width: 80px; height: 80px; background: rgba(255, 107, 107, 0.6); left: 10%; top: 20%; animation-delay: 0s; }
+        .bokeh-light:nth-child(2) { width: 60px; height: 60px; background: rgba(78, 205, 196, 0.6); left: 80%; top: 30%; animation-delay: 2s; }
+        .bokeh-light:nth-child(3) { width: 100px; height: 100px; background: rgba(255, 206, 84, 0.6); left: 60%; top: 70%; animation-delay: 4s; }
+        .bokeh-light:nth-child(4) { width: 70px; height: 70px; background: rgba(199, 121, 208, 0.6); left: 20%; top: 80%; animation-delay: 1s; }
+        .bokeh-light:nth-child(5) { width: 90px; height: 90px; background: rgba(130, 204, 221, 0.6); left: 85%; top: 15%; animation-delay: 3s; }
+
+        @keyframes bokehFloat {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
+            50% { transform: translateY(-20px) scale(1.1); opacity: 0.8; }
+        }
+
+        /* Background Controls */
+        .bg-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bg-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bg-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bg-btn.active {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+
+        /* Mobile responsiveness for background controls */
+        @media (max-width: 768px) {
+            .bg-controls {
+                top: 10px;
+                right: 10px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-width: 200px;
+            }
+            
+            .bg-btn {
+                padding: 6px 12px;
+                font-size: 10px;
+                flex: 1;
+                min-width: 60px;
+            }
+        }
+
+        /* Avatar System Styles */
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .avatar.small {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .avatar.large {
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        /* Avatar Selection Modal */
+        .avatar-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .avatar-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: #60a5fa;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+        }
+
+        .avatar-option.selected {
+            border-color: #fbbf24;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.8);
+        }
+
+        /* Avatar Background Gradients */
+        .avatar-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .avatar-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .avatar-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .avatar-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .avatar-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .avatar-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .avatar-7 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .avatar-8 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+        .avatar-9 { background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%); }
+        .avatar-10 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .avatar-11 { background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%); }
+        .avatar-12 { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+        .avatar-13 { background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); }
+        .avatar-14 { background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); }
+        .avatar-15 { background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); }
+        .avatar-16 { background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); }
         .bronze { background-image: linear-gradient(to right, #b08d57, #9c7a4c); color: #fef3c7; border-color: #b08d57 !important;}
         
         .slot-container {
@@ -94,10 +344,52 @@
 </head>
 <body class="bg-gray-900 text-white min-h-screen p-4">
 
+    <!-- Animated Background -->
+    <div id="animated-background" class="animated-bg bg-particles">
+        <!-- Floating Particles -->
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        
+        <!-- Bokeh Lights -->
+        <div class="bokeh-light"></div>
+        <div class="bokeh-light"></div>
+        <div class="bokeh-light"></div>
+        <div class="bokeh-light"></div>
+        <div class="bokeh-light"></div>
+    </div>
+
+    <!-- Background Controls -->
+    <div class="bg-controls">
+        <button class="bg-btn active" onclick="changeBackground('particles')" style="background: rgba(30, 27, 75, 0.8); color: #60a5fa;">Particles</button>
+        <button class="bg-btn" onclick="changeBackground('waves')" style="background: rgba(102, 126, 234, 0.8); color: white;">Waves</button>
+        <button class="bg-btn" onclick="changeBackground('geometric')" style="background: rgba(15, 23, 42, 0.8); color: #334155;">Geometric</button>
+        <button class="bg-btn" onclick="changeBackground('neon')" style="background: rgba(0, 0, 0, 0.8); color: cyan;">Neon</button>
+        <button class="bg-btn" onclick="changeBackground('bokeh')" style="background: rgba(26, 26, 46, 0.8); color: #ff6b6b;">Bokeh</button>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
+            <div class="avatar-grid" id="avatar-grid">
+                <!-- Avatars will be populated by JavaScript -->
+            </div>
+            <div class="flex gap-4 mt-6">
+                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
+                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Authentication Screen -->
-    <div id="auth-screen" class="w-full max-w-md">
-        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
-            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center">YETI Kelime Oyunu</h1>
+    <div id="auth-screen" class="w-full max-w-md relative z-10">
+        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
+            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center game-title">YETI Kelime Oyunu</h1>
             
             <!-- Login Form -->
             <div id="login-form">
@@ -123,15 +415,20 @@
         </div>
     </div>
 
-    <div id="initial-screen" class="hidden w-full max-w-sm">
-        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
-            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center">YETI Kelime Oyunu</h1>
-            <input id="nameInput" type="text" placeholder="İsminizi Girin" maxlength="15" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+    <div id="initial-screen" class="hidden w-full max-w-sm relative z-10">
+        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
+            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center game-title">YETI Kelime Oyunu</h1>
             
             <div id="join-options">
                 <div class="mb-4 p-3 bg-gray-900/50 rounded-lg">
-                    <p class="text-sm text-gray-400">Hoş geldin,</p>
-                    <p class="font-bold text-indigo-300" id="welcomeUsername">Oyuncu</p>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div id="user-avatar" class="avatar small avatar-1">🎮</div>
+                        <div>
+                            <p class="text-sm text-gray-400">Hoş geldin,</p>
+                            <p class="font-bold text-indigo-300" id="welcomeUsername">Oyuncu</p>
+                        </div>
+                    </div>
+                    <button id="choose-avatar-btn" class="w-full text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg transition">🎭 Avatar Değiştir</button>
                 </div>
                 <button id="createRoomButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Oda Oluştur</button>
                 <button id="showJoinFormButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Odaya Katıl</button>
@@ -150,8 +447,8 @@
     </div>
 
     <!-- Player Statistics Screen -->
-    <div id="stats-screen" class="hidden w-full max-w-4xl">
-        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
+    <div id="stats-screen" class="hidden w-full max-w-4xl relative z-10">
+        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
             <h2 class="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Oyuncu İstatistikleri</h2>
             
             <div id="stats-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -234,11 +531,11 @@
     </div>
 
 
-    <div id="game-container" class="hidden w-full max-w-6xl flex-col">
+    <div id="game-container" class="hidden w-full max-w-6xl flex-col relative z-10">
         <div id="invite-link-ingame" class="w-full max-w-md mx-auto mb-4 text-center"></div>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 text-center p-8 bg-gray-800 rounded-2xl shadow-2xl flex flex-col justify-between">
+            <div class="md:col-span-2 text-center p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl flex flex-col justify-between border border-gray-700/50">
                 <div>
                      <div id="task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
                         <div class="grid grid-cols-2 gap-4">
@@ -276,7 +573,7 @@
                 </div>
             </div>
 
-            <div id="sidebar" class="p-6 bg-gray-800 rounded-2xl shadow-2xl">
+            <div id="sidebar" class="p-6 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
                 <h3 class="text-2xl font-bold mb-1 text-center">🏆 Puan Tablosu & Ayarlar</h3>
                 <div class="text-center bg-gray-900/50 py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4">
                     <div>Hedef: <span id="score-goal-display" class="font-bold text-xl text-yellow-300">10</span></div>
@@ -319,9 +616,9 @@
     </div>
 
     <!-- Tek Oyunculu Mod Arayüzü -->
-    <div id="single-player-container" class="hidden w-full max-w-2xl flex flex-col text-center">
+    <div id="single-player-container" class="hidden w-full max-w-2xl flex flex-col text-center relative z-10">
         <h1 class="game-title text-4xl md:text-6xl font-black text-center my-4">Tek Başına Oyna</h1>
-        <div class="p-8 bg-gray-800 rounded-2xl shadow-2xl">
+        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
              <div id="sp-task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
                  <div class="text-3xl"><span id="sp-letter" class="font-bold text-indigo-300">A</span> harfi ile başlayan <span id="sp-category" class="font-bold text-indigo-300">İsim</span></div>
             </div>
@@ -375,11 +672,13 @@
             const initialScreen = document.getElementById('initial-screen');
             const gameContainer = document.getElementById('game-container');
             const singlePlayerContainer = document.getElementById('single-player-container');
-            const nameInput = document.getElementById('nameInput');
             const createRoomButton = document.getElementById('createRoomButton');
             const showJoinFormButton = document.getElementById('showJoinFormButton');
             const showStatsButton = document.getElementById('showStatsButton');
             const logoutButton = document.getElementById('logoutButton');
+            
+            // Global game state
+            let currentPlayers = [];
             const welcomeUsername = document.getElementById('welcomeUsername');
             const joinOptions = document.getElementById('join-options');
             const joinForm = document.getElementById('join-form');
@@ -477,10 +776,101 @@
             
             const showMainMenu = (user) => {
                 currentUser = user;
-                nameInput.value = user.username;
                 welcomeUsername.textContent = user.username;
                 authScreen.classList.add('hidden');
                 initialScreen.classList.remove('hidden');
+                
+                // Ensure avatar system is working
+                setupAvatarButton();
+            };
+            
+            const setupAvatarButton = () => {
+                const chooseAvatarBtn = document.getElementById('choose-avatar-btn');
+                const avatarModal = document.getElementById('avatar-modal');
+                const avatarGrid = document.getElementById('avatar-grid');
+                const avatarConfirm = document.getElementById('avatar-confirm');
+                const avatarCancel = document.getElementById('avatar-cancel');
+                const userAvatar = document.getElementById('user-avatar');
+                
+                if (chooseAvatarBtn && avatarModal) {
+                    // Remove any existing event listeners by cloning the button
+                    const newBtn = chooseAvatarBtn.cloneNode(true);
+                    chooseAvatarBtn.parentNode.replaceChild(newBtn, chooseAvatarBtn);
+                    
+                    // Add the click event listener
+                    newBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        avatarModal.classList.remove('hidden');
+                        
+                        // Initialize avatar grid if empty
+                        if (avatarGrid && avatarGrid.children.length === 0) {
+                            populateAvatarGrid();
+                        }
+                    });
+                    
+                    // Setup modal controls
+                    if (avatarCancel) {
+                        avatarCancel.addEventListener('click', () => {
+                            avatarModal.classList.add('hidden');
+                        });
+                    }
+                    
+                    if (avatarConfirm) {
+                        avatarConfirm.addEventListener('click', () => {
+                            const avatarData = getAvatarData(selectedAvatarId);
+                            if (userAvatar) {
+                                userAvatar.className = `avatar small ${avatarData.class}`;
+                                userAvatar.textContent = avatarData.emoji;
+                            }
+                            
+                            // Store user's avatar choice
+                            if (currentUser) {
+                                playerAvatars[currentUser.username] = selectedAvatarId;
+                                // Emit avatar change to server
+                                socket.emit('changeAvatar', { avatar: selectedAvatarId });
+                            }
+                            
+                            avatarModal.classList.add('hidden');
+                        });
+                    }
+                    
+                    // Close modal on background click
+                    avatarModal.addEventListener('click', (e) => {
+                        if (e.target === avatarModal) {
+                            avatarModal.classList.add('hidden');
+                        }
+                    });
+                    
+                }
+            };
+            
+            const populateAvatarGrid = () => {
+                const avatarGrid = document.getElementById('avatar-grid');
+                if (!avatarGrid) return;
+                
+                avatarGrid.innerHTML = ''; // Clear existing content
+                
+                // Populate avatar grid
+                for (let i = 1; i <= 16; i++) {
+                    const avatarOption = document.createElement('div');
+                    const avatarData = getAvatarData(i);
+                    avatarOption.className = `avatar avatar-option ${avatarData.class}`;
+                    avatarOption.textContent = avatarData.emoji;
+                    avatarOption.dataset.avatarId = i;
+                    
+                    avatarOption.addEventListener('click', () => {
+                        document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                        avatarOption.classList.add('selected');
+                        selectedAvatarId = i;
+                    });
+                    
+                    avatarGrid.appendChild(avatarOption);
+                }
+                
+                // Set default selection
+                if (avatarGrid.children[0]) {
+                    avatarGrid.children[0].classList.add('selected');
+                }
             };
             
             const logout = () => {
@@ -518,7 +908,17 @@
                     return;
                 }
                 
+                // Disable button to prevent double submission
+                loginButton.disabled = true;
+                loginButton.textContent = 'Giriş yapılıyor...';
+                
                 socket.emit('login', { email, password });
+                
+                // Re-enable button after a delay
+                setTimeout(() => {
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Giriş Yap';
+                }, 3000);
             });
             
             registerButton.addEventListener('click', () => {
@@ -531,7 +931,17 @@
                     return;
                 }
                 
+                // Disable button to prevent double submission
+                registerButton.disabled = true;
+                registerButton.textContent = 'Kayıt oluşturuluyor...';
+                
                 socket.emit('register', { email, username, password });
+                
+                // Re-enable button after a delay
+                setTimeout(() => {
+                    registerButton.disabled = false;
+                    registerButton.textContent = 'Kayıt Ol';
+                }, 3000);
             });
             
             // Handle Enter key in forms
@@ -550,6 +960,11 @@
             // Socket Authentication Handlers
             socket.on('authError', (message) => {
                 showAuthMessage(message, true);
+                // Re-enable buttons on error
+                loginButton.disabled = false;
+                loginButton.textContent = 'Giriş Yap';
+                registerButton.disabled = false;
+                registerButton.textContent = 'Kayıt Ol';
             });
             
             socket.on('registerSuccess', (message) => {
@@ -560,6 +975,9 @@
                 registerEmail.value = '';
                 registerUsername.value = '';
                 registerPassword.value = '';
+                // Re-enable button
+                registerButton.disabled = false;
+                registerButton.textContent = 'Kayıt Ol';
             });
             
             socket.on('loginSuccess', ({ token, user, message }) => {
@@ -569,6 +987,9 @@
                 // Clear login form
                 loginEmail.value = '';
                 loginPassword.value = '';
+                // Re-enable button
+                loginButton.disabled = false;
+                loginButton.textContent = 'Giriş Yap';
             });
             
             socket.on('authVerified', ({ user }) => {
@@ -580,6 +1001,18 @@
                 loadAuthToken();
             });
             
+            // Add socket error handling
+            socket.on('connect_error', (error) => {
+                showAuthMessage('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.', true);
+            });
+            
+            socket.on('disconnect', (reason) => {
+                if (reason === 'io server disconnect') {
+                    showAuthMessage('Sunucu bağlantısı kesildi. Sayfa yenileniyor...', true);
+                    setTimeout(() => location.reload(), 3000);
+                }
+            });
+            
             showJoinFormButton.addEventListener('click', () => {
                 joinOptions.classList.add('hidden');
                 joinForm.classList.remove('hidden');
@@ -589,12 +1022,11 @@
                 joinOptions.classList.remove('hidden');
             });
              const validateInputs = () => {
-                const name = nameInput.value.trim();
-                if (!name) {
-                    alert('Lütfen bir isim girin.');
+                if (!currentUser || !currentUser.username) {
+                    alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
                     return false;
                 }
-                return { name };
+                return { name: currentUser.username };
             };
             createRoomButton.addEventListener('click', () => {
                 const { name } = validateInputs();
@@ -721,6 +1153,7 @@
             });
             socket.on('lobbyUpdate', ({ players, gameHostId, settings }) => {
                 currentHostId = gameHostId;
+                currentPlayers = players; // Store current players
                 updatePlayerSlots(players);
                 document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated', 'active', 'correct'));
                 statusText.textContent = `${players.length} / 8 oyuncu bekleniyor...`;
@@ -772,7 +1205,7 @@
                 }
             }
             
-            socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver));
+            socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver, currentPlayers));
             socket.on('usedWordsUpdate', ({ usedWords }) => {
                 updateUsedWords(usedWords, false);
                 updateUsedWords(usedWords, true); // Update both displays
@@ -879,7 +1312,7 @@
             socket.on('finalWinner', ({winner, scores}) => {
                 wordInputArea.classList.add('hidden');
                 if (recognition) recognition.stop();
-                updateScoreboard(scores, true);
+                updateScoreboard(scores, true, currentPlayers);
                 countdownEl.textContent = '';
                 statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black">${winner}</span> 🏆</div>`;
                 const isHost = myDetails && myDetails.id === currentHostId;
@@ -963,6 +1396,8 @@
                 reel.style.top = `-${finalPosition}px`;
             }
             function updatePlayerSlots(players = []) {
+                if (!playerSlotsDiv) return;
+                
                 playerSlotsDiv.innerHTML = '';
                 for (let i = 1; i <= 8; i++) {
                     const player = players.find(p => p.playerNumber === i);
@@ -970,14 +1405,28 @@
                     slot.className = 'player-slot p-4 rounded-lg flex flex-col justify-center items-center';
                     if (player) {
                         slot.id = `player-slot-${player.id}`;
-                        slot.innerHTML = `<div class="font-bold text-xl">${player.name}</div><div class="text-sm text-gray-400">Oyuncu ${i}</div>`;
+                        const avatarData = getAvatarData(player.avatar || 1);
+                        slot.innerHTML = `
+                            <div class="avatar small ${avatarData.class}" style="margin-bottom: 8px;">
+                                ${avatarData.emoji}
+                            </div>
+                            <div class="font-bold text-xl">${player.name}</div>
+                            <div class="text-sm text-gray-400">Oyuncu ${i}</div>
+                        `;
                     } else {
-                        slot.innerHTML = `<div class="text-gray-500">Boş Slot</div>`;
+                        slot.innerHTML = `
+                            <div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center mb-2">
+                                <span class="text-gray-400">?</span>
+                            </div>
+                            <div class="text-gray-500">Boş Slot</div>
+                        `;
                     }
                     playerSlotsDiv.appendChild(slot);
                 }
             }
-             function updateScoreboard(scores = {}, isGameOver = false) {
+             function updateScoreboard(scores = {}, isGameOver = false, players = []) {
+                if (!scoreboardDiv) return;
+                
                 scoreboardDiv.innerHTML = '';
                 const sortedScores = Object.entries(scores).sort(([,a],[,b]) => b-a);
                 if (sortedScores.length === 0) {
@@ -991,9 +1440,24 @@
                             else if (rank === 2) rankClass = 'silver';
                             else if (rank === 3) rankClass = 'bronze';
                         }
+                        
+                        // Find player's avatar with null safety
+                        const player = players.find(p => p && p.name === name);
+                        const avatarId = player?.avatar || playerAvatars[name] || 1;
+                        const avatarData = getAvatarData(avatarId);
+                        
                         const scoreEntry = document.createElement('div');
                         scoreEntry.className = `flex justify-between items-center p-2 rounded-md border-2 border-transparent bg-gray-700 ${rankClass}`;
-                        scoreEntry.innerHTML = `<div class="flex items-center"><span class="font-bold mr-3 text-lg w-6 text-center">${rank}.</span><span class="font-semibold">${name}</span></div><span class="font-bold text-xl">${score}</span>`;
+                        scoreEntry.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-lg w-6 text-center">${rank}.</span>
+                                <div class="avatar small ${avatarData.class}" style="margin-bottom: 0; width: 30px; height: 30px; font-size: 14px;">
+                                    ${avatarData.emoji}
+                                </div>
+                                <span class="font-semibold">${name || 'Bilinmeyen Oyuncu'}</span>
+                            </div>
+                            <span class="font-bold text-xl">${score}</span>
+                        `;
                         scoreboardDiv.appendChild(scoreEntry);
                     });
                 }
@@ -1076,6 +1540,140 @@
             
             socket.on('playerStatsUpdate', ({ playerName, stats }) => {
                 updatePlayerStatsDisplay(stats);
+            });
+        }
+
+        // Animated Background Control
+        function changeBackground(type) {
+            const backgroundElement = document.getElementById('animated-background');
+            const buttons = document.querySelectorAll('.bg-btn');
+            
+            // Remove active class from all buttons
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Remove all background classes
+            backgroundElement.className = 'animated-bg';
+            
+            // Add new background class
+            switch(type) {
+                case 'particles':
+                    backgroundElement.classList.add('bg-particles');
+                    break;
+                case 'waves':
+                    backgroundElement.classList.add('bg-waves');
+                    break;
+                case 'geometric':
+                    backgroundElement.classList.add('bg-geometric');
+                    break;
+                case 'neon':
+                    backgroundElement.classList.add('bg-neon');
+                    break;
+                case 'bokeh':
+                    backgroundElement.classList.add('bg-bokeh');
+                    break;
+                default:
+                    backgroundElement.classList.add('bg-particles');
+            }
+        }
+
+        // Initialize background on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default background
+            changeBackground('particles');
+            
+            // Initialize avatar system
+            initializeAvatarSystem();
+            
+            // Also setup avatar button when DOM is loaded
+            setTimeout(() => {
+                setupAvatarButton();
+            }, 500);
+        });
+
+        // Avatar System Functions
+        const avatarEmojis = ['🎮', '🚀', '⭐', '🌟', '🎯', '🎲', '🏆', '💎', '🔥', '⚡', '🎪', '🎭', '🎨', '🎵', '🌈', '💫'];
+        let selectedAvatarId = 1;
+        let playerAvatars = {}; // Store player avatars
+        let avatarSystemInitialized = false; // Flag to prevent multiple initializations
+        
+        function getAvatarData(avatarId) {
+            return {
+                emoji: avatarEmojis[avatarId - 1] || '🎮',
+                class: `avatar-${avatarId}`
+            };
+        }
+        
+        function initializeAvatarSystem() {
+            if (avatarSystemInitialized) return; // Prevent multiple initializations
+            
+            const avatarGrid = document.getElementById('avatar-grid');
+            const avatarModal = document.getElementById('avatar-modal');
+            const chooseAvatarBtn = document.getElementById('choose-avatar-btn');
+            const avatarConfirm = document.getElementById('avatar-confirm');
+            const avatarCancel = document.getElementById('avatar-cancel');
+            const userAvatar = document.getElementById('user-avatar');
+            
+            // Check if all elements exist
+            if (!avatarGrid || !avatarModal || !chooseAvatarBtn || !avatarConfirm || !avatarCancel || !userAvatar) {
+                return;
+            }
+            
+            avatarSystemInitialized = true;
+            
+            // Populate avatar grid
+            for (let i = 1; i <= 16; i++) {
+                const avatarOption = document.createElement('div');
+                const avatarData = getAvatarData(i);
+                avatarOption.className = `avatar avatar-option ${avatarData.class}`;
+                avatarOption.textContent = avatarData.emoji;
+                avatarOption.dataset.avatarId = i;
+                
+                avatarOption.addEventListener('click', () => {
+                    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                    avatarOption.classList.add('selected');
+                    selectedAvatarId = i;
+                });
+                
+                avatarGrid.appendChild(avatarOption);
+            }
+            
+            // Set default selection
+            avatarGrid.children[0].classList.add('selected');
+            
+            // Event listeners
+            chooseAvatarBtn.addEventListener('click', (e) => {
+                console.log('Avatar button clicked!');
+                e.preventDefault();
+                avatarModal.classList.remove('hidden');
+            });
+            
+            avatarCancel.addEventListener('click', () => {
+                avatarModal.classList.add('hidden');
+            });
+            
+            avatarConfirm.addEventListener('click', () => {
+                const avatarData = getAvatarData(selectedAvatarId);
+                userAvatar.className = `avatar small ${avatarData.class}`;
+                userAvatar.textContent = avatarData.emoji;
+                
+                // Store user's avatar choice
+                if (currentUser) {
+                    playerAvatars[currentUser.username] = selectedAvatarId;
+                    // Emit avatar change to server
+                    socket.emit('changeAvatar', { avatar: selectedAvatarId });
+                }
+                
+                avatarModal.classList.add('hidden');
+            });
+            
+            // Close modal on background click
+            avatarModal.addEventListener('click', (e) => {
+                if (e.target === avatarModal) {
+                    avatarModal.classList.add('hidden');
+                }
             });
         }
     </script>

@@ -1,19 +1,19 @@
-{
-  "Görkem": {
-    "gamesPlayed": 0,
-    "gamesWon": 0,
-    "totalCorrectWords": 1,
-    "totalResponseTime": 1.99,
-    "responseCount": 1,
-    "longestWinStreak": 0,
-    "currentWinStreak": 0,
+  "co4erol": {
+    "gamesPlayed": 2,
+    "gamesWon": 1,
+    "totalCorrectWords": 2,
+    "totalResponseTime": 5.5489999999999995,
+    "responseCount": 2,
+    "longestWinStreak": 1,
+    "currentWinStreak": 1,
     "categoriesPlayed": {
-      "İsim": 1
+      "Eşya": 2
     },
     "wordsUsed": {
-      "ismail": 1
+      "bez": 1,
+      "tarak": 1
     },
-    "lastPlayed": "2025-09-07T10:49:03.905Z",
+    "lastPlayed": "2025-09-07T10:58:50.264Z",
     "achievements": []
   }
 }

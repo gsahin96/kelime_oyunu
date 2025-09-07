@@ -55,6 +55,7 @@ try {
 }
 
 let rooms = {};
+let pendingRegistrations = new Set(); // Track pending registrations to prevent duplicates
 
 // User Authentication Functions
 const saveUsers = () => {
@@ -80,44 +81,61 @@ const validatePassword = (password) => {
 
 const createUser = async (email, username, password) => {
     try {
-        // Check if email or username already exists
-        const existingUser = Object.values(users).find(user => 
-            user.email.toLowerCase() === email.toLowerCase() || 
-            user.username.toLowerCase() === username.toLowerCase()
-        );
+        const normalizedEmail = email.toLowerCase();
+        const normalizedUsername = username.toLowerCase();
+        const registrationKey = `${normalizedEmail}:${normalizedUsername}`;
         
-        if (existingUser) {
-            if (existingUser.email.toLowerCase() === email.toLowerCase()) {
-                return { success: false, message: 'Bu e-posta adresi zaten kullanılıyor.' };
-            }
-            if (existingUser.username.toLowerCase() === username.toLowerCase()) {
-                return { success: false, message: 'Bu kullanıcı adı zaten alınmış.' };
-            }
+        // Check if registration is already in progress
+        if (pendingRegistrations.has(registrationKey)) {
+            return { success: false, message: 'Kayıt işlemi devam ediyor, lütfen bekleyin.' };
         }
+        
+        // Mark this registration as pending
+        pendingRegistrations.add(registrationKey);
+        
+        try {
+            // Check if email or username already exists
+            const existingUser = Object.values(users).find(user => 
+                user.email.toLowerCase() === normalizedEmail || 
+                user.username.toLowerCase() === normalizedUsername
+            );
+            
+            if (existingUser) {
+                if (existingUser.email.toLowerCase() === normalizedEmail) {
+                    return { success: false, message: 'Bu e-posta adresi zaten kullanılıyor.' };
+                }
+                if (existingUser.username.toLowerCase() === normalizedUsername) {
+                    return { success: false, message: 'Bu kullanıcı adı zaten alınmış.' };
+                }
+            }
 
-        // Hash password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
-        // Create user ID
-        const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-        
-        // Create user object
-        users[userId] = {
-            id: userId,
-            email: email.toLowerCase(),
-            username: username,
-            hashedPassword: hashedPassword,
-            createdAt: new Date().toISOString(),
-            lastLogin: null
-        };
-        
-        saveUsers();
-        
-        // Initialize player statistics for new user
-        initializePlayerStats(username);
-        
-        return { success: true, userId: userId, message: 'Hesap başarıyla oluşturuldu!' };
+            // Hash password
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            
+            // Create user ID
+            const userId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            
+            // Create user object
+            users[userId] = {
+                id: userId,
+                email: normalizedEmail,
+                username: username,
+                hashedPassword: hashedPassword,
+                createdAt: new Date().toISOString(),
+                lastLogin: null
+            };
+            
+            saveUsers();
+            
+            // Initialize player statistics for new user
+            initializePlayerStats(username);
+            
+            return { success: true, userId: userId, message: 'Hesap başarıyla oluşturuldu!' };
+        } finally {
+            // Always remove from pending registrations
+            pendingRegistrations.delete(registrationKey);
+        }
     } catch (error) {
         console.error('Kullanıcı oluşturma hatası:', error);
         return { success: false, message: 'Hesap oluşturulurken bir hata oluştu.' };
@@ -384,7 +402,7 @@ io.on('connection', (socket) => {
         rooms[roomId] = createInitialGameState();
         const gameState = rooms[roomId];
 
-        const newPlayer = { id: socket.id, name: name, playerNumber: 1 };
+        const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: 1 };
         gameState.hostId = socket.id;
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -409,7 +427,7 @@ io.on('connection', (socket) => {
         socket.join(roomId);
         const gameState = room;
         const playerNumber = gameState.players.length + 1;
-        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber };
+        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: 1 };
 
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -426,7 +444,7 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         
         gameState.isSinglePlayer = true;
-        const player = { id: socket.id, name, playerNumber: 1 };
+        const player = { id: socket.id, name, playerNumber: 1, avatar: 1 };
         gameState.players.push(player);
         gameState.scores[name] = 0;
         gameState.gameInProgress = true;
@@ -437,6 +455,23 @@ io.on('connection', (socket) => {
         startSinglePlayerTurn(roomId);
     });
 
+    socket.on('changeAvatar', ({ avatar }) => {
+        const roomId = getRoomIdFromSocket();
+        if (!rooms[roomId]) return;
+        
+        const gameState = rooms[roomId];
+        const player = gameState.players.find(p => p.id === socket.id);
+        
+        if (player && avatar >= 1 && avatar <= 16) {
+            player.avatar = avatar;
+            // Emit lobby update to sync avatar changes
+            io.to(roomId).emit('lobbyUpdate', { 
+                players: gameState.players, 
+                gameHostId: gameState.hostId, 
+                settings: gameState.settings 
+            });
+        }
+    });
 
     socket.on('gameSettingsChanged', (settings) => {
         const roomId = getRoomIdFromSocket();
