@@ -528,7 +528,7 @@
                 <button id="copyLinkButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold p-3 rounded-lg transition">Kopyala</button>
             </div>
         </div>
-        <button id="lobby-main-menu-button" onclick="returnToMainMenu(); console.log('Button clicked!');" class="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-base shadow-lg z-50 border-2 border-white">Ana Menü</button>
+        <button id="lobby-main-menu-button" class="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-base shadow-lg z-50 border-2 border-white">Ana Menü</button>
     </div>
 
 
@@ -1078,6 +1078,7 @@
                 if (name) socket.emit('startSinglePlayer', { name });
             });
             spMainMenuButton.addEventListener('click', () => returnToMainMenu());
+            lobbyMainMenuButton.addEventListener('click', () => returnToMainMenu());
             
             copyLinkButton.addEventListener('click', () => {
                 roomLinkInput.select();
