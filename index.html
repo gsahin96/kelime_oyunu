@@ -519,7 +519,7 @@
         </div>
     </div>
 
-    <div id="lobby-screen" class="hidden w-full max-w-lg text-center">
+    <div id="lobby-screen" class="hidden w-full max-w-lg text-center relative pb-16">
         <h2 class="text-3xl font-bold text-indigo-400 mb-4">Oyun Lobisi</h2>
         <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl">
             <p class="text-gray-400 mb-2">Arkadaşlarını davet et:</p>
@@ -528,6 +528,7 @@
                 <button id="copyLinkButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold p-3 rounded-lg transition">Kopyala</button>
             </div>
         </div>
+        <button id="lobby-main-menu-button" class="absolute bottom-2 right-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm shadow-lg z-10">Ana Menü</button>
     </div>
 
 
@@ -721,6 +722,7 @@
             const spFinalScoreEl = document.getElementById('sp-final-score');
             const spReplayButton = document.getElementById('sp-replay-button');
             const spMainMenuButton = document.getElementById('sp-main-menu-button');
+            const lobbyMainMenuButton = document.getElementById('lobby-main-menu-button');
             const spLetterEl = document.getElementById('sp-letter');
             const spCategoryEl = document.getElementById('sp-category');
             
@@ -1061,6 +1063,17 @@
                 if (name) socket.emit('startSinglePlayer', { name });
             });
             spMainMenuButton.addEventListener('click', () => window.location.reload());
+            
+            lobbyMainMenuButton.addEventListener('click', () => {
+                // Leave the current room
+                if (currentRoomId) {
+                    socket.emit('leaveRoom');
+                    currentRoomId = null;
+                }
+                // Return to main menu
+                lobbyScreen.classList.add('hidden');
+                initialScreen.classList.remove('hidden');
+            });
             
             copyLinkButton.addEventListener('click', () => {
                 roomLinkInput.select();

@@ -654,6 +654,58 @@ io.on('connection', (socket) => {
         socket.emit('playerStatsUpdate', { playerName, stats });
     });
     
+    socket.on('leaveRoom', () => {
+        const roomId = getRoomIdFromSocket();
+        if (!roomId || !rooms[roomId]) return;
+
+        const gameState = rooms[roomId];
+        if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
+
+        if (gameState.isSinglePlayer) {
+            delete rooms[roomId];
+            return;
+        }
+        
+        const leavingPlayer = gameState.players.find(p => p.id === socket.id);
+        if (!leavingPlayer) return;
+
+        const wasHost = leavingPlayer.id === gameState.hostId;
+        
+        gameState.players = gameState.players.filter(p => p.id !== socket.id);
+        
+        if (gameState.players.length === 0) {
+            console.log(`Oda ${roomId} kapatıldı.`);
+            delete rooms[roomId];
+            return;
+        }
+
+        if (wasHost) {
+            gameState.hostId = gameState.players[0].id;
+        }
+
+        if (gameState.roundInProgress) {
+            const activePlayerIndex = gameState.activePlayersInRound.findIndex(p => p.id === socket.id);
+            if (activePlayerIndex !== -1) {
+                const wasCurrentPlayer = activePlayerIndex === gameState.currentPlayerIndex;
+                gameState.activePlayersInRound.splice(activePlayerIndex, 1);
+                
+                if (gameState.activePlayersInRound.length <= 1) {
+                    handleRoundOver(roomId);
+                } else if (wasCurrentPlayer) {
+                    startTurn(roomId);
+                } else if (gameState.currentPlayerIndex > activePlayerIndex) {
+                    gameState.currentPlayerIndex--;
+                }
+            }
+        } else {
+            // If in lobby, just update lobby
+            broadcastLobbyUpdate(roomId);
+        }
+        
+        // Leave the socket room
+        socket.leave(roomId);
+    });
+    
     socket.on('disconnect', () => {
         const roomId = getRoomIdFromSocket();
         if (!roomId || !rooms[roomId]) return;
