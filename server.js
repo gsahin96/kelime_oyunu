@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const fs = require('fs');
 const { Server } = require("socket.io");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -21,9 +22,15 @@ app.get('/test.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'test.html'));
 });
 
-// PostgreSQL database - no more JSON files!
+// PostgreSQL database for users, JSON database for words
 let database = {};
-console.log("✅ PostgreSQL veritabanı kullanılıyor - JSON dosyaları artık gerekmiyor!");
+try {
+    database = JSON.parse(fs.readFileSync('./database.json', 'utf8'));
+    console.log("✅ PostgreSQL veritabanı kullanılıyor (kullanıcılar), JSON dosyası kullanılıyor (kelimeler)");
+} catch (error) {
+    console.error("❌ database.json dosyası yüklenemedi:", error);
+    database = {};
+}
 
 let rooms = {};
 let pendingRegistrations = new Set(); // Track pending registrations to prevent duplicates
