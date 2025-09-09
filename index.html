@@ -386,32 +386,31 @@
         </div>
     </div>
 
-    <!-- Authentication Screen -->
+    <!-- Simple Entry Screen -->
     <div id="auth-screen" class="w-full max-w-md relative z-10">
         <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
             <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center game-title">YETI Kelime Oyunu</h1>
             
-            <!-- Login Form -->
-            <div id="login-form">
-                <h2 class="text-xl font-bold mb-4 text-center text-white">Giriş Yap</h2>
-                <input id="loginEmail" type="email" placeholder="E-posta adresiniz" maxlength="50" class="w-full p-3 mb-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <input id="loginPassword" type="password" placeholder="Şifreniz" maxlength="50" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button id="loginButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition mb-3">Giriş Yap</button>
-                <button id="showRegisterButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">Hesabın yok mu? Kayıt ol</button>
+            <!-- Simple Entry Form -->
+            <div id="simple-entry-form">
+                <h2 class="text-xl font-bold mb-6 text-center text-white">Oyuna Başla</h2>
+                
+                <!-- Avatar Selection -->
+                <div class="mb-6 text-center">
+                    <p class="text-sm text-gray-400 mb-3">Profil fotoğrafını seç:</p>
+                    <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500">🎮</div>
+                    <button id="entry-change-avatar" class="mt-2 text-xs text-indigo-400 hover:text-indigo-300 transition">🎭 Değiştir</button>
+                </div>
+                
+                <!-- Username Input -->
+                <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center">
+                
+                <!-- Start Button -->
+                <button id="startGameButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition">🎮 Oyuna Başla</button>
             </div>
             
-            <!-- Register Form -->
-            <div id="register-form" class="hidden">
-                <h2 class="text-xl font-bold mb-4 text-center text-white">Kayıt Ol</h2>
-                <input id="registerEmail" type="email" placeholder="E-posta adresiniz" maxlength="50" class="w-full p-3 mb-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <input id="registerUsername" type="text" placeholder="Kullanıcı adınız" maxlength="20" class="w-full p-3 mb-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <input id="registerPassword" type="password" placeholder="Şifreniz (en az 6 karakter)" maxlength="50" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button id="registerButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition mb-3">Kayıt Ol</button>
-                <button id="showLoginButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">Zaten hesabın var mı? Giriş yap</button>
-            </div>
-            
-            <!-- Error/Success Messages -->
-            <div id="authMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
+            <!-- Error Messages -->
+            <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
         </div>
     </div>
 
@@ -435,7 +434,7 @@
                 <button id="showStatsButton" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">📊 İstatistiklerim</button>
                 <div class="my-4 border-t border-gray-700"></div>
                 <button id="startSinglePlayerButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Tek Başına Oyna</button>
-                <button id="logoutButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">Çıkış Yap</button>
+                <button id="changeUserButton" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">👤 Kullanıcı Değiştir</button>
             </div>
 
             <div id="join-form" class="hidden">
@@ -667,14 +666,13 @@
             if (singlePlayerContainer) singlePlayerContainer.classList.add('hidden');
             if (statsScreen) statsScreen.classList.add('hidden');
             
-            // Check if user is logged in via localStorage
-            const token = localStorage.getItem('yeti-auth-token');
-            if (token) {
-                console.log('Token found, showing main menu');
+            // Show entry screen if no current user, otherwise show main menu
+            if (window.currentUser) {
+                console.log('User found, showing main menu');
                 if (authScreen) authScreen.classList.add('hidden');
                 if (initialScreen) initialScreen.classList.remove('hidden');
             } else {
-                console.log('No token found, showing login screen');
+                console.log('No user found, showing entry screen');
                 if (initialScreen) initialScreen.classList.add('hidden');
                 if (authScreen) authScreen.classList.remove('hidden');
             }
@@ -685,18 +683,12 @@
         } else {
             // Element Tanımlamaları
             const authScreen = document.getElementById('auth-screen');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const authMessage = document.getElementById('authMessage');
-            const loginEmail = document.getElementById('loginEmail');
-            const loginPassword = document.getElementById('loginPassword');
-            const loginButton = document.getElementById('loginButton');
-            const registerEmail = document.getElementById('registerEmail');
-            const registerUsername = document.getElementById('registerUsername');
-            const registerPassword = document.getElementById('registerPassword');
-            const registerButton = document.getElementById('registerButton');
-            const showRegisterButton = document.getElementById('showRegisterButton');
-            const showLoginButton = document.getElementById('showLoginButton');
+            const simpleEntryForm = document.getElementById('simple-entry-form');
+            const entryMessage = document.getElementById('entryMessage');
+            const entryUsername = document.getElementById('entryUsername');
+            const startGameButton = document.getElementById('startGameButton');
+            const entryAvatar = document.getElementById('entry-avatar');
+            const entryChangeAvatar = document.getElementById('entry-change-avatar');
             
             const initialScreen = document.getElementById('initial-screen');
             const gameContainer = document.getElementById('game-container');
@@ -704,10 +696,11 @@
             const createRoomButton = document.getElementById('createRoomButton');
             const showJoinFormButton = document.getElementById('showJoinFormButton');
             const showStatsButton = document.getElementById('showStatsButton');
-            const logoutButton = document.getElementById('logoutButton');
+            const changeUserButton = document.getElementById('changeUserButton');
             
             // Global game state
             let currentPlayers = [];
+            let selectedEntryAvatar = 1; // Default avatar for entry
             const welcomeUsername = document.getElementById('welcomeUsername');
             const joinOptions = document.getElementById('join-options');
             const joinForm = document.getElementById('join-form');
@@ -770,7 +763,7 @@
             let currentRoomId = null;
             let wordToAddInfo = null;
             let currentUser = null;
-            let authToken = null;
+            window.currentUser = null; // Make it globally accessible
             const socket = io();
             const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
             const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
@@ -783,30 +776,43 @@
                 recognition.continuous = false;
             }
             
-            // Authentication Functions
-            const showAuthMessage = (message, isError = false) => {
-                authMessage.textContent = message;
-                authMessage.className = `mt-4 p-3 rounded-lg text-center text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
-                authMessage.classList.remove('hidden');
-                setTimeout(() => authMessage.classList.add('hidden'), 5000);
+            // Simple Entry Functions
+            const showEntryMessage = (message, isError = false) => {
+                entryMessage.textContent = message;
+                entryMessage.className = `mt-4 p-3 rounded-lg text-center text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
+                entryMessage.classList.remove('hidden');
+                setTimeout(() => entryMessage.classList.add('hidden'), 3000);
             };
             
-            const saveAuthToken = (token) => {
-                authToken = token;
-                localStorage.setItem('yeti-auth-token', token);
-            };
-            
-            const loadAuthToken = () => {
-                const token = localStorage.getItem('yeti-auth-token');
-                if (token) {
-                    authToken = token;
-                    socket.emit('verifyAuth', { token });
+            const validateUsername = (username) => {
+                if (!username || username.length < 2) {
+                    showEntryMessage('Kullanıcı adı en az 2 karakter olmalı!', true);
+                    return false;
                 }
+                if (username.length > 20) {
+                    showEntryMessage('Kullanıcı adı en fazla 20 karakter olabilir!', true);
+                    return false;
+                }
+                if (!/^[a-zA-Z0-9_çğıöşüÇĞIİÖŞÜ\s]+$/.test(username)) {
+                    showEntryMessage('Kullanıcı adı sadece harf, rakam ve _ içerebilir!', true);
+                    return false;
+                }
+                return true;
             };
             
             const showMainMenu = (user) => {
                 currentUser = user;
+                window.currentUser = user; // Update global reference
                 welcomeUsername.textContent = user.username;
+                
+                // Set user avatar in main menu
+                const userAvatar = document.getElementById('user-avatar');
+                if (userAvatar) {
+                    const avatarData = getAvatarData(user.avatar || 1);
+                    userAvatar.className = `avatar small ${avatarData.class}`;
+                    userAvatar.textContent = avatarData.emoji;
+                }
+                
                 authScreen.classList.add('hidden');
                 initialScreen.classList.remove('hidden');
                 
@@ -855,6 +861,7 @@
                             
                             // Store user's avatar choice
                             if (currentUser) {
+                                currentUser.avatar = selectedAvatarId;
                                 playerAvatars[currentUser.username] = selectedAvatarId;
                                 // Emit avatar change to server
                                 socket.emit('changeAvatar', { avatar: selectedAvatarId });
@@ -917,150 +924,90 @@
                     console.log('Showing main menu for user:', currentUser.username);
                     showMainMenu(currentUser);
                 } else {
-                    console.log('No current user, checking auth token');
-                    // If no current user, try to check for saved token
-                    loadAuthToken();
+                    console.log('No current user, showing entry screen');
+                    showEntryScreen();
                 }
             };
             
-            const logout = () => {
+            const showEntryScreen = () => {
                 currentUser = null;
-                authToken = null;
-                localStorage.removeItem('yeti-auth-token');
+                window.currentUser = null; // Update global reference
                 initialScreen.classList.add('hidden');
                 gameContainer.classList.add('hidden');
                 singlePlayerContainer.classList.add('hidden');
                 statsScreen.classList.add('hidden');
                 authScreen.classList.remove('hidden');
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
+                entryUsername.value = '';
+                selectedEntryAvatar = 1;
+                updateEntryAvatar();
             };
             
-            // Authentication Event Handlers
-            showRegisterButton.addEventListener('click', () => {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                authMessage.classList.add('hidden');
-            });
+            const updateEntryAvatar = () => {
+                const avatarData = getAvatarData(selectedEntryAvatar);
+                entryAvatar.className = `avatar large ${avatarData.class} mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500`;
+                entryAvatar.textContent = avatarData.emoji;
+            };
             
-            showLoginButton.addEventListener('click', () => {
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                authMessage.classList.add('hidden');
-            });
-            
-            loginButton.addEventListener('click', () => {
-                const email = loginEmail.value.trim();
-                const password = loginPassword.value;
+            // Entry Event Handlers
+            entryChangeAvatar.addEventListener('click', () => {
+                const avatarModal = document.getElementById('avatar-modal');
+                const avatarGrid = document.getElementById('avatar-grid');
+                const avatarConfirm = document.getElementById('avatar-confirm');
+                const avatarCancel = document.getElementById('avatar-cancel');
                 
-                if (!email || !password) {
-                    showAuthMessage('E-posta ve şifre gereklidir.', true);
-                    return;
+                avatarModal.classList.remove('hidden');
+                
+                // Initialize avatar grid if empty
+                if (avatarGrid.children.length === 0) {
+                    populateAvatarGrid();
                 }
                 
-                // Disable button to prevent double submission
-                loginButton.disabled = true;
-                loginButton.textContent = 'Giriş yapılıyor...';
-                
-                socket.emit('login', { email, password });
-                
-                // Re-enable button after a delay
-                setTimeout(() => {
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Giriş Yap';
-                }, 3000);
-            });
-            
-            registerButton.addEventListener('click', () => {
-                const email = registerEmail.value.trim();
-                const username = registerUsername.value.trim();
-                const password = registerPassword.value;
-                
-                if (!email || !username || !password) {
-                    showAuthMessage('Tüm alanları doldurunuz.', true);
-                    return;
+                // Set current selection
+                document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
+                const currentOption = document.querySelector(`[data-avatar-id="${selectedEntryAvatar}"]`);
+                if (currentOption) {
+                    currentOption.classList.add('selected');
+                    selectedAvatarId = selectedEntryAvatar;
                 }
                 
-                // Disable button to prevent double submission
-                registerButton.disabled = true;
-                registerButton.textContent = 'Kayıt oluşturuluyor...';
+                // Override confirm button for entry screen
+                const newConfirm = avatarConfirm.cloneNode(true);
+                avatarConfirm.parentNode.replaceChild(newConfirm, avatarConfirm);
                 
-                socket.emit('register', { email, username, password });
-                
-                // Re-enable button after a delay
-                setTimeout(() => {
-                    registerButton.disabled = false;
-                    registerButton.textContent = 'Kayıt Ol';
-                }, 3000);
-            });
-            
-            // Handle Enter key in forms
-            [loginEmail, loginPassword].forEach(input => {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') loginButton.click();
+                newConfirm.addEventListener('click', () => {
+                    selectedEntryAvatar = selectedAvatarId;
+                    updateEntryAvatar();
+                    avatarModal.classList.add('hidden');
                 });
             });
             
-            [registerEmail, registerUsername, registerPassword].forEach(input => {
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') registerButton.click();
-                });
-            });
-            
-            // Socket Authentication Handlers
-            socket.on('authError', (message) => {
-                showAuthMessage(message, true);
-                // Re-enable buttons on error
-                loginButton.disabled = false;
-                loginButton.textContent = 'Giriş Yap';
-                registerButton.disabled = false;
-                registerButton.textContent = 'Kayıt Ol';
-            });
-            
-            socket.on('registerSuccess', (message) => {
-                showAuthMessage(message, false);
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                // Clear register form
-                registerEmail.value = '';
-                registerUsername.value = '';
-                registerPassword.value = '';
-                // Re-enable button
-                registerButton.disabled = false;
-                registerButton.textContent = 'Kayıt Ol';
-            });
-            
-            socket.on('loginSuccess', ({ token, user, message }) => {
-                saveAuthToken(token);
-                showMainMenu(user);
-                showAuthMessage(message, false);
-                // Clear login form
-                loginEmail.value = '';
-                loginPassword.value = '';
-                // Re-enable button
-                loginButton.disabled = false;
-                loginButton.textContent = 'Giriş Yap';
-            });
-            
-            socket.on('authVerified', ({ user }) => {
-                showMainMenu(user);
-            });
-            
-            // Load token on page load
-            window.addEventListener('load', () => {
-                loadAuthToken();
-            });
-            
-            // Add socket error handling
-            socket.on('connect_error', (error) => {
-                showAuthMessage('Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.', true);
-            });
-            
-            socket.on('disconnect', (reason) => {
-                if (reason === 'io server disconnect') {
-                    showAuthMessage('Sunucu bağlantısı kesildi. Sayfa yenileniyor...', true);
-                    setTimeout(() => location.reload(), 3000);
+            startGameButton.addEventListener('click', () => {
+                const username = entryUsername.value.trim();
+                
+                if (!validateUsername(username)) {
+                    return;
                 }
+                
+                // Create user object
+                currentUser = {
+                    username: username,
+                    avatar: selectedEntryAvatar
+                };
+                window.currentUser = currentUser; // Update global reference
+                
+                showMainMenu(currentUser);
+                showEntryMessage(`Hoş geldin ${username}!`, false);
+            });
+            
+            // Handle Enter key in username input
+            entryUsername.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startGameButton.click();
+                }
+            });
+            
+            changeUserButton.addEventListener('click', () => {
+                showEntryScreen();
             });
             
             showJoinFormButton.addEventListener('click', () => {
@@ -1073,7 +1020,7 @@
             });
              const validateInputs = () => {
                 if (!currentUser || !currentUser.username) {
-                    alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+                    showEntryMessage('Kullanıcı bilgisi bulunamadı. Lütfen ana menüye dönün.', true);
                     return false;
                 }
                 return { name: currentUser.username };
@@ -1567,11 +1514,15 @@
                     });
                 }
             }
+            closeStatsButton.addEventListener('click', () => {
+                statsScreen.classList.add('hidden');
+                initialScreen.classList.remove('hidden');
+            });
             
             // Statistics Event Handlers
             showStatsButton.addEventListener('click', () => {
                 if (!currentUser) {
-                    showAuthMessage('İstatistikleri görmek için giriş yapın!', true);
+                    showEntryMessage('İstatistikleri görmek için oyuna giriş yapın!', true);
                     return;
                 }
                 socket.emit('requestPlayerStats', { playerName: currentUser.username });
@@ -1579,17 +1530,13 @@
                 statsScreen.classList.remove('hidden');
             });
             
-            closeStatsButton.addEventListener('click', () => {
-                statsScreen.classList.add('hidden');
-                initialScreen.classList.remove('hidden');
-            });
-            
-            logoutButton.addEventListener('click', () => {
-                logout();
-            });
-            
             socket.on('playerStatsUpdate', ({ playerName, stats }) => {
                 updatePlayerStatsDisplay(stats);
+            });
+            
+            // Initialize on page load
+            window.addEventListener('load', () => {
+                showEntryScreen();
             });
         }
 
