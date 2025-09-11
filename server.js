@@ -108,6 +108,7 @@ const createInitialGameState = () => ({
     turnResolved: false,
     usedLettersThisGame: [],
     turnStartTime: null,
+    currentTimeLeft: null,
 });
 
 const normalizeWord = (word) => {
@@ -152,15 +153,40 @@ io.on('connection', (socket) => {
         if (room.players.length >= 8) {
             return socket.emit('gameError', 'Oda dolu.');
         }
-        if (room.gameInProgress) {
-            return socket.emit('gameError', 'Oyun çoktan başladı.');
+        
+        // Check if player is already in the room (reconnecting)
+        const existingPlayer = room.players.find(p => p.name === name);
+        if (existingPlayer) {
+            // Reconnecting player
+            existingPlayer.id = socket.id;
+            socket.join(roomId);
+            socket.emit('joined', { playerDetails: existingPlayer, roomId });
+            broadcastLobbyUpdate(roomId);
+            broadcastScoreUpdate(roomId);
+            
+            // If game is in progress, send current game state
+            if (room.gameInProgress) {
+                socket.emit('gameReconnected', {
+                    letter: room.currentLetter,
+                    category: room.currentCategory,
+                    usedWords: room.usedWords,
+                    isSpectator: !room.activePlayersInRound.find(p => p.id === socket.id)
+                });
+            }
+            return;
         }
         
         socket.join(roomId);
         const gameState = room;
         const playerNumber = gameState.players.length + 1;
         
-        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: avatar || 1 };
+        const newPlayer = { 
+            id: socket.id, 
+            name: name, 
+            playerNumber: playerNumber, 
+            avatar: avatar || 1,
+            isSpectator: gameState.gameInProgress // New players are spectators if game is running
+        };
 
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -168,6 +194,15 @@ io.on('connection', (socket) => {
         socket.emit('joined', { playerDetails: newPlayer, roomId });
         broadcastLobbyUpdate(roomId);
         broadcastScoreUpdate(roomId);
+        
+        // If game is in progress, notify that they'll join next round
+        if (gameState.gameInProgress) {
+            socket.emit('spectatorMode', {
+                letter: gameState.currentLetter,
+                category: gameState.currentCategory,
+                usedWords: gameState.usedWords
+            });
+        }
     });
 
     socket.on('changeAvatar', ({ avatar }) => {
@@ -194,9 +229,12 @@ io.on('connection', (socket) => {
     socket.on('gameSettingsChanged', (settings) => {
         const roomId = getRoomIdFromSocket();
         const gameState = rooms[roomId];
-        if (gameState && socket.id === gameState.hostId && !gameState.gameInProgress) {
+        if (gameState && socket.id === gameState.hostId) {
             gameState.settings.scoreGoal = settings.scoreGoal;
             gameState.settings.turnDuration = settings.turnDuration;
+            if (gameState.roundInProgress) {
+                gameState.currentTimeLeft = Math.max(gameState.currentTimeLeft, gameState.settings.turnDuration);
+            }
             broadcastLobbyUpdate(roomId);
         }
     });
@@ -210,7 +248,16 @@ io.on('connection', (socket) => {
         gameState.roundInProgress = true;
         gameState.usedWords = [];
         io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
-        gameState.activePlayersInRound = [...gameState.players];
+        
+        // Include all connected players (including those who joined during game as spectators)
+        gameState.activePlayersInRound = gameState.players.filter(p => !p.disconnected);
+        
+        // Clear spectator status for new round
+        gameState.players.forEach(p => {
+            if (p.isSpectator) {
+                delete p.isSpectator;
+            }
+        });
 
         const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
         const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
@@ -365,16 +412,24 @@ io.on('connection', (socket) => {
 
         const wasHost = leavingPlayer.id === gameState.hostId;
         
-        gameState.players = gameState.players.filter(p => p.id !== socket.id);
+        // Mark player as disconnected instead of removing
+        leavingPlayer.disconnected = true;
+        leavingPlayer.id = null; // Clear socket ID
         
-        if (gameState.players.length === 0) {
-            console.log(`Oda ${roomId} kapatıldı.`);
+        // Only delete room if ALL players are disconnected
+        const connectedPlayers = gameState.players.filter(p => !p.disconnected);
+        if (connectedPlayers.length === 0) {
+            console.log(`Oda ${roomId} kapatıldı - tüm oyuncular ayrıldı.`);
             delete rooms[roomId];
             return;
         }
 
+        // Transfer host to connected player if needed
         if (wasHost) {
-            gameState.hostId = gameState.players[0].id;
+            const newHost = connectedPlayers[0];
+            if (newHost) {
+                gameState.hostId = newHost.id;
+            }
         }
 
         if (gameState.roundInProgress) {
@@ -391,10 +446,9 @@ io.on('connection', (socket) => {
                     gameState.currentPlayerIndex--;
                 }
             }
-        } else {
-            // If in lobby, just update lobby
-            broadcastLobbyUpdate(roomId);
         }
+        
+        broadcastLobbyUpdate(roomId);
         
         // Leave the socket room
         socket.leave(roomId);
@@ -412,16 +466,24 @@ io.on('connection', (socket) => {
 
         const wasHost = disconnectedPlayer.id === gameState.hostId;
         
-        gameState.players = gameState.players.filter(p => p.id !== socket.id);
+        // Mark player as disconnected instead of removing
+        disconnectedPlayer.disconnected = true;
+        disconnectedPlayer.id = null; // Clear socket ID
         
-        if (gameState.players.length === 0) {
-            console.log(`Oda ${roomId} kapatıldı.`);
+        // Only delete room if ALL players are disconnected
+        const connectedPlayers = gameState.players.filter(p => !p.disconnected);
+        if (connectedPlayers.length === 0) {
+            console.log(`Oda ${roomId} kapatıldı - tüm oyuncular ayrıldı.`);
             delete rooms[roomId];
             return;
         }
 
+        // Transfer host to connected player if needed
         if (wasHost) {
-            gameState.hostId = gameState.players[0].id;
+            const newHost = connectedPlayers[0];
+            if (newHost) {
+                gameState.hostId = newHost.id;
+            }
         }
 
         if (gameState.roundInProgress) {
@@ -488,10 +550,10 @@ io.on('connection', (socket) => {
         const currentPlayer = gameState.activePlayersInRound[gameState.currentPlayerIndex];
         if (!currentPlayer) return handleRoundOver(roomId, 'Hata: Oyuncu bulunamadı');
 
-        let timeLeft = gameState.settings.turnDuration;
+        gameState.currentTimeLeft = gameState.settings.turnDuration;
         io.to(roomId).emit('turnUpdate', {
             player: currentPlayer,
-            timeLeft,
+            timeLeft: gameState.currentTimeLeft,
             activePlayersCount: gameState.activePlayersInRound.length,
             letter: gameState.currentLetter,
             category: gameState.currentCategory
@@ -499,9 +561,9 @@ io.on('connection', (socket) => {
 
         clearInterval(gameState.countdownInterval);
         gameState.countdownInterval = setInterval(() => {
-            timeLeft--;
-            io.to(roomId).emit('countdown', timeLeft);
-            if (timeLeft <= 0) {
+            gameState.currentTimeLeft--;
+            io.to(roomId).emit('countdown', gameState.currentTimeLeft);
+            if (gameState.currentTimeLeft <= 0) {
                 clearInterval(gameState.countdownInterval);
                 setTimeout(() => {
                     if (!gameState.turnResolved) {
