@@ -269,13 +269,22 @@ io.on('connection', (socket) => {
 
         const normalizedSubmittedWord = normalizeWord(word);
         const normalizedLetter = normalizeWord(gameState.currentLetter);
-        const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
-        const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSubmittedWord) && !gameState.usedWords.includes(normalizedSubmittedWord);
-        
+
+        // Make dbWords all lowercase for comparison
+        const dbWordsRaw = database[gameState.currentCategory]?.[normalizedLetter] || [];
+        const dbWords = dbWordsRaw.map(w => normalizeWord(w));
+
+        // Used words also normalized
+        const usedWordsNormalized = gameState.usedWords.map(w => normalizeWord(w));
+
+        const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter)
+            && dbWords.includes(normalizedSubmittedWord)
+            && !usedWordsNormalized.includes(normalizedSubmittedWord);
+
         if (isCorrect) {
             // Update player statistics
             updatePlayerWordStat(currentPlayer.name, normalizedSubmittedWord, gameState.currentCategory, responseTime);
-            
+
             gameState.usedWords.push(normalizedSubmittedWord);
             io.to(roomId).emit('wordAccepted', { playerNumber: currentPlayer.playerNumber, word: normalizedSubmittedWord });
             io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
@@ -294,8 +303,11 @@ io.on('connection', (socket) => {
             try {
                 const normalizedLetter = wordInfo.letter.toLocaleLowerCase('tr-TR');
                 const normalizedWord = wordInfo.word.toLocaleLowerCase('tr-TR');
-                if (database[wordInfo.category]?.[normalizedLetter] && !database[wordInfo.category][normalizedLetter].includes(normalizedWord)) {
-                    database[wordInfo.category][normalizedLetter].push(normalizedWord);
+                // Compare normalizedWord with normalized dbWords for existence
+                const dbWordsRaw = database[wordInfo.category]?.[normalizedLetter] || [];
+                const dbWords = dbWordsRaw.map(w => w.toLocaleLowerCase('tr-TR'));
+                if (database[wordInfo.category]?.[normalizedLetter] && !dbWords.includes(normalizedWord)) {
+                    database[wordInfo.category][normalizedLetter].push(wordInfo.word);
                     database[wordInfo.category][normalizedLetter].sort();
                     fs.writeFileSync(dbPath, JSON.stringify(database, null, 2), 'utf8');
                     socket.emit('dbUpdateSuccess', `'${wordInfo.word}' eklendi!`);
@@ -307,7 +319,7 @@ io.on('connection', (socket) => {
                 socket.emit('dbUpdateError', 'Dosya yazma hatası!');
             }
         }
-        
+
         setTimeout(() => resumeGameAfterDecision(roomId), 1000);
     });
 
