@@ -15,29 +15,24 @@
             align-items: center;
             justify-content: center;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: var(--theme-primary);
+            color: var(--theme-text);
         }
         .hidden { display: none; }
-        .player-slot { 
-            transition: all 0.3s ease;
-            border: 2px solid #4b5563;
-            min-height: 80px;
-        }
+        
         .player-slot.active {
             border-color: #818cf8;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #818cf8;
-        }
-        .player-slot.correct {
-            border-color: #22c55e;
-            background-color: #166534;
-            transform: scale(1.1);
-            box-shadow: 0 0 25px #22c55e;
+            --scale: 1.15;
+            box-shadow: 0 0 25px #818cf8;
+            z-index: 20;
         }
         .player-slot.eliminated {
-            opacity: 0.5;
+            opacity: 0.4;
             background-color: #374151;
             border-color: #1f2937;
-            transform: scale(0.95);
+            --scale: 0.95;
         }
         @keyframes pulse-white-to-red {
             0% { color: #ffffff; }
@@ -49,7 +44,6 @@
         .gold { background-image: linear-gradient(to right, #fde047, #eab308); color: #422006; border-color: #fde047 !important;}
         .silver { background-image: linear-gradient(to right, #e5e7eb, #a1a1aa); color: #1f2937; border-color: #e5e7eb !important;}
 
-        /* Animated Background Styles */
         .animated-bg {
             position: fixed;
             top: 0;
@@ -58,230 +52,233 @@
             height: 100%;
             z-index: -1;
             overflow: hidden;
+            background: var(--theme-primary);
+        }
+        
+        /* TEMA SİSTEMİ */
+        :root {
+            --theme-primary: #1f2937;
+            --theme-secondary: #374151;
+            --theme-accent: #6366f1;
+            --theme-accent-hover: #4f46e5;
+            --theme-text: #ffffff;
+            --theme-text-muted: #9ca3af;
+            --theme-border: #4b5563;
+            --theme-bg-overlay: rgba(31, 41, 55, 0.9);
+            --theme-glow: rgba(99, 102, 241, 0.4);
         }
 
-        /* Floating Particles Background */
-        .bg-particles {
-            background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #1e40af 100%);
+        .theme-void {
+            --theme-primary: #0c0c0c;
+            --theme-secondary: #1a1a1a;
+            --theme-accent: #8b5cf6;
+            --theme-accent-hover: #7c3aed;
+            --theme-text: #e5e7eb;
+            --theme-text-muted: #6b7280;
+            --theme-border: #262626;
+            --theme-bg-overlay: rgba(12, 12, 12, 0.95);
+            --theme-glow: rgba(139, 92, 246, 0.5);
         }
 
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.7;
-            animation: float 6s infinite ease-in-out;
+        .theme-dark {
+            --theme-primary: #1f2937;
+            --theme-secondary: #374151;
+            --theme-accent: #3b82f6;
+            --theme-accent-hover: #2563eb;
+            --theme-text: #f9fafb;
+            --theme-text-muted: #9ca3af;
+            --theme-border: #4b5563;
+            --theme-bg-overlay: rgba(31, 41, 55, 0.9);
+            --theme-glow: rgba(59, 130, 246, 0.4);
         }
 
-        .particle:nth-child(1) { width: 20px; height: 20px; background: #60a5fa; left: 10%; animation-delay: 0s; }
-        .particle:nth-child(2) { width: 15px; height: 15px; background: #a78bfa; left: 20%; animation-delay: 2s; }
-        .particle:nth-child(3) { width: 25px; height: 25px; background: #34d399; left: 35%; animation-delay: 4s; }
-        .particle:nth-child(4) { width: 18px; height: 18px; background: #fbbf24; left: 50%; animation-delay: 1s; }
-        .particle:nth-child(5) { width: 22px; height: 22px; background: #f87171; left: 65%; animation-delay: 3s; }
-        .particle:nth-child(6) { width: 16px; height: 16px; background: #06d6a0; left: 80%; animation-delay: 5s; }
-        .particle:nth-child(7) { width: 30px; height: 30px; background: #8b5cf6; left: 95%; animation-delay: 2.5s; }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(100vh) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        .theme-light {
+            --theme-primary: #ffffff;
+            --theme-secondary: #f8f9fa;
+            --theme-accent: #0f172a;
+            --theme-accent-hover: #1e293b;
+            --theme-text: #1e293b;
+            --theme-text-muted: #64748b;
+            --theme-border: #cbd5e1;
+            --theme-bg-overlay: rgba(255, 255, 255, 0.95);
+            --theme-glow: rgba(15, 23, 42, 0.2);
         }
 
-        /* Gradient Wave Background */
-        .bg-waves {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: gradientWave 15s ease infinite;
-        }
-
-        @keyframes gradientWave {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Geometric Pattern Background */
-        .bg-geometric {
-            background: #0f172a;
-            background-image: 
-                radial-gradient(circle at 25px 25px, #1e293b 2px, transparent 2px),
-                radial-gradient(circle at 75px 75px, #334155 2px, transparent 2px);
-            background-size: 100px 100px;
-            animation: geometricMove 20s linear infinite;
-        }
-
-        @keyframes geometricMove {
-            0% { background-position: 0 0, 50px 50px; }
-            100% { background-position: 100px 100px, 150px 150px; }
-        }
-
-        /* Neon Grid Background */
-        .bg-neon {
-            background: #000;
-            background-image: 
-                linear-gradient(cyan 1px, transparent 1px),
-                linear-gradient(90deg, cyan 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: neonPulse 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes neonPulse {
-            0% { 
-                background-image: 
-                    linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px);
-            }
-            100% { 
-                background-image: 
-                    linear-gradient(rgba(0, 255, 255, 0.8) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 255, 255, 0.8) 1px, transparent 1px);
-            }
-        }
-
-        /* Bokeh Lights Background */
-        .bg-bokeh {
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-        }
-
-        .bokeh-light {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(5px);
-            animation: bokehFloat 8s infinite ease-in-out;
-        }
-
-        .bokeh-light:nth-child(1) { width: 80px; height: 80px; background: rgba(255, 107, 107, 0.6); left: 10%; top: 20%; animation-delay: 0s; }
-        .bokeh-light:nth-child(2) { width: 60px; height: 60px; background: rgba(78, 205, 196, 0.6); left: 80%; top: 30%; animation-delay: 2s; }
-        .bokeh-light:nth-child(3) { width: 100px; height: 100px; background: rgba(255, 206, 84, 0.6); left: 60%; top: 70%; animation-delay: 4s; }
-        .bokeh-light:nth-child(4) { width: 70px; height: 70px; background: rgba(199, 121, 208, 0.6); left: 20%; top: 80%; animation-delay: 1s; }
-        .bokeh-light:nth-child(5) { width: 90px; height: 90px; background: rgba(130, 204, 221, 0.6); left: 85%; top: 15%; animation-delay: 3s; }
-
-        @keyframes bokehFloat {
-            0%, 100% { transform: translateY(0px) scale(1); opacity: 0.6; }
-            50% { transform: translateY(-20px) scale(1.1); opacity: 0.8; }
-        }
-
-        /* Background Controls */
-        .bg-controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .bg-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .bg-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .bg-btn.active {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-            border-color: #3b82f6;
-        }
-
-        /* Mobile responsiveness for background controls */
-        @media (max-width: 768px) {
-            .bg-controls {
-                top: 10px;
-                right: 10px;
-                flex-direction: row;
-                flex-wrap: wrap;
-                max-width: 200px;
-            }
-            
-            .bg-btn {
-                padding: 6px 12px;
-                font-size: 10px;
-                flex: 1;
-                min-width: 60px;
-            }
-        }
-
-        /* Avatar System Styles */
-        .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            border: 3px solid transparent;
-            transition: all 0.3s ease;
-            margin-bottom: 8px;
-        }
-
-        .avatar.small {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .avatar.large {
-            width: 80px;
-            height: 80px;
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
-        /* Avatar Selection Modal */
-        .avatar-modal {
+        /* HAREKETLI ARKA PLANLAR */
+        .animated-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            z-index: -1;
+            overflow: hidden;
+            background: var(--theme-primary);
+        }
+
+        .theme-void .animated-bg {
+            background: linear-gradient(45deg, #0c0c0c 0%, #1a1a1a 50%, #0c0c0c 100%);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+            background-size: 200% 200%, 300% 300%, 400% 400%;
+            animation: voidFloat 20s ease-in-out infinite, voidPulse 15s ease-in-out infinite;
+        }
+
+        .theme-dark .animated-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #1f2937 100%);
+            background-image: 
+                radial-gradient(circle at 25px 25px, #334155 2px, transparent 2px),
+                radial-gradient(circle at 75px 75px, #475569 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px;
+            animation: darkFloat 25s linear infinite;
+        }
+
+        .theme-light .animated-bg {
+            background: #ffffff;
+            background-image: 
+                radial-gradient(circle at 30% 20%, rgba(15, 23, 42, 0.03) 0%, transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(15, 23, 42, 0.05) 0%, transparent 40%);
+            background-size: 400px 400px, 600px 600px;
+            animation: lightFloat 30s ease-in-out infinite;
+        }
+
+        @keyframes voidFloat {
+            0%, 100% { background-position: 0% 0%, 100% 100%, 50% 50%; }
+            33% { background-position: 100% 50%, 0% 0%, 100% 0%; }
+            66% { background-position: 50% 100%, 50% 50%, 0% 100%; }
+        }
+
+        @keyframes voidPulse {
+            0%, 100% { background-size: 200% 200%, 300% 300%, 400% 400%; }
+            50% { background-size: 250% 250%, 350% 350%, 450% 450%; }
+        }
+
+        @keyframes darkFloat {
+            0% { background-position: 0 0, 50px 50px; }
+            100% { background-position: 100px 100px, 150px 150px; }
+        }
+
+        @keyframes lightFloat {
+            0%, 100% { background-position: 0% 0%, 100% 100%; }
+            50% { background-position: 100% 100%, 0% 0%; }
+        }
+
+        /* TEMA BUTONLARI */
+        .bg-controls {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .bg-btn {
+            background: rgba(0,0,0,0.35);
+            color: var(--theme-text);
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 8px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.18s ease;
+        }
+        .bg-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+
+        .home-btn { display: none; }
+        .home-btn.show { display: inline-flex; align-items: center; }
+
+        .theme-btn {
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(5px);
-        }
-
-        .avatar-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            max-width: 400px;
-            padding: 20px;
-        }
-
-        .avatar-option {
+            font-size: 20px;
+            line-height: 1;
+            border-radius: 50%;
+            border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .avatar-option:hover {
+        .theme-btn:hover {
             transform: scale(1.1);
-            border-color: #60a5fa;
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
-        .avatar-option.selected {
+        .theme-btn.active {
             border-color: #fbbf24;
-            box-shadow: 0 0 25px rgba(251, 191, 36, 0.8);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
         }
 
-        /* Avatar Background Gradients */
+        .theme-btn-void {
+            background-color: #0b1220; /* solid dark */
+            color: #e6eef8;
+            font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .theme-btn-dark {
+            background-color: #2d3748; /* solid slate */
+            color: #f1f5f9;
+            font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .theme-btn-light {
+            background-color: #ffffff; /* solid white */
+            color: #0f172a;
+            font-size: 18px;
+            border: 1px solid #e6eef8;
+            box-shadow: 0 2px 6px rgba(2,6,23,0.06);
+        }
+        
+        .theme-btn::before {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .bg-controls { top: 10px; right: 10px; flex-direction: row; flex-wrap: wrap; max-width: 200px; }
+            .bg-btn { padding: 6px 12px; font-size: 10px; flex: 1; min-width: 60px; }
+        }
+
+        #howto-panel {
+            position: fixed;
+            top: 76px;
+            right: 20px;
+            width: 320px;
+            max-width: calc(100% - 40px);
+            z-index: 1100;
+            background: rgba(17,24,39,0.95);
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 14px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+        }
+        #howto-panel .close-howto { position: absolute; top: 8px; right: 8px; background: transparent; border: none; color: #c7d2fe; font-weight: 700; cursor: pointer; }
+        
+        .avatar { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); border: 3px solid transparent; transition: all 0.3s ease; margin-bottom: 8px; }
+        .avatar.small { width: 40px; height: 40px; font-size: 16px; margin-bottom: 4px; }
+        .avatar.large { width: 80px; height: 80px; font-size: 32px; margin-bottom: 12px; }
+        
+        .avatar-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 400px; padding: 20px; }
+        .avatar-option { cursor: pointer; transition: all 0.3s ease; border: 3px solid transparent; }
+        .avatar-option:hover { transform: scale(1.1); border-color: #60a5fa; box-shadow: 0 0 20px rgba(96, 165, 250, 0.5); }
+        .avatar-option.selected { border-color: #fbbf24; box-shadow: 0 0 25px rgba(251, 191, 36, 0.8); }
+
         .avatar-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .avatar-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .avatar-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
@@ -298,87 +295,408 @@
         .avatar-14 { background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); }
         .avatar-15 { background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); }
         .avatar-16 { background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); }
-        .bronze { background-image: linear-gradient(to right, #b08d57, #9c7a4c); color: #fef3c7; border-color: #b08d57 !important;}
         
-        .slot-container {
-            height: 80px;
-            overflow: hidden;
-            position: relative;
-            border-radius: 0.75rem;
-            background-color: #1f2937;
-            border: 2px solid #4b5563;
+        .slot-container { 
+            height: 60px; 
+            overflow: hidden; 
+            position: relative; 
+            border-radius: 0.75rem; 
+            background-color: var(--theme-secondary); 
+            border: 2px solid var(--theme-border); 
         }
-        .slot-reel {
+        .slot-reel { 
+            position: absolute; 
+            top: 0; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            white-space: nowrap; 
+            transition: top 2.5s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+        .slot-item { 
+            height: 60px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            background-color: var(--theme-secondary); 
+            backface-visibility: hidden; 
+            padding: 0 10px; 
+            font-size: 2rem; 
+            line-height: 1; 
+            color: var(--theme-text);
+        }
+        
+        .game-title { background: linear-gradient( 90deg, #a5b4fc, #6366f1, #a5b4fc ); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: modern-shine 4s linear infinite; }
+        @keyframes modern-shine { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+
+        /* YENİ OYUN LOBİSİ STİLLERİ */
+        #center-game-panel { position: relative; width: 100%; max-width: 700px; margin: auto; aspect-ratio: 1 / 1; }
+        #center-task-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; width: 260px; }
+        #circular-player-container { position: relative; width: 100%; height: 100%; }
+        
+        @keyframes contentFloat {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(var(--float-x1), var(--float-y1)); }
+            40% { transform: translate(var(--float-x2), var(--float-y2)); }
+            60% { transform: translate(var(--float-x3), var(--float-y3)); }
+            80% { transform: translate(var(--float-x4), var(--float-y4)); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .player-slot-circle {
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            transition: top 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: var(--theme-secondary);
+            background-image: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 50%), radial-gradient(circle at 70% 70%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 50%);
+            background-size: cover;
+            border: 2px solid var(--theme-border);
+            box-shadow: 0 0 15px var(--theme-glow), inset 0 0 8px rgba(255, 255, 255, 0.05);
+            transition: all 0.2s ease-out;
+            transform: translate(-50%, -50%) scale(var(--scale, 1));
+            animation: slotFloat 4s ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
         }
-        .slot-item {
-            height: 80px;
+        .player-slot-circle.active {
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 25px var(--theme-glow), inset 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(1.15);
+            z-index: 20;
+            animation: none;
+        }
+
+        /* AVATAR BASED GLOW COLORS */
+        .player-slot-circle[data-avatar="1"] { 
+            box-shadow: 0 0 15px rgba(139, 69, 19, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="1"].active { 
+            box-shadow: 0 0 30px rgba(139, 69, 19, 0.8), 0 0 50px rgba(139, 69, 19, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="2"] { 
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="2"].active { 
+            box-shadow: 0 0 30px rgba(220, 20, 60, 0.8), 0 0 50px rgba(220, 20, 60, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="3"] { 
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="3"].active { 
+            box-shadow: 0 0 30px rgba(255, 140, 0, 0.8), 0 0 50px rgba(255, 140, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="4"] { 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="4"].active { 
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="5"] { 
+            box-shadow: 0 0 15px rgba(154, 205, 50, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="5"].active { 
+            box-shadow: 0 0 30px rgba(154, 205, 50, 0.8), 0 0 50px rgba(154, 205, 50, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="6"] { 
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="6"].active { 
+            box-shadow: 0 0 30px rgba(0, 255, 127, 0.8), 0 0 50px rgba(0, 255, 127, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="7"] { 
+            box-shadow: 0 0 15px rgba(64, 224, 208, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="7"].active { 
+            box-shadow: 0 0 30px rgba(64, 224, 208, 0.8), 0 0 50px rgba(64, 224, 208, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="8"] { 
+            box-shadow: 0 0 15px rgba(135, 206, 235, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="8"].active { 
+            box-shadow: 0 0 30px rgba(135, 206, 235, 0.8), 0 0 50px rgba(135, 206, 235, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="9"] { 
+            box-shadow: 0 0 15px rgba(70, 130, 180, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="9"].active { 
+            box-shadow: 0 0 30px rgba(70, 130, 180, 0.8), 0 0 50px rgba(70, 130, 180, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="10"] { 
+            box-shadow: 0 0 15px rgba(147, 112, 219, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="10"].active { 
+            box-shadow: 0 0 30px rgba(147, 112, 219, 0.8), 0 0 50px rgba(147, 112, 219, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="11"] { 
+            box-shadow: 0 0 15px rgba(186, 85, 211, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="11"].active { 
+            box-shadow: 0 0 30px rgba(186, 85, 211, 0.8), 0 0 50px rgba(186, 85, 211, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="12"] { 
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="12"].active { 
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.8), 0 0 50px rgba(255, 20, 147, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="13"] { 
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="13"].active { 
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.8), 0 0 50px rgba(255, 69, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="14"] { 
+            box-shadow: 0 0 15px rgba(255, 99, 71, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="14"].active { 
+            box-shadow: 0 0 30px rgba(255, 99, 71, 0.8), 0 0 50px rgba(255, 99, 71, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="15"] { 
+            box-shadow: 0 0 15px rgba(255, 192, 203, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="15"].active { 
+            box-shadow: 0 0 30px rgba(255, 192, 203, 0.8), 0 0 50px rgba(255, 192, 203, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle[data-avatar="16"] { 
+            box-shadow: 0 0 15px rgba(173, 216, 230, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.05);
+        }
+        .player-slot-circle[data-avatar="16"].active { 
+            box-shadow: 0 0 30px rgba(173, 216, 230, 0.8), 0 0 50px rgba(173, 216, 230, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .player-slot-circle.eliminated {
+            opacity: 0.5;
+            filter: grayscale(80%);
+            box-shadow: none;
+            border-color: #4b5563;
+            background-color: #374151;
+            animation: none;
+        }
+        .player-slot-circle.is-hovering {
+            animation: none;
+        }
+
+        /* SÜZÜLME ANİMASYONU */
+        @keyframes slotFloat {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) translateY(-3px) rotate(1deg); }
+            50% { transform: translate(-50%, -50%) translateY(0px) rotate(-0.5deg); }
+            75% { transform: translate(-50%, -50%) translateY(2px) rotate(0.3deg); }
+        }
+
+        .bubble-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease-out;
+            transform: translate(var(--push-x, 0px), var(--push-y, 0px));
+            position: relative;
+        }
+
+        #turn-indicator { 
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100%;
+            height: 6px;
+            margin-top: 80px; /* push below bubble and panel */
+            background: linear-gradient(90deg, rgba(129, 140, 248, 0), #a5b4fc);
+            transform: translate(-50%, 0) rotate(-90deg);
+            transform-origin: center center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1; /* below bubble and panel */
+            opacity: 1;
+            border-radius: 3px;
+            box-shadow: 0 0 15px #a5b4fc;
+        }
+        #turn-indicator.visible { opacity: 1; }
+        #turn-indicator.winner { background: linear-gradient(90deg, rgba(34, 197, 94, 0), #22c55e); box-shadow: 0 0 20px #22c55e; }
+
+        /* BUTON STİLLERİ VE GLOW EFEKTİ */
+        .game-button {
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover));
+            border: 2px solid var(--theme-accent);
+            color: var(--theme-text);
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--theme-glow);
+        }
+        .game-button:hover {
+            box-shadow: 0 0 25px var(--theme-glow), 0 0 35px var(--theme-glow);
+            transform: translateY(-2px);
+        }
+
+        /* SÜRE GÖSTERGESI */
+        #countdown-wrapper { 
+            margin-top: 8px; 
+            height: 80px; 
+            width: 180px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: var(--theme-secondary); 
+            border: 2px solid var(--theme-border); 
+            border-radius: 0.75rem; 
+        }
+        #countdown { 
+            font-size: 4.5rem; 
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; 
+            font-weight: 700; 
+            color: #ffffff !important; /* Her zaman beyaz */
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+        }
+        #countdown.placeholder { 
+            font-size: 2rem; 
+            color: #9ca3af !important; /* Her zaman gri */
+            font-weight: 900; 
+        }
+        #countdown.animate-pulse-white-to-red {
+            color: #ef4444 !important; /* Sadece 0'da kırmızı */
+            animation: pulse 1s infinite;
+        }
+
+        /* PANEL STİLLERİ */
+        .game-panel {
+            background: var(--theme-bg-overlay);
+            border: 1px solid var(--theme-border);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        /* TEMA STİLLERİ */
+        .themed-title { color: var(--theme-accent); }
+        .themed-text-muted { color: var(--theme-text-muted); }
+        .themed-accent { color: var(--theme-accent); }
+        .themed-bg-secondary { background: var(--theme-secondary); }
+        .themed-input {
+            background-color: var(--theme-secondary);
+            color: var(--theme-text);
+            border: 1px solid var(--theme-border);
+        }
+        .themed-input:focus {
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 2px var(--theme-glow);
+        }
+
+        /* ANASAYFA BUTONU */
+        .home-btn { display: none; }
+        .home-btn.show { display: inline-flex; align-items: center; }
+
+        /* POPUP STİLLERİ */
+        .confirmation-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 900;
-            background-color: #1f2937;
-            backface-visibility: hidden;
-            padding: 0 10px;
-            font-size: 2.5rem;
-            line-height: 1;
         }
-        @keyframes modern-shine {
-            0% { background-position: 200% center; }
-            100% { background-position: -200% center; }
+        .popup-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
         }
-        .game-title {
-            background: linear-gradient( 90deg, #a5b4fc, #6366f1, #a5b4fc );
-            background-size: 200% auto;
-            color: transparent;
-            background-clip: text;
-            -webkit-background-clip: text;
-            animation: modern-shine 4s linear infinite;
+        .popup-content {
+            position: relative;
+            background: var(--theme-bg-overlay);
+            border: 2px solid var(--theme-border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            margin: 20px;
+            text-align: center;
+        }
+        .popup-content h3 {
+            color: var(--theme-accent);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .popup-content p {
+            color: var(--theme-text);
+            margin-bottom: 24px;
+        }
+        .popup-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .confirm-btn, .cancel-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .confirm-btn {
+            background: #dc2626;
+            color: white;
+        }
+        .confirm-btn:hover {
+            background: #b91c1c;
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+        }
+        .cancel-btn {
+            background: var(--theme-secondary);
+            color: var(--theme-text);
+            border: 1px solid var(--theme-border);
+        }
+        .cancel-btn:hover {
+            background: var(--theme-accent);
+            box-shadow: 0 0 15px var(--theme-glow);
+        }
+
+        /* AVATAR STİLLERİ */
+        .avatar { 
+            background-clip: padding-box !important;
+            box-sizing: border-box;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4">
-
-    <!-- Animated Background -->
-    <div id="animated-background" class="animated-bg bg-particles">
-        <!-- Floating Particles -->
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        
-        <!-- Bokeh Lights -->
-        <div class="bokeh-light"></div>
-        <div class="bokeh-light"></div>
-        <div class="bokeh-light"></div>
-        <div class="bokeh-light"></div>
-        <div class="bokeh-light"></div>
+<body class="bg-gray-900 text-white min-h-screen p-2">
+    <div id="animated-background" class="animated-bg"></div>
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn" id="toggle-howto">Nasıl Oynanır</button>
+        <button class="bg-btn home-btn" id="go-home" onclick="goToMainMenu()">🏠 Anasayfa</button>
     </div>
 
-    <!-- Background Controls -->
-    <div class="bg-controls">
-        <button class="bg-btn active" onclick="changeBackground('particles', event)" style="background: rgba(30, 27, 75, 0.8); color: #60a5fa;">Particles</button>
-        <button class="bg-btn" onclick="changeBackground('waves', event)" style="background: rgba(102, 126, 234, 0.8); color: white;">Waves</button>
-        <button class="bg-btn" onclick="changeBackground('geometric', event)" style="background: rgba(15, 23, 42, 0.8); color: #334155;">Geometric</button>
-        <button class="bg-btn" onclick="changeBackground('neon', event)" style="background: rgba(0, 0, 0, 0.8); color: cyan;">Neon</button>
-        <button class="bg-btn" onclick="changeBackground('bokeh', event)" style="background: rgba(26, 26, 46, 0.8); color: #ff6b6b;">Bokeh</button>
+    <div id="howto-panel" class="hidden" aria-hidden="true">
+        <button class="close-howto" id="close-howto">✕</button>
+        <h3 class="text-lg font-bold text-indigo-300 mb-2">Nasıl Oynanır?</h3>
+        <ul class="list-disc pl-5 text-sm text-gray-300">
+            <li>Profil fotoğrafı ve kullanıcı adı seçerek giriş yapın.</li>
+            <li>Oda oluşturabilir, odaya katılabilir veya tek başınıza oynayabilirsiniz.</li>
+            <li>Her turda verilen harf ve kategoriye uygun kelimeyi hızlıca yazın veya söyleyin.</li>
+            <li>Hedef puana ulaşan kazanır!</li>
+        </ul>
     </div>
 
-    <!-- Avatar Selection Modal -->
     <div id="avatar-modal" class="avatar-modal hidden">
         <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
             <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
-            <div class="avatar-grid" id="avatar-grid">
-                <!-- Avatars will be populated by JavaScript -->
-            </div>
+            <div class="avatar-grid" id="avatar-grid"></div>
             <div class="flex gap-4 mt-6">
                 <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
                 <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
@@ -386,203 +704,96 @@
         </div>
     </div>
 
-    <!-- Simple Entry Screen -->
     <div id="auth-screen" class="w-full max-w-md relative z-10">
-        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
-            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center game-title">YETI Kelime Oyunu</h1>
-            
-            <!-- Simple Entry Form -->
-            <div id="simple-entry-form">
-                <h2 class="text-xl font-bold mb-6 text-center text-white">Oyuna Başla</h2>
-                
-                <!-- Avatar Selection -->
-                <div class="mb-6 text-center">
-                    <p class="text-sm text-gray-400 mb-3">Profil fotoğrafını seç:</p>
-                    <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500">🎮</div>
-                    <button id="entry-change-avatar" class="mt-2 text-xs text-indigo-400 hover:text-indigo-300 transition">🎭 Değiştir</button>
-                </div>
-                
-                <!-- Username Input -->
-                <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center">
-                
-                <!-- Start Button -->
-                <button id="startGameButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition">🎮 Oyuna Başla</button>
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <h1 class="text-3xl font-black mb-6 text-center game-title themed-title">YETI Kelime Oyunu</h1>
+            <div class="mb-6 text-center">
+                <p class="text-sm mb-3 themed-text-muted">Profil fotoğrafını seç:</p>
+                <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500" title="Profili değiştir">🎮</div>
             </div>
-            
-            <!-- Error Messages -->
-            <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
+            <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 rounded-lg text-center focus:outline-none focus:ring-2 themed-input">
+            <button id="startGameButton" class="w-full game-button">🎮 Oyuna Başla</button>
         </div>
+        <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
     </div>
 
     <div id="initial-screen" class="hidden w-full max-w-sm relative z-10">
-        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
-            <h1 class="text-3xl font-black mb-6 text-indigo-400 text-center game-title">YETI Kelime Oyunu</h1>
-            
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <h1 class="text-3xl font-black mb-6 text-center game-title themed-title">YETI Kelime Oyunu</h1>
             <div id="join-options">
-                <div class="mb-4 p-3 bg-gray-900/50 rounded-lg">
+                <div class="mb-4 p-3 rounded-lg themed-bg-secondary">
                     <div class="flex items-center gap-3 mb-2">
                         <div id="user-avatar" class="avatar small avatar-1">🎮</div>
                         <div>
-                            <p class="text-sm text-gray-400">Hoş geldin,</p>
-                            <p class="font-bold text-indigo-300" id="welcomeUsername">Oyuncu</p>
+                            <p class="text-sm themed-text-muted">Hoş geldin,</p>
+                            <p class="font-bold themed-accent" id="welcomeUsername">Oyuncu</p>
                         </div>
                     </div>
-                    <button id="choose-avatar-btn" class="w-full text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg transition">🎭 Avatar Değiştir</button>
+                    <button id="choose-avatar-btn" class="w-full text-xs bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded-lg transition">🎭 Avatar Değiştir</button>
+                    <button id="edit-username-btn" class="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition mt-2">✏️ İsim Değiştir</button>
                 </div>
-                <button id="createRoomButton" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Oda Oluştur</button>
-                <button id="showJoinFormButton" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Odaya Katıl</button>
-                <button id="showStatsButton" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">📊 İstatistiklerim</button>
-                <div class="my-4 border-t border-gray-700"></div>
-                <button id="startSinglePlayerButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">Tek Başına Oyna</button>
-                <button id="changeUserButton" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">👤 Kullanıcı Değiştir</button>
+                <button id="createRoomButton" class="w-full game-button mb-2">Oda Oluştur</button>
+                <button id="showJoinFormButton" class="w-full game-button mb-2">Odaya Katıl</button>
+                <button id="showStatsButton" class="w-full game-button mb-2">� İstatistiklerim</button>
             </div>
-
             <div id="join-form" class="hidden">
-                <input id="roomInput" type="text" placeholder="Oda Kodunu Gir" maxlength="6" class="w-full p-3 mb-4 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase">
-                <button id="joinRoomButton" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 rounded-lg transition">Katıl</button>
+                <input id="roomInput" type="text" placeholder="Oda Kodunu Gir" maxlength="6" class="w-full p-3 mb-4 rounded-lg themed-input uppercase">
+                <button id="joinRoomButton" class="w-full game-button">Katıl</button>
                 <button id="backToOptionsButton" class="w-full mt-2 text-gray-400 hover:text-white transition">Geri</button>
             </div>
         </div>
     </div>
 
-    <!-- Player Statistics Screen -->
     <div id="stats-screen" class="hidden w-full max-w-4xl relative z-10">
-        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
             <h2 class="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Oyuncu İstatistikleri</h2>
-            
             <div id="stats-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Game Statistics -->
-                <div class="bg-gray-900/50 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-indigo-400">🎮 Oyun İstatistikleri</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Oynanan Oyun:</span>
-                            <span class="font-bold text-white" id="stat-games-played">0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Kazanılan Oyun:</span>
-                            <span class="font-bold text-green-400" id="stat-games-won">0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Kazanma Oranı:</span>
-                            <span class="font-bold text-yellow-400" id="stat-win-rate">0%</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">En Uzun Galibiyet Serisi:</span>
-                            <span class="font-bold text-purple-400" id="stat-longest-streak">0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Mevcut Seri:</span>
-                            <span class="font-bold text-blue-400" id="stat-current-streak">0</span>
-                        </div>
+                <div class="themed-bg-secondary p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 themed-accent">🎮 Oyun İstatistikleri</h3>
+                    <div class="space-y-2">
+                        <p>Toplam Oyun: <span id="stat-games-played" class="font-bold">0</span></p>
+                        <p>Kazanılan Oyun: <span id="stat-games-won" class="font-bold">0</span></p>
+                        <p>Kazanma Oranı: %<span id="stat-win-rate" class="font-bold">0</span></p>
+                        <p>En Uzun Kazanma Serisi: <span id="stat-longest-streak" class="font-bold">0</span></p>
+                        <p>Mevcut Kazanma Serisi: <span id="stat-current-streak" class="font-bold">0</span></p>
+                        <p>Son Oyun: <span id="stat-last-played" class="font-bold">Hiç</span></p>
                     </div>
                 </div>
-
-                <!-- Word Statistics -->
-                <div class="bg-gray-900/50 p-6 rounded-lg">
+                <div class="themed-bg-secondary p-6 rounded-lg">
                     <h3 class="text-xl font-bold mb-4 text-green-400">📝 Kelime İstatistikleri</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Toplam Doğru Kelime:</span>
-                            <span class="font-bold text-white" id="stat-total-words">0</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Ortalama Cevap Süresi:</span>
-                            <span class="font-bold text-cyan-400" id="stat-avg-time">0s</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">En Sevilen Kategori:</span>
-                            <span class="font-bold text-pink-400" id="stat-fav-category">-</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-300">Son Oyun:</span>
-                            <span class="font-bold text-gray-400" id="stat-last-played">-</span>
-                        </div>
+                    <div class="space-y-2">
+                        <p>Toplam Doğru Kelime: <span id="stat-total-words" class="font-bold">0</span></p>
+                        <p>Ortalama Yanıt Süresi: <span id="stat-avg-time" class="font-bold">0</span>sn</p>
+                        <p>Favori Kategori: <span id="stat-fav-category" class="font-bold">Henüz yok</span></p>
                     </div>
                 </div>
-
-                <!-- Most Used Words -->
-                <div class="bg-gray-900/50 p-6 rounded-lg md:col-span-2">
+                <div class="themed-bg-secondary p-6 rounded-lg md:col-span-2">
                     <h3 class="text-xl font-bold mb-4 text-orange-400">🔤 En Çok Kullanılan Kelimeler</h3>
-                    <div id="most-used-words" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        <p class="text-gray-500 col-span-full text-center">Henüz kelime verisi yok</p>
-                    </div>
+                    <div id="most-used-words" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
                 </div>
             </div>
-
             <div class="mt-6 text-center">
-                <button id="closeStatsButton" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">
-                    Geri Dön
-                </button>
+                <button id="closeStatsButton" class="game-button">Geri Dön</button>
             </div>
         </div>
     </div>
-
-    <div id="lobby-screen" class="hidden w-full max-w-lg text-center relative pb-16">
-        <h2 class="text-3xl font-bold text-indigo-400 mb-4">Oyun Lobisi</h2>
-        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl">
-            <p class="text-gray-400 mb-2">Arkadaşlarını davet et:</p>
-            <div class="flex items-center justify-center space-x-2">
-                <input id="roomLinkInput" type="text" readonly class="w-full p-3 bg-gray-700 rounded-lg text-white text-center font-mono select-all">
-                <button id="copyLinkButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold p-3 rounded-lg transition">Kopyala</button>
-            </div>
-        </div>
-        <button id="lobby-main-menu-button" onclick="goToMainMenu()" class="absolute bottom-4 right-4 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-base shadow-lg z-50 border-2 border-white">Ana Menü</button>
-    </div>
-
-
-    <div id="game-container" class="hidden w-full max-w-6xl flex-col relative z-10">
-        <div id="invite-link-ingame" class="w-full max-w-md mx-auto mb-4 text-center"></div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="md:col-span-2 text-center p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl flex flex-col justify-between border border-gray-700/50">
-                <div>
-                     <div id="task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div id="letter-slot-container" class="slot-container">
-                                <div class="slot-reel"><div class="slot-item"></div></div>
-                            </div>
-                            <div id="category-slot-container" class="slot-container">
-                                <div class="slot-reel"><div class="slot-item"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                     <div id="player-slots" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+    
+    <div id="game-container" class="hidden w-full max-w-screen-2xl mx-auto flex-col relative z-10 p-2">
+        <div class="flex flex-col md:flex-row gap-4 w-full">
+    
+            <div id="left-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col">
+                <h3 class="text-xl font-bold mb-4 text-center themed-title">Tüm Ayarlar</h3>
+                <div id="invite-link-ingame" class="mb-4">
+                     <p class="text-sm themed-text-muted mb-2">Arkadaşlarını Davet et:</p>
+                     <div class="flex items-center space-x-2">
+                        <input id="roomLinkInput" type="text" readonly class="w-full p-2 themed-input rounded-lg text-center font-mono select-all text-sm">
+                        <button id="copyLinkButton" class="game-button text-sm p-2">Kopyala</button>
+                     </div>
                 </div>
-                <div>
-                    <div id="countdown" class="text-7xl md:text-8xl font-mono font-bold my-6 text-white h-24"></div>
-                    <p id="status-text" class="text-lg text-gray-400 mb-6 h-8 flex items-center justify-center"></p>
-                    <div id="game-buttons" class="h-14 flex items-center justify-center space-x-4">
-                        <button id="startButton" class="hidden bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">
-                            🎲 Zar At & Başlat
-                        </button>
-                        <button id="newGameButton" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">
-                            🎉 Yeni Oyun Başlat
-                        </button>
-                        <div id="host-decision-buttons" class="hidden space-x-4">
-                             <button id="addWordYes" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👍 Evet, Ekle</button>
-                             <button id="addWordNo" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👎 Hayır</button>
-                        </div>
-                    </div>
-                     <div id="word-input-area" class="hidden mt-4">
-                        <form id="word-form" class="flex justify-center space-x-2">
-                            <input type="text" id="wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button type="submit" id="sendWordButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">Gönder</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sidebar" class="p-6 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
-                <h3 class="text-2xl font-bold mb-1 text-center">🏆 Puan Tablosu & Ayarlar</h3>
-                <div class="text-center bg-gray-900/50 py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4">
-                    <div>Hedef: <span id="score-goal-display" class="font-bold text-xl text-yellow-300">10</span></div>
-                    <div>Süre: <span id="turn-duration-display" class="font-bold text-xl text-yellow-300">5</span>sn</div>
-                </div>
-                <div id="host-options" class="hidden space-y-4">
+                <div id="host-options" class="hidden space-y-4 mb-4">
                      <div>
-                        <label for="scoreGoalSelect" class="block mb-2 text-sm text-gray-300">Hedef Skoru Değiştir:</label>
-                        <select id="scoreGoalSelect" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label for="scoreGoalSelect" class="block mb-2 text-sm themed-text-muted">Hedef Skoru Değiştir:</label>
+                        <select id="scoreGoalSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
                             <option value="5">5 Puan</option>
                             <option value="10" selected>10 Puan</option>
                             <option value="15">15 Puan</option>
@@ -590,135 +801,169 @@
                         </select>
                      </div>
                      <div>
-                        <label for="turnDurationSelect" class="block mb-2 text-sm text-gray-300">Tur Süresini Değiştir:</label>
-                        <select id="turnDurationSelect" class="w-full p-3 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label for="turnDurationSelect" class="block mb-2 text-sm themed-text-muted">Tur Süresini Değiştir:</label>
+                        <select id="turnDurationSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
                             <option value="5" selected>5 Saniye</option>
                             <option value="10">10 Saniye</option>
                             <option value="15">15 Saniye</option>
                         </select>
                      </div>
                 </div>
-                <div id="scoreboard" class="space-y-2 mt-4"></div>
-                
-                <!-- Used Words Section -->
-                <div id="used-words-section" class="mt-6">
-                    <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Kullanılan Kelimeler</h4>
-                    <div id="used-words-list" class="bg-gray-900/50 rounded-lg p-3 max-h-40 overflow-y-auto">
-                        <p class="text-gray-500 text-sm text-center" id="no-words-text">Henüz kelime girilmedi</p>
+                <div id="used-words-section" class="mt-auto flex-grow min-h-[150px]">
+                    <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Son Kelimeler</h4>
+                    <div id="used-words-list" class="themed-bg-secondary rounded-lg p-3 max-h-40 overflow-y-auto"></div>
+                </div>
+                <button id="saveSettingsButton" class="hidden w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">KAYDET</button>
+                <button id="resetScoreButton" class="hidden w-full mt-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">SIFIRLA</button>
+            </div>
+    
+            <div id="center-panel" class="w-full md:w-3/5 flex-grow flex flex-col justify-center items-center p-4 game-panel rounded-2xl shadow-2xl min-h-[600px]">
+                <div id="center-game-panel">
+                    <div id="center-task-area">
+                         <div id="task-area" class="mb-4 p-4 themed-bg-secondary rounded-xl flex flex-col items-center gap-2">
+                            <div id="letter-slot-container" class="slot-container w-full">
+                                <div class="slot-reel"><div class="slot-item">HARF</div></div>
+                            </div>
+                            <div id="category-slot-container" class="slot-container w-full">
+                                <div class="slot-reel"><div class="slot-item">KATEGORİ</div></div>
+                            </div>
+                            <div id="countdown-wrapper">
+                                <div id="countdown" class="placeholder">SÜRE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="circular-player-container" class="w-full h-full"></div>
+                    <div id="turn-indicator"></div>
+                </div>
+                 <p id="status-text" class="text-lg themed-text-muted mt-4 h-8 flex items-center justify-center text-center"></p>
+                 <div id="word-input-area" class="hidden mt-4">
+                    <form id="word-form" class="flex justify-center space-x-2">
+                        <input type="text" id="wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
+                        <button type="submit" id="sendWordButton" class="game-button">Gönder</button>
+                    </form>
+                </div>
+                 <div id="host-decision-buttons" class="hidden space-x-4 h-14 mt-4">
+                     <button id="addWordYes" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👍 Evet, Ekle</button>
+                     <button id="addWordNo" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👎 Hayır</button>
+                </div>
+            </div>
+    
+            <div id="right-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col">
+                <h3 class="text-xl font-bold mb-1 text-center themed-title">🏆 Skor Tablosu</h3>
+                <div class="text-center themed-bg-secondary py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4 text-sm">
+                    <div>Hedef: <span id="score-goal-display" class="font-bold text-lg text-yellow-300">10</span></div>
+                    <div>Süre: <span id="turn-duration-display" class="font-bold text-lg text-yellow-300">5</span>sn</div>
+                </div>
+                <div id="scoreboard" class="space-y-2 mt-4 flex-grow"></div>
+                <div id="game-buttons" class="h-14 flex items-center justify-center space-x-4 mt-6">
+                    <button id="startButton" class="hidden game-button">BAŞLAT</button>
+                    <button id="newGameButton" class="hidden game-button">Yeni Oyun Başlat</button>
+                </div>
+                <div class="confirmation-popup hidden" id="reset-confirmation">
+                    <div class="popup-overlay"></div>
+                    <div class="popup-content">
+                        <h3>Sıfırlama Onayı</h3>
+                        <p>Tüm skorları sıfırlamak istediğinizden emin misiniz?</p>
+                        <div class="popup-buttons">
+                            <button id="confirm-reset" class="confirm-btn">Evet, Sıfırla</button>
+                            <button id="cancel-reset" class="cancel-btn">İptal</button>
+                        </div>
                     </div>
                 </div>
-                
-                <button id="resetScoreButton" class="hidden w-full mt-6 bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg transition">
-                    Skorları Sıfırla
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Tek Oyunculu Mod Arayüzü -->
     <div id="single-player-container" class="hidden w-full max-w-2xl flex flex-col text-center relative z-10">
-        <h1 class="game-title text-4xl md:text-6xl font-black text-center my-4">Tek Başına Oyna</h1>
-        <div class="p-8 bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-700/50">
-             <div id="sp-task-area" class="mb-6 p-4 bg-gray-900/50 rounded-xl">
-                 <div class="text-3xl"><span id="sp-letter" class="font-bold text-indigo-300">A</span> harfi ile başlayan <span id="sp-category" class="font-bold text-indigo-300">İsim</span></div>
-            </div>
-            <div id="sp-score" class="text-5xl font-bold mb-4">Puan: <span class="text-yellow-300">0</span></div>
-            <div id="sp-countdown" class="text-8xl font-mono font-bold my-6 text-white h-28"></div>
-            <p id="sp-status-text" class="text-lg text-gray-400 mb-6 h-8"></p>
-            <div id="sp-word-input-area" class="mt-4">
-                <form id="sp-word-form" class="flex justify-center space-x-2">
-                    <input type="text" id="sp-wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 bg-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition">Gönder</button>
-                </form>
-            </div>
-
-            <div id="sp-game-over" class="hidden">
-                 <h2 class="text-4xl font-bold text-red-500 mb-4">Oyun Bitti!</h2>
-                 <p class="text-2xl mb-6">Toplam Puanın: <span id="sp-final-score" class="font-bold text-yellow-300">0</span></p>
-                 <button id="sp-replay-button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl mr-2">Yeniden Oyna</button>
-                 <button id="sp-main-menu-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">Ana Menü</button>
-            </div>
-            
-            <!-- Single Player Used Words Section -->
-            <div id="sp-used-words-section" class="mt-6">
-                <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Kullanılan Kelimeler</h4>
-                <div id="sp-used-words-list" class="bg-gray-900/50 rounded-lg p-3 max-h-40 overflow-y-auto">
-                    <p class="text-gray-500 text-sm text-center" id="sp-no-words-text">Henüz kelime girilmedi</p>
-                </div>
-            </div>
-        </div>
+        <!-- TEK BAŞINA OYNA ÖZELLİĞİ KALDIRILDI -->
     </div>
     
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // Global function for Ana Menü button - accessible from anywhere
+
         window.goToMainMenu = function() {
-            console.log('goToMainMenu called globally');
-            
-            // Hide all game screens
             const gameContainer = document.getElementById('game-container');
             const singlePlayerContainer = document.getElementById('single-player-container');
             const statsScreen = document.getElementById('stats-screen');
             const initialScreen = document.getElementById('initial-screen');
             const authScreen = document.getElementById('auth-screen');
+            const homeBtn = document.getElementById('go-home');
             
             if (gameContainer) gameContainer.classList.add('hidden');
             if (singlePlayerContainer) singlePlayerContainer.classList.add('hidden');
             if (statsScreen) statsScreen.classList.add('hidden');
+            if (homeBtn) homeBtn.classList.remove('show');
             
-            // Show entry screen if no current user, otherwise show main menu
             if (window.currentUser) {
-                console.log('User found, showing main menu');
                 if (authScreen) authScreen.classList.add('hidden');
                 if (initialScreen) initialScreen.classList.remove('hidden');
             } else {
-                console.log('No user found, showing entry screen');
                 if (initialScreen) initialScreen.classList.add('hidden');
                 if (authScreen) authScreen.classList.remove('hidden');
             }
         };
+
+        // TEMA SİSTEMİ
+        let currentTheme = 'theme-void';
+        const themes = ['theme-void', 'theme-dark', 'theme-light'];
+        
+        function switchTheme(themeName) {
+            document.body.className = document.body.className.replace(/theme-\w+/g, '');
+            document.body.classList.add(themeName);
+            currentTheme = themeName;
+            localStorage.setItem('selectedTheme', themeName);
+        }
+        
+        function cycleTheme() {
+            const currentIndex = themes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % themes.length;
+            switchTheme(themes[nextIndex]);
+        }
+
+        // ANASAYFA BUTONU YÖNETİMİ
+        function showHomeButton() {
+            const homeBtn = document.getElementById('go-home');
+            if (homeBtn) homeBtn.classList.add('show');
+        }
+        
+        function hideHomeButton() {
+            const homeBtn = document.getElementById('go-home');
+            if (homeBtn) homeBtn.classList.remove('show');
+        }
         
         if (window.location.protocol === 'file:') {
             document.body.innerHTML = `<div class="bg-red-900 border border-red-700 text-white p-8 rounded-lg shadow-xl max-w-lg mx-auto"><h1 class="text-3xl font-bold mb-4">Hata: Yanlış Çalıştırma Yöntemi</h1><p class="mb-2 text-lg">Bu dosyayı doğrudan çift tıklayarak açtınız. Bu oyunun çalışması için bir sunucu üzerinden açılması gerekir.</p><p class="mt-4">Lütfen <strong>node server.js</strong> komutunu çalıştırdıktan sonra tarayıcınızın adres çubuğuna şunu yazın:</p><p class="text-2xl font-mono bg-gray-900 p-3 rounded my-4 text-center select-all">http://localhost:3000</p></div>`;
         } else {
-            // Element Tanımlamaları
             const authScreen = document.getElementById('auth-screen');
-            const simpleEntryForm = document.getElementById('simple-entry-form');
             const entryMessage = document.getElementById('entryMessage');
             const entryUsername = document.getElementById('entryUsername');
             const startGameButton = document.getElementById('startGameButton');
             const entryAvatar = document.getElementById('entry-avatar');
-            const entryChangeAvatar = document.getElementById('entry-change-avatar');
-            
             const initialScreen = document.getElementById('initial-screen');
             const gameContainer = document.getElementById('game-container');
             const singlePlayerContainer = document.getElementById('single-player-container');
             const createRoomButton = document.getElementById('createRoomButton');
             const showJoinFormButton = document.getElementById('showJoinFormButton');
             const showStatsButton = document.getElementById('showStatsButton');
-            const changeUserButton = document.getElementById('changeUserButton');
-            
-            // Global game state
+            const editUsernameBtn = document.getElementById('edit-username-btn');
             let currentPlayers = [];
-            let selectedEntryAvatar = 1; // Default avatar for entry
+            let selectedEntryAvatar = 1;
             const welcomeUsername = document.getElementById('welcomeUsername');
             const joinOptions = document.getElementById('join-options');
             const joinForm = document.getElementById('join-form');
             const roomInput = document.getElementById('roomInput');
             const joinRoomButton = document.getElementById('joinRoomButton');
             const backToOptionsButton = document.getElementById('backToOptionsButton');
-            const startSinglePlayerButton = document.getElementById('startSinglePlayerButton');
-            const lobbyScreen = document.getElementById('lobby-screen');
-            const roomLinkInput = document.getElementById('roomLinkInput');
-            const copyLinkButton = document.getElementById('copyLinkButton');
+            const roomLinkInputIngame = document.getElementById('roomLinkInput');
+            const copyLinkButtonIngame = document.getElementById('copyLinkButton');
             const inviteLinkInGame = document.getElementById('invite-link-ingame');
             const statusText = document.getElementById('status-text');
-            const playerSlotsDiv = document.getElementById('player-slots');
             const countdownEl = document.getElementById('countdown');
             const startButton = document.getElementById('startButton');
             const newGameButton = document.getElementById('newGameButton');
             const scoreboardDiv = document.getElementById('scoreboard');
             const resetScoreButton = document.getElementById('resetScoreButton');
+            const saveSettingsButton = document.getElementById('saveSettingsButton');
             const scoreGoalSelect = document.getElementById('scoreGoalSelect');
             const scoreGoalDisplay = document.getElementById('score-goal-display');
             const hostOptions = document.getElementById('host-options');
@@ -732,42 +977,25 @@
             const wordForm = document.getElementById('word-form');
             const turnDurationSelect = document.getElementById('turnDurationSelect');
             const turnDurationDisplay = document.getElementById('turn-duration-display');
-            const spTaskArea = document.getElementById('sp-task-area');
-            const spScoreEl = document.getElementById('sp-score').querySelector('span');
-            const spCountdownEl = document.getElementById('sp-countdown');
-            const spStatusText = document.getElementById('sp-status-text');
-            const spWordInputArea = document.getElementById('sp-word-input-area');
-            const spWordForm = document.getElementById('sp-word-form');
-            const spWordInput = document.getElementById('sp-wordInput');
-            const spGameOverScreen = document.getElementById('sp-game-over');
-            const spFinalScoreEl = document.getElementById('sp-final-score');
-            const spReplayButton = document.getElementById('sp-replay-button');
-            const spMainMenuButton = document.getElementById('sp-main-menu-button');
-            const lobbyMainMenuButton = document.getElementById('lobby-main-menu-button');
-            const spLetterEl = document.getElementById('sp-letter');
-            const spCategoryEl = document.getElementById('sp-category');
-            
-            // Used Words Elements
-            const usedWordsList = document.getElementById('used-words-list');
-            const noWordsText = document.getElementById('no-words-text');
-            const spUsedWordsList = document.getElementById('sp-used-words-list');
-            const spNoWordsText = document.getElementById('sp-no-words-text');
-            
-            // Statistics Elements
             const statsScreen = document.getElementById('stats-screen');
             const closeStatsButton = document.getElementById('closeStatsButton');
-
+            
+            // TEK BAŞINA OYNA ÖZELLİĞİ KALDIRILDI
+            // const spTaskArea = document.getElementById('sp-task-area');
+            // const spScoreEl = document.getElementById('sp-score').querySelector('span');
+            // ...diğer sp elementleri kaldırıldı
+            
             let synth = null;
             let myDetails = null;
             let currentHostId = null;
             let currentRoomId = null;
             let wordToAddInfo = null;
             let currentUser = null;
-            window.currentUser = null; // Make it globally accessible
+            let gameStarted = false;
+            window.currentUser = null;
             const socket = io();
             const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
             const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
-            
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             let recognition;
             if (SpeechRecognition) {
@@ -775,15 +1003,13 @@
                 recognition.lang = 'tr-TR';
                 recognition.continuous = false;
             }
-            
-            // Simple Entry Functions
             const showEntryMessage = (message, isError = false) => {
+                const entryMessage = document.getElementById('entryMessage');
                 entryMessage.textContent = message;
                 entryMessage.className = `mt-4 p-3 rounded-lg text-center text-sm ${isError ? 'bg-red-600 text-white' : 'bg-green-600 text-white'}`;
                 entryMessage.classList.remove('hidden');
                 setTimeout(() => entryMessage.classList.add('hidden'), 3000);
             };
-            
             const validateUsername = (username) => {
                 if (!username || username.length < 2) {
                     showEntryMessage('Kullanıcı adı en az 2 karakter olmalı!', true);
@@ -799,95 +1025,63 @@
                 }
                 return true;
             };
-            
             const showMainMenu = (user) => {
                 currentUser = user;
-                window.currentUser = user; // Update global reference
+                window.currentUser = user;
                 welcomeUsername.textContent = user.username;
-                
-                // Set user avatar in main menu
                 const userAvatar = document.getElementById('user-avatar');
                 if (userAvatar) {
                     const avatarData = getAvatarData(user.avatar || 1);
                     userAvatar.className = `avatar small ${avatarData.class}`;
                     userAvatar.textContent = avatarData.emoji;
                 }
-                
                 authScreen.classList.add('hidden');
                 initialScreen.classList.remove('hidden');
-                
-                // Ensure avatar system is working
+                hideHomeButton();
                 setupAvatarButton();
+                setupUsernameEdit();
             };
             
+            const setupUsernameEdit = () => {
+                if (editUsernameBtn) {
+                    editUsernameBtn.addEventListener('click', () => {
+                        const newUsername = prompt('Yeni kullanıcı adını girin:', currentUser.username);
+                        if (newUsername && newUsername.trim() && validateUsername(newUsername.trim())) {
+                            currentUser.username = newUsername.trim();
+                            window.currentUser = currentUser;
+                            welcomeUsername.textContent = currentUser.username;
+                            showEntryMessage(`İsim "${currentUser.username}" olarak değiştirildi!`, false);
+                        }
+                    });
+                }
+            };
             const setupAvatarButton = () => {
                 const chooseAvatarBtn = document.getElementById('choose-avatar-btn');
                 const avatarModal = document.getElementById('avatar-modal');
-                const avatarGrid = document.getElementById('avatar-grid');
-                const avatarConfirm = document.getElementById('avatar-confirm');
-                const avatarCancel = document.getElementById('avatar-cancel');
-                const userAvatar = document.getElementById('user-avatar');
-                
                 if (chooseAvatarBtn && avatarModal) {
-                    // Remove any existing event listeners by cloning the button
                     const newBtn = chooseAvatarBtn.cloneNode(true);
                     chooseAvatarBtn.parentNode.replaceChild(newBtn, chooseAvatarBtn);
-                    
-                    // Add the click event listener
                     newBtn.addEventListener('click', (e) => {
                         e.preventDefault();
                         avatarModal.classList.remove('hidden');
-                        
-                        // Initialize avatar grid if empty
+                        const avatarGrid = document.getElementById('avatar-grid');
                         if (avatarGrid && avatarGrid.children.length === 0) {
                             populateAvatarGrid();
                         }
                     });
-                    
-                    // Setup modal controls
-                    if (avatarCancel) {
-                        avatarCancel.addEventListener('click', () => {
-                            avatarModal.classList.add('hidden');
-                        });
-                    }
-                    
-                    if (avatarConfirm) {
-                        avatarConfirm.addEventListener('click', () => {
-                            const avatarData = getAvatarData(selectedAvatarId);
-                            if (userAvatar) {
-                                userAvatar.className = `avatar small ${avatarData.class}`;
-                                userAvatar.textContent = avatarData.emoji;
-                            }
-                            
-                            // Store user's avatar choice
-                            if (currentUser) {
-                                currentUser.avatar = selectedAvatarId;
-                                playerAvatars[currentUser.username] = selectedAvatarId;
-                                // Emit avatar change to server
-                                socket.emit('changeAvatar', { avatar: selectedAvatarId });
-                            }
-                            
-                            avatarModal.classList.add('hidden');
-                        });
-                    }
-                    
-                    // Close modal on background click
-                    avatarModal.addEventListener('click', (e) => {
-                        if (e.target === avatarModal) {
-                            avatarModal.classList.add('hidden');
-                        }
-                    });
-                    
                 }
             };
-            
             const populateAvatarGrid = () => {
                 const avatarGrid = document.getElementById('avatar-grid');
                 if (!avatarGrid) return;
+                avatarGrid.innerHTML = '';
                 
-                avatarGrid.innerHTML = ''; // Clear existing content
+                // Determine current avatar - from entry screen or current user
+                let currentAvatarId = selectedEntryAvatar;
+                if (window.currentUser && window.currentUser.avatar) {
+                    currentAvatarId = window.currentUser.avatar;
+                }
                 
-                // Populate avatar grid
                 for (let i = 1; i <= 16; i++) {
                     const avatarOption = document.createElement('div');
                     const avatarData = getAvatarData(i);
@@ -895,43 +1089,39 @@
                     avatarOption.textContent = avatarData.emoji;
                     avatarOption.dataset.avatarId = i;
                     
+                    // Pre-select current avatar
+                    if (i === currentAvatarId) {
+                        avatarOption.classList.add('selected');
+                        selectedAvatarId = i;
+                    }
+                    
                     avatarOption.addEventListener('click', () => {
                         document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
                         avatarOption.classList.add('selected');
                         selectedAvatarId = i;
                     });
-                    
                     avatarGrid.appendChild(avatarOption);
                 }
                 
-                // Set default selection
-                if (avatarGrid.children[0]) {
+                // Fallback if no avatar was pre-selected
+                if (!selectedAvatarId && avatarGrid.children[0]) {
                     avatarGrid.children[0].classList.add('selected');
+                    selectedAvatarId = 1;
                 }
             };
-            
             const returnToMainMenu = () => {
-                console.log('returnToMainMenu called');
-                console.log('currentUser:', currentUser);
-                
-                // Hide all game screens
                 gameContainer.classList.add('hidden');
                 singlePlayerContainer.classList.add('hidden');
                 statsScreen.classList.add('hidden');
-                
-                // Show main menu if user is authenticated
                 if (currentUser) {
-                    console.log('Showing main menu for user:', currentUser.username);
                     showMainMenu(currentUser);
                 } else {
-                    console.log('No current user, showing entry screen');
                     showEntryScreen();
                 }
             };
-            
             const showEntryScreen = () => {
                 currentUser = null;
-                window.currentUser = null; // Update global reference
+                window.currentUser = null;
                 initialScreen.classList.add('hidden');
                 gameContainer.classList.add('hidden');
                 singlePlayerContainer.classList.add('hidden');
@@ -941,75 +1131,43 @@
                 selectedEntryAvatar = 1;
                 updateEntryAvatar();
             };
-            
             const updateEntryAvatar = () => {
                 const avatarData = getAvatarData(selectedEntryAvatar);
                 entryAvatar.className = `avatar large ${avatarData.class} mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500`;
                 entryAvatar.textContent = avatarData.emoji;
             };
-            
-            // Entry Event Handlers
-            entryChangeAvatar.addEventListener('click', () => {
+            entryAvatar.addEventListener('click', () => {
                 const avatarModal = document.getElementById('avatar-modal');
                 const avatarGrid = document.getElementById('avatar-grid');
-                const avatarConfirm = document.getElementById('avatar-confirm');
-                const avatarCancel = document.getElementById('avatar-cancel');
-                
                 avatarModal.classList.remove('hidden');
-                
-                // Initialize avatar grid if empty
                 if (avatarGrid.children.length === 0) {
                     populateAvatarGrid();
                 }
-                
-                // Set current selection
                 document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
                 const currentOption = document.querySelector(`[data-avatar-id="${selectedEntryAvatar}"]`);
                 if (currentOption) {
                     currentOption.classList.add('selected');
                     selectedAvatarId = selectedEntryAvatar;
                 }
-                
-                // Override confirm button for entry screen
-                const newConfirm = avatarConfirm.cloneNode(true);
-                avatarConfirm.parentNode.replaceChild(newConfirm, avatarConfirm);
-                
-                newConfirm.addEventListener('click', () => {
-                    selectedEntryAvatar = selectedAvatarId;
-                    updateEntryAvatar();
-                    avatarModal.classList.add('hidden');
-                });
             });
-            
             startGameButton.addEventListener('click', () => {
                 const username = entryUsername.value.trim();
-                
-                if (!validateUsername(username)) {
-                    return;
+                if (!validateUsername(username)) return;
+                // Ensure selectedEntryAvatar is defined
+                if (!selectedEntryAvatar) selectedEntryAvatar = selectedAvatarId || 1;
+                currentUser = { username: username, avatar: selectedEntryAvatar };
+                // Update main menu avatar element immediately so it persists
+                const userAvatar = document.getElementById('user-avatar');
+                if (userAvatar) {
+                    const avatarData = getAvatarData(currentUser.avatar || 1);
+                    userAvatar.className = `avatar small ${avatarData.class}`;
+                    userAvatar.textContent = avatarData.emoji;
                 }
-                
-                // Create user object
-                currentUser = {
-                    username: username,
-                    avatar: selectedEntryAvatar
-                };
-                window.currentUser = currentUser; // Update global reference
-                
-                showMainMenu(currentUser);
-                showEntryMessage(`Hoş geldin ${username}!`, false);
-            });
-            
-            // Handle Enter key in username input
-            entryUsername.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    startGameButton.click();
-                }
-            });
-            
-            changeUserButton.addEventListener('click', () => {
-                showEntryScreen();
-            });
-            
+                 window.currentUser = currentUser;
+                 showMainMenu(currentUser);
+                 showEntryMessage(`Hoş geldin ${username}!`, false);
+             });
+            entryUsername.addEventListener('keypress', (e) => { if (e.key === 'Enter') startGameButton.click(); });
             showJoinFormButton.addEventListener('click', () => {
                 joinOptions.classList.add('hidden');
                 joinForm.classList.remove('hidden');
@@ -1018,83 +1176,109 @@
                 joinForm.classList.add('hidden');
                 joinOptions.classList.remove('hidden');
             });
-             const validateInputs = () => {
+            const validateInputs = () => {
                 if (!currentUser || !currentUser.username) {
                     showEntryMessage('Kullanıcı bilgisi bulunamadı. Lütfen ana menüye dönün.', true);
                     return false;
                 }
-                return { name: currentUser.username };
+                return { name: currentUser.username, avatar: currentUser.avatar };
             };
             createRoomButton.addEventListener('click', () => {
-                const { name } = validateInputs();
-                if (name) {
+                const userData = validateInputs();
+                if (userData) {
                     initializeAudio();
-                    socket.emit('createRoom', { name });
+                    socket.emit('createRoom', userData);
                 }
             });
             joinRoomButton.addEventListener('click', () => {
-                const { name } = validateInputs();
+                const userData = validateInputs();
                 const roomId = roomInput.value.trim().toUpperCase();
-                if (!roomId) {
-                    alert('Lütfen bir oda kodu girin.');
-                    return;
-                }
-                if (name) {
+                if (!roomId) return alert('Lütfen bir oda kodu girin.');
+                if (userData) {
                     initializeAudio();
-                    socket.emit('joinRoom', { name, roomId });
+                    socket.emit('joinRoom', { ...userData, roomId });
                 }
             });
 
-            startSinglePlayerButton.addEventListener('click', () => {
-                const { name } = validateInputs();
-                if(name) {
-                    initializeAudio();
-                    socket.emit('startSinglePlayer', { name });
-                }
-            });
-
-            spReplayButton.addEventListener('click', () => {
-                const { name } = validateInputs();
-                if (name) socket.emit('startSinglePlayer', { name });
-            });
-            spMainMenuButton.addEventListener('click', () => returnToMainMenu());
-            
-            copyLinkButton.addEventListener('click', () => {
-                roomLinkInput.select();
+            // TEK BAŞINA OYNA ÖZELLİĞİ KALDIRILDI
+            // startSinglePlayerButton.addEventListener('click', () => {
+            //     const userData = validateInputs();
+            //     if(userData) {
+            //         initializeAudio();
+            //         socket.emit('startSinglePlayer', userData);
+            //     }
+            // });
+            copyLinkButtonIngame.addEventListener('click', () => {
+                roomLinkInputIngame.select();
                 document.execCommand('copy');
-                copyLinkButton.textContent = 'Kopyalandı!';
-                setTimeout(() => { copyLinkButton.textContent = 'Kopyala'; }, 1500);
+                copyLinkButtonIngame.textContent = 'Kopyalandı!';
+                setTimeout(() => { copyLinkButtonIngame.textContent = 'Kopyala'; }, 1500);
             });
-             startButton.addEventListener('click', () => socket.emit('startDiceRoll'));
-             newGameButton.addEventListener('click', () => socket.emit('newGame'));
-             resetScoreButton.addEventListener('click', () => {
-                 if (confirm('Tüm skorları sıfırlamak istediğinizden emin misiniz?')) {
-                     socket.emit('resetScores');
-                 }
-             });
-             function sendSettingsUpdate() {
-                 if (myDetails && myDetails.id === currentHostId) {
+            startButton.addEventListener('click', () => {
+                gameStarted = true;
+                socket.emit('startDiceRoll');
+            });
+            newGameButton.addEventListener('click', () => {
+                gameStarted = false;
+                socket.emit('newGame');
+            });
+            resetScoreButton.addEventListener('click', () => showResetConfirmation());
+            saveSettingsButton.addEventListener('click', () => {
+                // Ayarları kaydet
+                const scoreGoal = scoreGoalSelect.value;
+                const turnDuration = turnDurationSelect.value;
+                socket.emit('updateSettings', { scoreGoal: parseInt(scoreGoal), turnDuration: parseInt(turnDuration) });
+                
+                // Başarı mesajı göster
+                saveSettingsButton.textContent = 'KAYDEDİLDİ ✓';
+                saveSettingsButton.style.backgroundColor = '#059669';
+                setTimeout(() => {
+                    saveSettingsButton.textContent = 'KAYDET';
+                    saveSettingsButton.style.backgroundColor = '#16a34a';
+                }, 2000);
+            });
+            
+            function showResetConfirmation() {
+                const popup = document.getElementById('reset-confirmation');
+                if (popup) {
+                    popup.classList.remove('hidden');
+                    
+                    document.getElementById('confirm-reset').onclick = () => {
+                        socket.emit('resetScores');
+                        popup.classList.add('hidden');
+                    };
+                    
+                    document.getElementById('cancel-reset').onclick = () => {
+                        popup.classList.add('hidden');
+                    };
+                    
+                    popup.querySelector('.popup-overlay').onclick = () => {
+                        popup.classList.add('hidden');
+                    };
+                }
+            }
+            function sendSettingsUpdate() {
+                if (myDetails && myDetails.id === currentHostId && !gameStarted) {
                     socket.emit('gameSettingsChanged', { 
                         scoreGoal: parseInt(scoreGoalSelect.value, 10),
                         turnDuration: parseInt(turnDurationSelect.value, 10)
                     });
                 }
-             }
-             scoreGoalSelect.addEventListener('change', sendSettingsUpdate);
-             turnDurationSelect.addEventListener('change', sendSettingsUpdate);
-             addWordYesButton.addEventListener('click', () => {
+            }
+            scoreGoalSelect.addEventListener('change', sendSettingsUpdate);
+            turnDurationSelect.addEventListener('change', sendSettingsUpdate);
+            addWordYesButton.addEventListener('click', () => {
                 if(wordToAddInfo) {
                     socket.emit('hostDecisionOnWord', { add: true, wordInfo: wordToAddInfo });
                     hostDecisionButtons.classList.add('hidden');
                 }
-             });
-             addWordNoButton.addEventListener('click', () => {
-                 if(wordToAddInfo) {
+            });
+            addWordNoButton.addEventListener('click', () => {
+                if(wordToAddInfo) {
                     socket.emit('hostDecisionOnWord', { add: false, wordInfo: wordToAddInfo });
                     hostDecisionButtons.classList.add('hidden');
                 }
-             });
-
+            });
             window.addEventListener('load', () => {
                 const params = new URLSearchParams(window.location.search);
                 const roomIdFromUrl = params.get('oda');
@@ -1103,138 +1287,120 @@
                     showJoinFormButton.click();
                 }
             });
-            
             function submitWord(word) {
                 if (word && word.trim()) {
-                    socket.emit('submitWord', word.trim());
+                   
+                                       socket.emit('submitWord', word.trim());
+
                     wordInput.value = '';
                     wordInputArea.classList.add('hidden');
                     if (recognition) recognition.stop();
                 }
             }
-
-            wordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                submitWord(wordInput.value);
-            });
-            
-            spWordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                submitWord(spWordInput.value);
-                spWordInput.value = '';
-            });
-
+            wordForm.addEventListener('submit', (e) => { e.preventDefault(); submitWord(wordInput.value); });
+            // SP FORM KALDIRILDI: spWordForm.addEventListener('submit', (e) => { e.preventDefault(); submitWord(spWordInput.value); spWordInput.value = ''; });
             if(recognition) {
                 recognition.onresult = (event) => submitWord(event.results[0][0].transcript);
                 recognition.onerror = (event) => console.error('Ses tanıma hatası:', event.error);
             }
-            
             socket.on('roomCreated', ({ roomId, playerDetails }) => {
                 myDetails = playerDetails;
                 currentRoomId = roomId;
+                gameStarted = false;
                 initialScreen.classList.add('hidden');
-                lobbyScreen.classList.remove('hidden');
+                document.getElementById('lobby-screen')?.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
-                
-                const link = `${window.location.origin}?oda=${roomId}`;
-                roomLinkInput.value = link;
-                inviteLinkInGame.innerHTML = lobbyScreen.innerHTML;
-                lobbyScreen.classList.add('hidden');
+                showHomeButton();
+                roomLinkInputIngame.value = `${window.location.origin}?oda=${roomId}`;
             });
             socket.on('joined', ({ playerDetails, roomId }) => {
                 myDetails = playerDetails;
                 currentRoomId = roomId;
+                gameStarted = false;
                 initialScreen.classList.add('hidden');
-                lobbyScreen.classList.add('hidden');
+                document.getElementById('lobby-screen')?.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
+                showHomeButton();
             });
             socket.on('lobbyUpdate', ({ players, gameHostId, settings }) => {
                 currentHostId = gameHostId;
-                currentPlayers = players; // Store current players
+                currentPlayers = players; 
                 updatePlayerSlots(players);
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated', 'active', 'correct'));
                 statusText.textContent = `${players.length} / 8 oyuncu bekleniyor...`;
-                countdownEl.textContent = '';
-                updateUsedWords([], false); // Clear used words when returning to lobby
-                
+                countdownEl.textContent = 'SÜRE';
+                countdownEl.classList.remove('placeholder');
+                countdownEl.classList.add('placeholder');
+                updateUsedWords([], false); 
+                const turnIndicator = document.getElementById('turn-indicator');
+                if(turnIndicator && players.length > 0) {
+                    // İlk oyuncuyu göster
+                    const firstPlayer = players[0];
+                    const firstSlot = document.getElementById(`player-slot-${firstPlayer.id}`);
+                    if (firstSlot) {
+                        const rect = firstSlot.getBoundingClientRect();
+                        const containerRect = document.getElementById('circular-player-container').getBoundingClientRect();
+                        const x = rect.left + rect.width/2 - containerRect.left;
+                        const y = rect.top + rect.height/2 - containerRect.top;
+                        const angle = Math.atan2(y - containerRect.height/2, x - containerRect.width/2) * (180 / Math.PI);
+                        turnIndicator.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+                        turnIndicator.classList.add('visible');
+                    }
+                } else if(turnIndicator) {
+                    turnIndicator.classList.remove('visible', 'winner');
+                }
                 scoreGoalDisplay.textContent = settings.scoreGoal;
                 scoreGoalSelect.value = settings.scoreGoal;
                 turnDurationDisplay.textContent = settings.turnDuration;
                 turnDurationSelect.value = settings.turnDuration;
-
                 const isHost = myDetails && myDetails.id === gameHostId;
-                
-                const linkDiv = document.querySelector('#invite-link-ingame');
-                if(linkDiv) linkDiv.classList.toggle('hidden', !isHost || players.length === 8);
-                if (isHost) {
-                    const linkInput = document.querySelector('#invite-link-ingame input');
-                    const copyButton = document.querySelector('#invite-link-ingame button');
-                    if(linkInput) linkInput.value = `${window.location.origin}?oda=${currentRoomId}`;
-                    if(copyButton) copyButton.onclick = () => {
-                        linkInput.select();
-                        document.execCommand('copy');
-                        copyButton.textContent = 'Kopyalandı!';
-                        setTimeout(() => { copyButton.textContent = 'Kopyala'; }, 1500);
-                    };
-                }
-
-                hostOptions.classList.toggle('hidden', !isHost);
-                startButton.classList.toggle('hidden', !(isHost && players.length >= 1));
+                inviteLinkInGame.classList.toggle('hidden', players.length === 8);
+                if (isHost) roomLinkInputIngame.value = `${window.location.origin}?oda=${currentRoomId}`;
+                hostOptions.classList.toggle('hidden', !isHost || gameStarted);
+                startButton.classList.toggle('hidden', !(isHost && players.length >= 1) || gameStarted);
                 newGameButton.classList.add('hidden');
                 hostDecisionButtons.classList.add('hidden');
                 resetScoreButton.classList.toggle('hidden', !isHost);
+                saveSettingsButton.classList.toggle('hidden', !isHost);
+                
+                // Eğer oyun bitmiş ve host ise, başlat butonunu göster
+                if (!gameStarted && isHost && players.length >= 1) {
+                    startButton.classList.remove('hidden');
+                }
             });
-
             function updateTaskDisplay(letter, category) {
                 const letterReel = letterSlotContainer.querySelector('.slot-reel');
                 const categoryReel = categorySlotContainer.querySelector('.slot-reel');
                 letterReel.style.transition = 'none';
                 categoryReel.style.transition = 'none';
-
                 const letterIndex = alphabet.indexOf(letter);
-                if (letterIndex > -1) {
-                    letterReel.style.top = `-${letterIndex * 80}px`;
-                }
-
+                if (letterIndex > -1) letterReel.style.top = `-${letterIndex * 60}px`;
                 const categoryIndex = categories.indexOf(category);
-                if (categoryIndex > -1) {
-                    categoryReel.style.top = `-${categoryIndex * 80}px`;
-                }
+                if (categoryIndex > -1) categoryReel.style.top = `-${categoryIndex * 60}px`;
             }
-            
             socket.on('scoreUpdate', ({ scores, isGameOver }) => updateScoreboard(scores, isGameOver, currentPlayers));
-            socket.on('usedWordsUpdate', ({ usedWords }) => {
-                updateUsedWords(usedWords, false);
-                updateUsedWords(usedWords, true); // Update both displays
-            });
-            socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex, letter, category }) => {
+            socket.on('usedWordsUpdate', ({ usedWords }) => { updateUsedWords(usedWords, false); updateUsedWords(usedWords, true); });
+            socket.on('diceRolling', ({ finalLetterIndex, finalCategoryIndex }) => {
+                const turnIndicator = document.getElementById('turn-indicator');
+                if(turnIndicator) turnIndicator.classList.remove('winner');
                 startButton.classList.add('hidden');
                 newGameButton.classList.add('hidden');
                 statusText.textContent = 'Zar atılıyor...';
-                populateReel(letterSlotContainer, alphabet);
-                populateReel(categorySlotContainer, categories);
-                spinReel(letterSlotContainer, alphabet, finalLetterIndex);
-                spinReel(categorySlotContainer, categories, finalCategoryIndex);
+                populateReel(letterSlotContainer, alphabet, 60);
+                populateReel(categorySlotContainer, categories, 60);
+                spinReel(letterSlotContainer, alphabet, finalLetterIndex, 60);
+                spinReel(categorySlotContainer, categories, finalCategoryIndex, 60);
             });
             socket.on('gameStart', () => {
                 statusText.textContent = '';
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('eliminated'));
-                updateUsedWords([], false); // Initialize empty used words for multiplayer
+                document.querySelectorAll('.player-slot-circle').forEach(s => s.classList.remove('eliminated'));
+                updateUsedWords([], false);
             });
             socket.on('playerEliminated', ({ loserId, loserName, reason, word }) => {
                  if (synth) synth.triggerAttackRelease("C3", "8n");
                  const playerSlot = document.querySelector(`#player-slot-${loserId}`);
-                 if(playerSlot) {
-                    playerSlot.classList.add('eliminated');
-                 }
-                 let statusMessage = `${loserName}, "${reason}" nedeniyle elendi.`;
-                 if (word) {
-                    statusMessage += ` (Söylenen: "${word}")`;
-                 }
-                 statusText.textContent = statusMessage;
-                 if (myDetails && myDetails.id === loserId) {
-                    wordInputArea.classList.add('hidden');
-                 }
+                 if(playerSlot) playerSlot.classList.add('eliminated');
+                 statusText.textContent = `${loserName}, "${reason}" nedeniyle elendi. ${word ? `(Söylenen: "${word}")` : ''}`;
+                 if (myDetails && myDetails.id === loserId) wordInputArea.classList.add('hidden');
             });
             socket.on('askHostAboutWord', (wordInfo) => {
                 wordToAddInfo = wordInfo;
@@ -1245,30 +1411,37 @@
             socket.on('turnUpdate', ({ player, timeLeft, activePlayersCount, letter, category }) => {
                 updateTaskDisplay(letter, category);
                 hostDecisionButtons.classList.add('hidden');
-                if (activePlayersCount >= 3 && synth) {
-                     synth.triggerAttackRelease("G4", "16n");
-                }
-                
+                if (activePlayersCount >= 3 && synth) synth.triggerAttackRelease("G4", "16n");
                 statusText.textContent = '';
                 countdownEl.textContent = timeLeft;
                 countdownEl.classList.remove('animate-pulse-white-to-red');
-                
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.player-slot-circle').forEach(s => s.classList.remove('active'));
                 const activeSlot = document.querySelector(`#player-slot-${player.id}`);
                 if(activeSlot) activeSlot.classList.add('active');
-
+                const turnIndicator = document.getElementById('turn-indicator');
+                if (activeSlot && turnIndicator) {
+                    const sortedPlayers = [...currentPlayers].sort((a, b) => a.playerNumber - b.playerNumber);
+                    const playerIndex = sortedPlayers.findIndex(p => p.id === player.id);
+                    const numPlayers = sortedPlayers.length;
+                    if(playerIndex !== -1) {
+                        let angle;
+                        if (numPlayers === 1) { angle = -90; } 
+                        else if (numPlayers === 2) { angle = (playerIndex === 0) ? 180 : 0; }
+                        else if (numPlayers === 3) { angle = -90 + (playerIndex * 120); }
+                        else { angle = -90 + (playerIndex * (360 / numPlayers)); }
+                        turnIndicator.style.transform = `rotate(${angle}deg)`;
+                        turnIndicator.classList.add('visible');
+                    }
+                } else if (turnIndicator) {
+                    turnIndicator.classList.remove('visible');
+                }
                 const isMyTurn = myDetails && myDetails.id === player.id;
                 wordInputArea.classList.toggle('hidden', !isMyTurn);
-
                 if (isMyTurn) {
                     wordInput.focus();
                     if (recognition) {
-                        try { 
-                            recognition.start(); 
-                        } catch(e) { 
-                            console.error("Ses tanıma başlatılamadı!", e);
-                            statusText.textContent = "Mikrofon kullanılamıyor, yazarak cevap verin.";
-                        }
+                        try { recognition.start(); } 
+                        catch(e) { console.error("Ses tanıma başlatılamadı!", e); }
                     }
                 } else {
                      if (recognition) recognition.stop();
@@ -1276,21 +1449,42 @@
             });
             socket.on('countdown', (timeLeft) => {
                 countdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
-                if (timeLeft === 0) {
-                    countdownEl.classList.add('animate-pulse-white-to-red');
-                }
+                if (timeLeft === 0) countdownEl.classList.add('animate-pulse-white-to-red');
             });
-            socket.on('wordAccepted', ({ playerNumber, word }) => {
+            socket.on('wordAccepted', ({ playerId }) => {
                 if (synth) synth.triggerAttackRelease("C5", "8n");
-                const correctSlot = document.querySelector(`.player-slot:nth-child(${playerNumber})`);
+                const correctSlot = document.querySelector(`#player-slot-${playerId}`);
                 if (correctSlot) {
-                    correctSlot.classList.add('correct');
-                    setTimeout(() => correctSlot.classList.remove('correct'), 600);
+                    correctSlot.classList.add('round-winner');
+                    setTimeout(() => correctSlot.classList.remove('round-winner'), 1500);
                 }
             });
             socket.on('roundOver', ({ reason, winner }) => {
                 wordInputArea.classList.add('hidden');
                 hostDecisionButtons.classList.add('hidden');
+                const turnIndicator = document.getElementById('turn-indicator');
+                if (turnIndicator) {
+                    turnIndicator.classList.remove('visible', 'winner');
+                    if (winner) {
+                        const winnerPlayer = currentPlayers.find(p => p.name === winner);
+                        if(winnerPlayer) {
+                             const sortedPlayers = [...currentPlayers].sort((a, b) => a.playerNumber - b.playerNumber);
+                             const playerIndex = sortedPlayers.findIndex(p => p.id === winnerPlayer.id);
+                             const numPlayers = sortedPlayers.length;
+                             if(playerIndex !== -1) {
+                                let angle;
+                                if (numPlayers === 1) { angle = -90; } 
+                                else if (numPlayers === 2) { angle = (playerIndex === 0) ? 180 : 0; }
+                                else if (numPlayers === 3) { angle = -90 + (playerIndex * 120); }
+                                else { angle = -90 + (playerIndex * (360 / numPlayers)); }
+                                turnIndicator.style.transform = `rotate(${angle}deg)`;
+                                turnIndicator.classList.add('visible', 'winner');
+                                const winnerSlot = document.querySelector(`#player-slot-${winnerPlayer.id}`);
+                                if (winnerSlot) winnerSlot.classList.add('round-winner');
+                             }
+                        }
+                    }
+                }
                 if (winner && synth) {
                     const now = Tone.now();
                     synth.triggerAttackRelease("C5", "16n", now);
@@ -1302,128 +1496,159 @@
                 if (recognition) recognition.stop();
                 statusText.textContent = winner ? `${reason} | Turun galibi: ${winner}` : reason;
                 countdownEl.textContent = '';
-                document.querySelectorAll('.player-slot').forEach(s => s.classList.remove('active', 'eliminated'));
+                document.querySelectorAll('.player-slot-circle').forEach(s => s.classList.remove('active', 'eliminated'));
                 const isHost = myDetails && myDetails.id === currentHostId;
+                gameStarted = false; // Oyun durumunu sıfırla
                 startButton.classList.toggle('hidden', !isHost);
+                newGameButton.classList.add('hidden'); // Yeni oyun butonunu gizle
             });
             socket.on('finalWinner', ({winner, scores}) => {
                 wordInputArea.classList.add('hidden');
                 if (recognition) recognition.stop();
                 updateScoreboard(scores, true, currentPlayers);
                 countdownEl.textContent = '';
-                statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black">${winner}</span> 🏆</div>`;
+                statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black p-2 rounded-md">${winner}</span> 🏆</div>`;
                 const isHost = myDetails && myDetails.id === currentHostId;
                 newGameButton.classList.toggle('hidden', !isHost);
                 startButton.classList.add('hidden');
                 hostDecisionButtons.classList.add('hidden');
+                gameStarted = false;
             });
-            
+
+            // TEK BAŞINA OYNA EVENT'LERİ KALDIRILDI
+            /*
             socket.on('singlePlayerStarted', () => {
                 initialScreen.classList.add('hidden');
                 gameContainer.classList.add('hidden');
                 singlePlayerContainer.classList.remove('hidden');
+                showHomeButton();
                 spGameOverScreen.classList.add('hidden');
                 spWordInputArea.classList.remove('hidden');
                 spTaskArea.classList.remove('hidden');
-                updateUsedWords([], true); // Initialize empty used words for single player
+                updateUsedWords([], true);
             });
-
-            socket.on('singlePlayerTurnUpdate', ({ letter, category, score, timeLeft }) => {
-                spLetterEl.textContent = letter;
-                spCategoryEl.textContent = category;
-                spScoreEl.textContent = score;
-                spCountdownEl.textContent = timeLeft;
-                spCountdownEl.classList.remove('animate-pulse-white-to-red');
-                spWordInput.focus();
-            });
-
-            socket.on('singlePlayerCountdown', (timeLeft) => {
-                spCountdownEl.textContent = timeLeft >= 0 ? timeLeft : 0;
-                if (timeLeft === 0) {
-                    spCountdownEl.classList.add('animate-pulse-white-to-red');
-                }
-            });
-
-            socket.on('singlePlayerGameOver', ({ score }) => {
-                spWordInputArea.classList.add('hidden');
-                spGameOverScreen.classList.remove('hidden');
-                spFinalScoreEl.textContent = score;
-                spTaskArea.classList.add('hidden');
-                spCountdownEl.textContent = '';
-            });
-
+            */
             socket.on('gameError', (message) => alert(message));
             socket.on('dbUpdateSuccess', (message) => {
                 statusText.textContent = message;
-                setTimeout(() => statusText.textContent = 'Oyun devam ediyor...', 2000);
+                setTimeout(() => statusText.textContent = '', 2000);
             });
             socket.on('dbUpdateError', (message) => alert(message));
-
             function initializeAudio() {
                 if(synth) return;
-                if (Tone.context.state !== 'running') {
-                    Tone.context.resume();
-                }
+                if (Tone.context.state !== 'running') Tone.context.resume();
                 synth = new Tone.Synth().toDestination();
             }
-            function populateReel(reelContainer, items, clones = 5) {
+            function populateReel(reelContainer, items, itemHeight) {
                 const reel = reelContainer.querySelector('.slot-reel');
                 reel.innerHTML = '';
                 const itemContainer = document.createElement('div');
-                for (let i = 0; i < clones; i++) {
+                for (let i = 0; i < 5; i++) {
                     items.forEach(item => {
                         const div = document.createElement('div');
                         div.className = `slot-item`;
+                        div.style.height = `${itemHeight}px`;
                         div.textContent = item;
                         itemContainer.appendChild(div);
                     });
                 }
                 reel.appendChild(itemContainer);
             }
-            function spinReel(reelContainer, items, finalIndex) {
+            function spinReel(reelContainer, items, finalIndex, itemHeight) {
                 const reel = reelContainer.querySelector('.slot-reel');
-                const itemHeight = 80;
                 const singleSetHeight = items.length * itemHeight;
                 reel.style.transition = 'none';
                 reel.style.top = `0px`;
                 reel.offsetHeight;
-                const spinCount = 4;
-                const finalPosition = (spinCount * singleSetHeight) + (finalIndex * itemHeight);
+                const finalPosition = (4 * singleSetHeight) + (finalIndex * itemHeight);
                 reel.style.transition = 'top 2.5s cubic-bezier(0.25, 1, 0.5, 1)';
                 reel.style.top = `-${finalPosition}px`;
             }
             function updatePlayerSlots(players = []) {
-                if (!playerSlotsDiv) return;
-                
-                playerSlotsDiv.innerHTML = '';
-                for (let i = 1; i <= 8; i++) {
-                    const player = players.find(p => p.playerNumber === i);
+                const container = document.getElementById('circular-player-container');
+                if (!container) return;
+                container.innerHTML = ''; 
+                const numPlayers = players.length;
+                const slotsToRender = numPlayers > 0 ? players : Array(8).fill(null);
+                slotsToRender.sort((a, b) => {
+                    if (a && b) return a.playerNumber - b.playerNumber;
+                    if (a) return -1;
+                    if (b) return 1;
+                    return 0;
+                });
+                slotsToRender.forEach((player, index) => {
                     const slot = document.createElement('div');
-                    slot.className = 'player-slot p-4 rounded-lg flex flex-col justify-center items-center';
+                    const floatDelay = `-${(Math.random() * 5).toFixed(2)}s`;
+
                     if (player) {
+                        slot.className = 'player-slot-circle';
                         slot.id = `player-slot-${player.id}`;
+                        slot.setAttribute('data-avatar', player.avatar || 1);
                         const avatarData = getAvatarData(player.avatar || 1);
                         slot.innerHTML = `
-                            <div class="avatar small ${avatarData.class}" style="margin-bottom: 8px;">
-                                ${avatarData.emoji}
-                            </div>
-                            <div class="font-bold text-xl">${player.name}</div>
-                            <div class="text-sm text-gray-400">Oyuncu ${i}</div>
+                           <div class="bubble-content animate-float" style="animation-delay: ${floatDelay};">
+                                <div class="avatar small ${avatarData.class}">
+                                    ${avatarData.emoji}
+                                </div>
+                                <div class="font-bold text-sm text-center break-all">${player.name}</div>
+                           </div>
                         `;
+                        slot.addEventListener('mouseenter', () => {
+                            slot.classList.add('is-hovering');
+                            const bubbleContent = slot.querySelector('.bubble-content');
+                            if (bubbleContent) bubbleContent.classList.remove('animate-float');
+                        });
+                        slot.addEventListener('mouseleave', () => {
+                           slot.classList.remove('is-hovering');
+                           slot.style.setProperty('--push-x', '0px');
+                           slot.style.setProperty('--push-y', '0px');
+                           const bubbleContent = slot.querySelector('.bubble-content');
+                           if (bubbleContent) {
+                               setTimeout(() => bubbleContent.classList.add('animate-float'), 100);
+                           }
+                        });
+                        slot.addEventListener('mousemove', (e) => {
+                            const rect = slot.getBoundingClientRect();
+                            const centerX = rect.left + rect.width / 2;
+                            const centerY = rect.top + rect.height / 2;
+                            const deltaX = e.clientX - centerX;
+                            const deltaY = e.clientY - centerY;
+                            const distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+                            if (distance === 0) return;
+                            const maxPush = 12;
+                            const pushX = (-deltaX / distance) * maxPush;
+                            const pushY = (-deltaY / distance) * maxPush;
+                            slot.style.setProperty('--push-x', `${pushX}px`);
+                            slot.style.setProperty('--push-y', `${pushY}px`);
+                        });
                     } else {
-                        slot.innerHTML = `
-                            <div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center mb-2">
-                                <span class="text-gray-400">?</span>
-                            </div>
-                            <div class="text-gray-500">Boş Slot</div>
-                        `;
+                        slot.className = 'player-slot-circle';
+                        slot.setAttribute('data-avatar', '0'); // Boş slot için default
+                        slot.innerHTML = `<div class="bubble-content"><div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center mb-1 opacity-50"><span class="text-gray-400">?</span></div><div class="text-gray-500 text-sm">Boş</div></div>`;
+                        slot.style.zIndex = -1;
                     }
-                    playerSlotsDiv.appendChild(slot);
-                }
+                    positionElement(slot, index, numPlayers > 0 ? numPlayers : 8, 42, !!player);
+                    container.appendChild(slot);
+                });
             }
-             function updateScoreboard(scores = {}, isGameOver = false, players = []) {
+            function positionElement(element, index, total, radiusPercent, isPlayer) {
+                let angle;
+                if (!isPlayer && total > 0) {
+                     angle = -90 + (index * (360 / total));
+                } else {
+                    if (total === 1) { angle = -90; } 
+                    else if (total === 2) { angle = (index === 0) ? 180 : 0; }
+                    else if (total === 3) { angle = -90 + (index * 120); }
+                    else { angle = -90 + (index * (360 / total)); }
+                }
+                const angleRad = angle * (Math.PI / 180);
+                const x = 50 + (radiusPercent * 0.8) * Math.cos(angleRad); // Radius'u %80'e düşür
+                const y = 50 + (radiusPercent * 0.8) * Math.sin(angleRad);
+                element.style.left = `${x}%`;
+                element.style.top = `${y}%`;
+            }
+            function updateScoreboard(scores = {}, isGameOver = false, players = []) {
                 if (!scoreboardDiv) return;
-                
                 scoreboardDiv.innerHTML = '';
                 const sortedScores = Object.entries(scores).sort(([,a],[,b]) => b-a);
                 if (sortedScores.length === 0) {
@@ -1437,55 +1662,32 @@
                             else if (rank === 2) rankClass = 'silver';
                             else if (rank === 3) rankClass = 'bronze';
                         }
-                        
-                        // Find player's avatar with null safety
                         const player = players.find(p => p && p.name === name);
-                        const avatarId = player?.avatar || playerAvatars[name] || 1;
+                        const avatarId = player?.avatar || 1;
                         const avatarData = getAvatarData(avatarId);
-                        
                         const scoreEntry = document.createElement('div');
                         scoreEntry.className = `flex justify-between items-center p-2 rounded-md border-2 border-transparent bg-gray-700 ${rankClass}`;
-                        scoreEntry.innerHTML = `
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-lg w-6 text-center">${rank}.</span>
-                                <div class="avatar small ${avatarData.class}" style="margin-bottom: 0; width: 30px; height: 30px; font-size: 14px;">
-                                    ${avatarData.emoji}
-                                </div>
-                                <span class="font-semibold">${name || 'Bilinmeyen Oyuncu'}</span>
-                            </div>
-                            <span class="font-bold text-xl">${score}</span>
-                        `;
+                        scoreEntry.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-lg w-6 text-center">${rank}.</span><div class="avatar small ${avatarData.class}" style="margin-bottom: 0; width: 30px; height: 30px; font-size: 14px;">${avatarData.emoji}</div><span class="font-semibold">${name || 'Bilinmeyen'}</span></div><span class="font-bold text-xl">${score}</span>`;
                         scoreboardDiv.appendChild(scoreEntry);
                     });
                 }
             }
-            
             function updateUsedWords(usedWords = [], isSinglePlayer = false) {
-                const wordsList = isSinglePlayer ? spUsedWordsList : usedWordsList;
-                const noWords = isSinglePlayer ? spNoWordsText : noWordsText;
-                
+                const wordsList = isSinglePlayer ? document.getElementById('sp-used-words-list') : document.getElementById('used-words-list');
+                if (!wordsList) return;
                 if (usedWords.length === 0) {
-                    noWords.style.display = 'block';
-                    wordsList.innerHTML = '<p class="text-gray-500 text-sm text-center">Henüz kelime girilmedi</p>';
+                    wordsList.innerHTML = `<p class="text-gray-500 text-sm text-center">Henüz kelime girilmedi</p>`;
                 } else {
-                    noWords.style.display = 'none';
                     wordsList.innerHTML = '';
-                    
                     usedWords.forEach((word, index) => {
                         const wordElement = document.createElement('div');
                         wordElement.className = 'flex justify-between items-center py-1 px-2 mb-1 bg-gray-800 rounded text-sm';
-                        wordElement.innerHTML = `
-                            <span class="text-white font-medium">${word}</span>
-                            <span class="text-green-400 text-xs">#${index + 1}</span>
-                        `;
+                        wordElement.innerHTML = `<span class="text-white font-medium">${word}</span><span class="text-green-400 text-xs">#${index + 1}</span>`;
                         wordsList.appendChild(wordElement);
                     });
-                    
-                    // Auto scroll to bottom to show latest word
                     wordsList.scrollTop = wordsList.scrollHeight;
                 }
             }
-            
             function updatePlayerStatsDisplay(stats) {
                 document.getElementById('stat-games-played').textContent = stats.gamesPlayed;
                 document.getElementById('stat-games-won').textContent = stats.gamesWon;
@@ -1493,11 +1695,12 @@
                 document.getElementById('stat-longest-streak').textContent = stats.longestWinStreak;
                 document.getElementById('stat-current-streak').textContent = stats.currentWinStreak;
                 document.getElementById('stat-total-words').textContent = stats.totalCorrectWords;
-                document.getElementById('stat-avg-time').textContent = stats.avgResponseTime;
+                document.getElementById('stat-avg-time').textContent = stats.avgResponseTime.toFixed(2);
                 document.getElementById('stat-fav-category').textContent = stats.favoriteCategory;
-                document.getElementById('stat-last-played').textContent = stats.lastPlayed;
                 
-                // Update most used words
+                const lastPlayed = new Date(stats.lastPlayed);
+                document.getElementById('stat-last-played').textContent = lastPlayed.toLocaleDateString('tr-TR');
+                
                 const mostUsedContainer = document.getElementById('most-used-words');
                 if (stats.mostUsedWords.length === 0) {
                     mostUsedContainer.innerHTML = '<p class="text-gray-500 col-span-full text-center">Henüz kelime verisi yok</p>';
@@ -1505,180 +1708,115 @@
                     mostUsedContainer.innerHTML = '';
                     stats.mostUsedWords.forEach(({ word, count }) => {
                         const wordElement = document.createElement('div');
-                        wordElement.className = 'bg-gray-800 p-3 rounded-lg text-center';
-                        wordElement.innerHTML = `
-                            <div class="font-bold text-white">${word}</div>
-                            <div class="text-sm text-gray-400">${count} kez</div>
-                        `;
+                        wordElement.className = 'themed-bg-secondary p-3 rounded-lg text-center';
+                        wordElement.innerHTML = `<div class="font-bold themed-text">${word}</div><div class="text-sm themed-text-muted">${count} kez</div>`;
                         mostUsedContainer.appendChild(wordElement);
                     });
                 }
             }
-            closeStatsButton.addEventListener('click', () => {
-                statsScreen.classList.add('hidden');
-                initialScreen.classList.remove('hidden');
+            closeStatsButton.addEventListener('click', () => { 
+                statsScreen.classList.add('hidden'); 
+                initialScreen.classList.remove('hidden'); 
+                hideHomeButton();
             });
-            
-            // Statistics Event Handlers
             showStatsButton.addEventListener('click', () => {
-                if (!currentUser) {
-                    showEntryMessage('İstatistikleri görmek için oyuna giriş yapın!', true);
-                    return;
-                }
+                if (!currentUser) return showEntryMessage('İstatistikleri görmek için oyuna giriş yapın!', true);
                 socket.emit('requestPlayerStats', { playerName: currentUser.username });
                 initialScreen.classList.add('hidden');
                 statsScreen.classList.remove('hidden');
+                showHomeButton();
             });
-            
-            socket.on('playerStatsUpdate', ({ playerName, stats }) => {
-                updatePlayerStatsDisplay(stats);
-            });
-            
-            // Initialize on page load
-            window.addEventListener('load', () => {
-                showEntryScreen();
-            });
+            socket.on('playerStatsUpdate', ({ stats }) => updatePlayerStatsDisplay(stats));
+            window.addEventListener('load', showEntryScreen);
         }
-
-        // Animated Background Control
-        function changeBackground(type, event) {
-            const backgroundElement = document.getElementById('animated-background');
-            const buttons = document.querySelectorAll('.bg-btn');
-            
-            // Remove active class from all buttons
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            // Add active class to clicked button (only if event exists)
-            if (event && event.target) {
-                event.target.classList.add('active');
-            } else {
-                // If no event, find the button for this type and make it active
-                const activeButton = document.querySelector(`.bg-btn[onclick*="${type}"]`);
-                if (activeButton) {
-                    activeButton.classList.add('active');
-                }
-            }
-            
-            // Remove all background classes
-            if (backgroundElement) {
-                backgroundElement.className = 'animated-bg';
-            }
-            
-            // Add new background class
-            switch(type) {
-                case 'particles':
-                    backgroundElement.classList.add('bg-particles');
-                    break;
-                case 'waves':
-                    backgroundElement.classList.add('bg-waves');
-                    break;
-                case 'geometric':
-                    backgroundElement.classList.add('bg-geometric');
-                    break;
-                case 'neon':
-                    backgroundElement.classList.add('bg-neon');
-                    break;
-                case 'bokeh':
-                    backgroundElement.classList.add('bg-bokeh');
-                    break;
-                default:
-                    backgroundElement.classList.add('bg-particles');
-            }
-        }
-
-        // Initialize background on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default background
-            changeBackground('particles');
-            
-            // Initialize avatar system
-            initializeAvatarSystem();
-        });
-
-        // Avatar System Functions
+        
         const avatarEmojis = ['🎮', '🚀', '⭐', '🌟', '🎯', '🎲', '🏆', '💎', '🔥', '⚡', '🎪', '🎭', '🎨', '🎵', '🌈', '💫'];
         let selectedAvatarId = 1;
-        let playerAvatars = {}; // Store player avatars
-        let avatarSystemInitialized = false; // Flag to prevent multiple initializations
+        let avatarSystemInitialized = false;
         
         function getAvatarData(avatarId) {
-            return {
-                emoji: avatarEmojis[avatarId - 1] || '🎮',
-                class: `avatar-${avatarId}`
-            };
+            return { emoji: avatarEmojis[avatarId - 1] || '🎮', class: `avatar-${avatarId}` };
         }
-        
         function initializeAvatarSystem() {
-            if (avatarSystemInitialized) return; // Prevent multiple initializations
-            
-            const avatarGrid = document.getElementById('avatar-grid');
+            if (avatarSystemInitialized) return; 
             const avatarModal = document.getElementById('avatar-modal');
             const chooseAvatarBtn = document.getElementById('choose-avatar-btn');
             const avatarConfirm = document.getElementById('avatar-confirm');
             const avatarCancel = document.getElementById('avatar-cancel');
             const userAvatar = document.getElementById('user-avatar');
-            
-            // Check if all elements exist
-            if (!avatarGrid || !avatarModal || !chooseAvatarBtn || !avatarConfirm || !avatarCancel || !userAvatar) {
-                return;
-            }
-            
+            if (!avatarModal || !chooseAvatarBtn || !avatarConfirm || !avatarCancel || !userAvatar) return;
             avatarSystemInitialized = true;
-            
-            // Populate avatar grid
-            for (let i = 1; i <= 16; i++) {
-                const avatarOption = document.createElement('div');
-                const avatarData = getAvatarData(i);
-                avatarOption.className = `avatar avatar-option ${avatarData.class}`;
-                avatarOption.textContent = avatarData.emoji;
-                avatarOption.dataset.avatarId = i;
-                
-                avatarOption.addEventListener('click', () => {
-                    document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-                    avatarOption.classList.add('selected');
-                    selectedAvatarId = i;
-                });
-                
-                avatarGrid.appendChild(avatarOption);
-            }
-            
-            // Set default selection
-            avatarGrid.children[0].classList.add('selected');
-            
-            // Event listeners
-            chooseAvatarBtn.addEventListener('click', (e) => {
-                console.log('Avatar button clicked!');
-                e.preventDefault();
-                avatarModal.classList.remove('hidden');
-            });
-            
-            avatarCancel.addEventListener('click', () => {
-                avatarModal.classList.add('hidden');
-            });
-            
+            chooseAvatarBtn.addEventListener('click', (e) => { e.preventDefault(); avatarModal.classList.remove('hidden'); });
+            avatarCancel.addEventListener('click', () => avatarModal.classList.add('hidden'));
             avatarConfirm.addEventListener('click', () => {
                 const avatarData = getAvatarData(selectedAvatarId);
-                userAvatar.className = `avatar small ${avatarData.class}`;
-                userAvatar.textContent = avatarData.emoji;
+                const entryAvatarEl = document.getElementById('entry-avatar');
+                const authScreenEl = document.getElementById('auth-screen');
+                const avatarModal = document.getElementById('avatar-modal');
                 
-                // Store user's avatar choice
-                if (currentUser) {
-                    playerAvatars[currentUser.username] = selectedAvatarId;
-                    // Emit avatar change to server
-                    socket.emit('changeAvatar', { avatar: selectedAvatarId });
+                // If auth screen is visible, update entry-avatar selection
+                if (authScreenEl && !authScreenEl.classList.contains('hidden') && entryAvatarEl) {
+                    selectedEntryAvatar = selectedAvatarId;
+                    entryAvatarEl.className = `avatar large ${avatarData.class} mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500`;
+                    entryAvatarEl.textContent = avatarData.emoji;
+                } else if (userAvatar) {
+                    // Otherwise update the user-avatar in the main menu and notify server
+                    userAvatar.className = `avatar small ${avatarData.class}`;
+                    userAvatar.textContent = avatarData.emoji;
+                    if (window.currentUser) {
+                        window.currentUser.avatar = selectedAvatarId;
+                        socket.emit('changeAvatar', { avatar: selectedAvatarId });
+                    }
                 }
-                
                 avatarModal.classList.add('hidden');
             });
+            avatarModal.addEventListener('click', (e) => { if (e.target === avatarModal) avatarModal.classList.add('hidden'); });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAvatarSystem();
+            const fixedControls = document.getElementById('bg-controls-fixed');
+            if (fixedControls) fixedControls.classList.remove('hidden');
             
-            // Close modal on background click
-            avatarModal.addEventListener('click', (e) => {
-                if (e.target === avatarModal) {
-                    avatarModal.classList.add('hidden');
-                }
-            });
+            const toggleHowtoBtn = document.getElementById('toggle-howto');
+            const howtoPanel = document.getElementById('howto-panel');
+            const closeHowto = document.getElementById('close-howto');
+            if (toggleHowtoBtn && howtoPanel) {
+                toggleHowtoBtn.addEventListener('click', () => {
+                    const isHidden = howtoPanel.classList.contains('hidden');
+                    howtoPanel.classList.toggle('hidden', !isHidden);
+                });
+            }
+            if (closeHowto && howtoPanel) closeHowto.addEventListener('click', () => howtoPanel.classList.add('hidden'));
+            
+            // Tema sistemi başlatma
+            const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+            changeTheme(savedTheme);
+        });
+
+        function changeTheme(theme) {
+            const body = document.body;
+            const themeBtns = document.querySelectorAll('.theme-btn');
+            
+            // Remove all theme classes
+            body.classList.remove('theme-void', 'theme-dark', 'theme-light');
+            
+            // Add new theme class
+            body.classList.add(`theme-${theme}`);
+            
+            // Update active button
+            themeBtns.forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.querySelector(`.theme-btn-${theme}`);
+            if (targetBtn) targetBtn.classList.add('active');
+            
+            // Update animated background
+            const animatedBg = document.getElementById('animated-background');
+            if (animatedBg) {
+                animatedBg.className = 'animated-bg';
+            }
+            
+            localStorage.setItem('selectedTheme', theme);
         }
     </script>
 </body>
 </html>
-

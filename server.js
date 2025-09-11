@@ -108,7 +108,6 @@ const createInitialGameState = () => ({
     turnResolved: false,
     usedLettersThisGame: [],
     turnStartTime: null,
-    isSinglePlayer: false,
 });
 
 const normalizeWord = (word) => {
@@ -124,7 +123,7 @@ io.on('connection', (socket) => {
         return Array.from(socket.rooms).find(r => r !== socket.id);
     };
     
-    socket.on('createRoom', ({ name }) => {
+    socket.on('createRoom', ({ name, avatar }) => {
         let roomId;
         do {
             roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -135,7 +134,7 @@ io.on('connection', (socket) => {
         rooms[roomId] = createInitialGameState();
         const gameState = rooms[roomId];
 
-        const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: 1 };
+        const newPlayer = { id: socket.id, name: name, playerNumber: 1, avatar: avatar || 1 };
         gameState.hostId = socket.id;
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -145,7 +144,7 @@ io.on('connection', (socket) => {
         broadcastScoreUpdate(roomId);
     });
 
-    socket.on('joinRoom', ({ name, roomId }) => {
+    socket.on('joinRoom', ({ name, roomId, avatar }) => {
         const room = rooms[roomId];
         if (!room) {
             return socket.emit('gameError', 'Oda bulunamadı.');
@@ -161,7 +160,7 @@ io.on('connection', (socket) => {
         const gameState = room;
         const playerNumber = gameState.players.length + 1;
         
-        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: 1 };
+        const newPlayer = { id: socket.id, name: name, playerNumber: playerNumber, avatar: avatar || 1 };
 
         gameState.players.push(newPlayer);
         gameState.scores[newPlayer.name] = 0;
@@ -169,24 +168,6 @@ io.on('connection', (socket) => {
         socket.emit('joined', { playerDetails: newPlayer, roomId });
         broadcastLobbyUpdate(roomId);
         broadcastScoreUpdate(roomId);
-    });
-
-    socket.on('startSinglePlayer', ({ name }) => {
-        const roomId = `SOLO_${socket.id}`;
-        socket.join(roomId);
-        rooms[roomId] = createInitialGameState();
-        const gameState = rooms[roomId];
-        
-        gameState.isSinglePlayer = true;
-        const player = { id: socket.id, name, playerNumber: 1, avatar: 1 };
-        gameState.players.push(player);
-        gameState.scores[name] = 0;
-        gameState.gameInProgress = true;
-        gameState.usedWords = [];
-        
-        socket.emit('singlePlayerStarted');
-        socket.emit('usedWordsUpdate', { usedWords: gameState.usedWords });
-        startSinglePlayerTurn(roomId);
     });
 
     socket.on('changeAvatar', ({ avatar }) => {
@@ -272,11 +253,7 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         if (!gameState || !gameState.roundInProgress) return;
 
-        if (gameState.isSinglePlayer) {
-            handleSinglePlayerWord(roomId, word);
-        } else {
-            handleMultiplayerWord(roomId, word);
-        }
+        handleMultiplayerWord(roomId, word);
     });
 
     function handleMultiplayerWord(roomId, word) {
@@ -305,33 +282,6 @@ io.on('connection', (socket) => {
             setTimeout(() => nextTurn(roomId), 700);
         } else {
             handlePlayerElimination(roomId, currentPlayer, 'Yanlış veya tekrar edilmiş kelime', normalizedSubmittedWord);
-        }
-    }
-
-    function handleSinglePlayerWord(roomId, word) {
-        const gameState = rooms[roomId];
-        clearInterval(gameState.countdownInterval);
-
-        // Calculate response time
-        const responseTime = gameState.turnStartTime ? (Date.now() - gameState.turnStartTime) / 1000 : 0;
-
-        const normalizedSubmittedWord = normalizeWord(word);
-        const normalizedLetter = normalizeWord(gameState.currentLetter);
-        const dbWords = database[gameState.currentCategory]?.[normalizedLetter] || [];
-        const isCorrect = normalizedSubmittedWord.startsWith(normalizedLetter) && dbWords.includes(normalizedSubmittedWord) && !gameState.usedWords.includes(normalizedSubmittedWord);
-
-        if (isCorrect) {
-            const playerName = gameState.players[0].name;
-            
-            // Update player statistics
-            updatePlayerWordStat(playerName, normalizedSubmittedWord, gameState.currentCategory, responseTime);
-            
-            gameState.scores[playerName]++;
-            gameState.usedWords.push(normalizedSubmittedWord);
-            io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
-            startSinglePlayerTurn(roomId);
-        } else {
-            handleSinglePlayerGameOver(roomId);
         }
     }
 
@@ -398,11 +348,6 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
 
-        if (gameState.isSinglePlayer) {
-            delete rooms[roomId];
-            return;
-        }
-        
         const leavingPlayer = gameState.players.find(p => p.id === socket.id);
         if (!leavingPlayer) return;
 
@@ -450,11 +395,6 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
 
-        if (gameState.isSinglePlayer) {
-            delete rooms[roomId];
-            return;
-        }
-        
         const disconnectedPlayer = gameState.players.find(p => p.id === socket.id);
         if (!disconnectedPlayer) return;
 
@@ -560,62 +500,6 @@ io.on('connection', (socket) => {
         }, 1000);
     }
     
-    function startSinglePlayerTurn(roomId) {
-        const gameState = rooms[roomId];
-        if (!gameState || !gameState.gameInProgress) return;
-        
-        gameState.roundInProgress = true;
-        gameState.turnStartTime = Date.now(); // Record turn start time for statistics
-        const alphabet = 'ABCÇDEFHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
-        const categories = ['İsim', 'Hayvan', 'Bitki/Meyve/Sebze', 'Ülke/Şehir/İlçe', 'Eşya', 'Meslek'];
-        
-        let letter, category, validCombo = false;
-        while (!validCombo) {
-            letter = alphabet[Math.floor(Math.random() * alphabet.length)];
-            category = categories[Math.floor(Math.random() * categories.length)];
-            const normalizedLetter = letter.toLocaleLowerCase('tr-TR');
-            if (database[category]?.[normalizedLetter] && database[category][normalizedLetter].length > 0) {
-                validCombo = true;
-            }
-        }
-        gameState.currentLetter = letter;
-        gameState.currentCategory = category;
-
-        const playerName = gameState.players[0].name;
-        let timeLeft = 5;
-        io.to(roomId).emit('singlePlayerTurnUpdate', {
-            letter,
-            category,
-            score: gameState.scores[playerName],
-            timeLeft
-        });
-
-        clearInterval(gameState.countdownInterval);
-        gameState.countdownInterval = setInterval(() => {
-            timeLeft--;
-            io.to(roomId).emit('singlePlayerCountdown', timeLeft);
-            if (timeLeft <= 0) {
-                clearInterval(gameState.countdownInterval);
-                handleSinglePlayerGameOver(roomId);
-            }
-        }, 1000);
-    }
-
-    function handleSinglePlayerGameOver(roomId) {
-        const gameState = rooms[roomId];
-        if (!gameState) return;
-        
-        clearInterval(gameState.countdownInterval);
-        gameState.gameInProgress = false;
-        const score = gameState.scores[gameState.players[0].name];
-        const playerName = gameState.players[0].name;
-        
-        // Update single player game statistics (treat any score > 0 as a "win")
-        updatePlayerGameResult(playerName, score > 0);
-        
-        io.to(roomId).emit('singlePlayerGameOver', { score });
-    }
-
     function nextTurn(roomId) {
         const gameState = rooms[roomId];
         if (!gameState) return;
