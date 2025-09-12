@@ -11,5 +11,22 @@
     "wordsUsed": {},
     "lastPlayed": "2025-09-07T11:48:03.298Z",
     "achievements": []
+  },
+  "Görkem": {
+    "gamesPlayed": 0,
+    "gamesWon": 0,
+    "winRate": 0,
+    "longestWinStreak": 0,
+    "currentWinStreak": 0,
+    "totalCorrectWords": 1,
+    "totalResponseTime": 3.13,
+    "responseCount": 1,
+    "favoriteCategory": "Bitki/Meyve/Sebze",
+    "lastPlayed": "2025-09-12T13:33:25.914Z",
+    "wordsUsed": {
+      "semizotu": 1
+    },
+    "categoriesPlayed": {},
+    "achievements": []
   }
 }
