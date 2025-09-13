@@ -14902,9 +14902,10 @@
       "oman",
       "ordu",
       "orta",
+      "osaka",
       "oslo",
-      "osmaniye",
       "osmangazi",
+      "osmaniye",
       "ottava"
     ],
     "ö": [
@@ -15600,25 +15601,26 @@
     ],
     "d": [
       "dalgıç",
-      "danışman",
       "dansçı",
+      "danışman",
       "dedektif",
       "dekan",
       "demirci",
       "denetçi",
       "denizci",
+      "derici",
       "desinatör",
       "devlet memuru",
       "dilenci",
       "diplomat",
-      "diş hekimi",
       "diyetisyen",
-      "doçent",
+      "diş hekimi",
       "doktor",
       "dokumacı",
       "dondurmacı",
-      "dövizci",
-      "dublör"
+      "doçent",
+      "dublör",
+      "dövizci"
     ],
     "e": [
       "ebe",
@@ -15714,10 +15716,11 @@
       "kalem müdürü",
       "kaloriferci",
       "kameraman",
+      "kamyon şoforü",
       "kamyoncu",
-      "kapıcı",
       "kaportacı",
       "kaptan",
+      "kapıcı",
       "kardiyolog",
       "karikatürist",
       "kasap",
@@ -15735,10 +15738,10 @@
       "kontrolör",
       "korsan",
       "kozmonot",
-      "kömürcü",
-      "köşe yazarı",
       "kuaför",
       "kuyumcu",
+      "kömürcü",
+      "köşe yazarı",
       "kütüphaneci"
     ],
     "l": [
@@ -15882,7 +15885,8 @@
       "şekerci",
       "şemsiyeci",
       "şimşirci",
-      "şoför"
+      "şoför",
+      "şıracı"
     ],
     "t": [
       "tabakçı",

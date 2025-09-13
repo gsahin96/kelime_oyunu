@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YETI Kelime Oyunu - Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-2 theme-dark flex items-center justify-center">
+    <div id="animated-background" class="animated-bg"></div>
+    
+    <!-- Theme Controls -->
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn home-btn show" onclick="window.location.href='/'">🏠 Ana Sayfa</button>
+    </div>
+
+    <!-- Stats Screen -->
+    <div id="stats-screen" class="w-full max-w-4xl relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <h2 class="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Oyuncu İstatistikleri</h2>
+            
+            <!-- User Info -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg text-center">
+                <div class="flex items-center justify-center gap-4 mb-3">
+                    <div id="profile-avatar" class="avatar large avatar-1">🎮</div>
+                    <div>
+                        <h3 class="text-xl font-bold themed-accent" id="profile-username">Oyuncu</h3>
+                        <p class="text-sm themed-text-muted">Aktif Oyuncu</p>
+                    </div>
+                </div>
+                <button id="edit-profile-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">✏️ Profili Düzenle</button>
+            </div>
+
+            <div id="stats-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="themed-bg-secondary p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 themed-accent">🎮 Oyun İstatistikleri</h3>
+                    <div class="space-y-2">
+                        <p>Toplam Oyun: <span id="stat-games-played" class="font-bold">0</span></p>
+                        <p>Kazanılan Oyun: <span id="stat-games-won" class="font-bold">0</span></p>
+                        <p>Kazanma Oranı: %<span id="stat-win-rate" class="font-bold">0</span></p>
+                        <p>En Uzun Kazanma Serisi: <span id="stat-longest-streak" class="font-bold">0</span></p>
+                        <p>Mevcut Kazanma Serisi: <span id="stat-current-streak" class="font-bold">0</span></p>
+                        <p>Son Oyun: <span id="stat-last-played" class="font-bold">Hiç</span></p>
+                    </div>
+                </div>
+                <div class="themed-bg-secondary p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">📝 Kelime İstatistikleri</h3>
+                    <div class="space-y-2">
+                        <p>Toplam Doğru Kelime: <span id="stat-total-words" class="font-bold">0</span></p>
+                        <p>Ortalama Yanıt Süresi: <span id="stat-avg-time" class="font-bold">0</span>sn</p>
+                        <p>Favori Kategori: <span id="stat-fav-category" class="font-bold">Henüz yok</span></p>
+                    </div>
+                </div>
+                <div class="themed-bg-secondary p-6 rounded-lg md:col-span-2">
+                    <h3 class="text-xl font-bold mb-4 text-orange-400">🔤 En Çok Kullanılan Kelimeler</h3>
+                    <div id="most-used-words" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+                </div>
+            </div>
+            <div class="mt-6 text-center">
+                <button onclick="window.location.href='/'" class="game-button mr-4">🏠 Ana Sayfa</button>
+                <button onclick="window.location.href='/join'" class="game-button">🚪 Odaya Katıl</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Edit Modal -->
+    <div id="profile-edit-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">✏️ Profili Düzenle</h3>
+            
+            <div class="mb-6 text-center">
+                <p class="text-sm mb-3 themed-text-muted">Avatar:</p>
+                <div id="edit-profile-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500" title="Avatar değiştir">🎮</div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="edit-profile-username" class="block text-sm themed-text-muted mb-2">Kullanıcı Adı:</label>
+                <input id="edit-profile-username" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 rounded-lg text-center focus:outline-none focus:ring-2 themed-input">
+            </div>
+            
+            <div class="flex gap-4">
+                <button id="save-profile-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Kaydet</button>
+                <button id="cancel-profile-edit" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
+            <div class="avatar-grid" id="avatar-grid"></div>
+            <div class="flex gap-4 mt-6">
+                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
+                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+</html>

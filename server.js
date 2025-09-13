@@ -9,13 +9,32 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(__dirname));
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Routes for different pages
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
-app.get('/test.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'test.html'));
+
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'home.html'));
+});
+
+app.get('/profile', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'profile.html'));
+});
+
+app.get('/join', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'join.html'));
+});
+
+app.get('/room/:code', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'game.html'));
+});
+
+app.get('/room/:code/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'game.html'));
 });
 
 // Simple JSON database for words
@@ -229,25 +248,45 @@ io.on('connection', (socket) => {
     socket.on('gameSettingsChanged', (settings) => {
         const roomId = getRoomIdFromSocket();
         const gameState = rooms[roomId];
-        if (gameState && socket.id === gameState.hostId) {
-            gameState.settings.scoreGoal = settings.scoreGoal;
-            gameState.settings.turnDuration = settings.turnDuration;
-            if (gameState.roundInProgress) {
-                gameState.currentTimeLeft = Math.max(gameState.currentTimeLeft, gameState.settings.turnDuration);
+        if (gameState) {
+            // Allow both host and admin (room creator) to change settings
+            const isHost = socket.id === gameState.hostId;
+            const isAdmin = gameState.players.find(p => p.id === socket.id && p.playerNumber === 1);
+            
+            if (isHost || isAdmin) {
+                gameState.settings.scoreGoal = settings.scoreGoal;
+                gameState.settings.turnDuration = settings.turnDuration;
+                if (gameState.roundInProgress) {
+                    gameState.currentTimeLeft = Math.max(gameState.currentTimeLeft, gameState.settings.turnDuration);
+                }
+                broadcastLobbyUpdate(roomId);
+                console.log(`✅ Settings changed by ${isHost ? 'host' : 'admin'}: scoreGoal=${settings.scoreGoal}, turnDuration=${settings.turnDuration}`);
+            } else {
+                console.log(`❌ Settings change rejected - not host or admin`);
             }
-            broadcastLobbyUpdate(roomId);
         }
     });
     
     socket.on('startDiceRoll', () => {
         const roomId = getRoomIdFromSocket();
         const gameState = rooms[roomId];
-        if (!gameState || socket.id !== gameState.hostId) return;
+        if (!gameState) return;
+
+        // Allow both host and admin (room creator) to start the game
+        const isHost = socket.id === gameState.hostId;
+        const isAdmin = gameState.players.find(p => p.id === socket.id && p.playerNumber === 1);
+        
+        if (!isHost && !isAdmin) {
+            console.log(`❌ Start game rejected - not host or admin`);
+            return;
+        }
 
         gameState.gameInProgress = true;
         gameState.roundInProgress = true;
         gameState.usedWords = [];
         io.to(roomId).emit('usedWordsUpdate', { usedWords: gameState.usedWords });
+        
+        console.log(`✅ Game started by ${isHost ? 'host' : 'admin'}`);
         
         // Include all connected players (including those who joined during game as spectators)
         gameState.activePlayersInRound = gameState.players.filter(p => !p.disconnected);
@@ -373,28 +412,21 @@ io.on('connection', (socket) => {
     socket.on('resetScores', () => {
         const roomId = getRoomIdFromSocket();
         const gameState = rooms[roomId];
-        if (gameState && socket.id === gameState.hostId) {
-            Object.keys(gameState.scores).forEach(name => gameState.scores[name] = 0);
-            broadcastScoreUpdate(roomId);
+        if (gameState) {
+            // Allow both host and admin (room creator) to reset scores
+            const isHost = socket.id === gameState.hostId;
+            const isAdmin = gameState.players.find(p => p.id === socket.id && p.playerNumber === 1);
+
+            if (isHost || isAdmin) {
+                Object.keys(gameState.scores).forEach(name => gameState.scores[name] = 0);
+                broadcastScoreUpdate(roomId);
+                console.log(`✅ Scores reset by ${isHost ? 'host' : 'admin'}`);
+            } else {
+                console.log(`❌ Score reset rejected - not host or admin`);
+            }
         }
     });
 
-    socket.on('newGame', () => {
-        const roomId = getRoomIdFromSocket();
-        const gameState = rooms[roomId];
-        if (gameState && socket.id === gameState.hostId) {
-            rooms[roomId] = {
-                ...createInitialGameState(),
-                players: gameState.players,
-                hostId: gameState.hostId,
-                scores: Object.fromEntries(gameState.players.map(p => [p.name, 0])),
-                settings: gameState.settings 
-            };
-            broadcastLobbyUpdate(roomId);
-            broadcastScoreUpdate(roomId);
-        }
-    });
-    
     socket.on('requestPlayerStats', ({ playerName }) => {
         const stats = getPlayerStats(playerName);
         socket.emit('playerStatsUpdate', { playerName, stats });
@@ -411,25 +443,25 @@ io.on('connection', (socket) => {
         if (!leavingPlayer) return;
 
         const wasHost = leavingPlayer.id === gameState.hostId;
-        
-        // Mark player as disconnected instead of removing
-        leavingPlayer.disconnected = true;
-        leavingPlayer.id = null; // Clear socket ID
-        
-        // Only delete room if ALL players are disconnected
-        const connectedPlayers = gameState.players.filter(p => !p.disconnected);
-        if (connectedPlayers.length === 0) {
+
+        // Completely remove player from the room
+        const playerIndex = gameState.players.indexOf(leavingPlayer);
+        if (playerIndex !== -1) {
+            gameState.players.splice(playerIndex, 1);
+            // Remove from scores
+            delete gameState.scores[leavingPlayer.name];
+        }
+
+        // Only delete room if ALL players are gone
+        if (gameState.players.length === 0) {
             console.log(`Oda ${roomId} kapatıldı - tüm oyuncular ayrıldı.`);
             delete rooms[roomId];
             return;
         }
 
-        // Transfer host to connected player if needed
-        if (wasHost) {
-            const newHost = connectedPlayers[0];
-            if (newHost) {
-                gameState.hostId = newHost.id;
-            }
+        // Transfer host to first remaining player if needed
+        if (wasHost && gameState.players.length > 0) {
+            gameState.hostId = gameState.players[0].id;
         }
 
         if (gameState.roundInProgress) {
@@ -437,7 +469,7 @@ io.on('connection', (socket) => {
             if (activePlayerIndex !== -1) {
                 const wasCurrentPlayer = activePlayerIndex === gameState.currentPlayerIndex;
                 gameState.activePlayersInRound.splice(activePlayerIndex, 1);
-                
+
                 if (gameState.activePlayersInRound.length <= 1) {
                     handleRoundOver(roomId);
                 } else if (wasCurrentPlayer) {
@@ -447,9 +479,10 @@ io.on('connection', (socket) => {
                 }
             }
         }
-        
+
         broadcastLobbyUpdate(roomId);
-        
+        broadcastScoreUpdate(roomId);
+
         // Leave the socket room
         socket.leave(roomId);
     });
@@ -465,25 +498,25 @@ io.on('connection', (socket) => {
         if (!disconnectedPlayer) return;
 
         const wasHost = disconnectedPlayer.id === gameState.hostId;
-        
-        // Mark player as disconnected instead of removing
-        disconnectedPlayer.disconnected = true;
-        disconnectedPlayer.id = null; // Clear socket ID
-        
-        // Only delete room if ALL players are disconnected
-        const connectedPlayers = gameState.players.filter(p => !p.disconnected);
-        if (connectedPlayers.length === 0) {
+
+        // Completely remove player from the room when they disconnect (close browser)
+        const playerIndex = gameState.players.indexOf(disconnectedPlayer);
+        if (playerIndex !== -1) {
+            gameState.players.splice(playerIndex, 1);
+            // Remove from scores
+            delete gameState.scores[disconnectedPlayer.name];
+        }
+
+        // Only delete room if ALL players are gone
+        if (gameState.players.length === 0) {
             console.log(`Oda ${roomId} kapatıldı - tüm oyuncular ayrıldı.`);
             delete rooms[roomId];
             return;
         }
 
-        // Transfer host to connected player if needed
-        if (wasHost) {
-            const newHost = connectedPlayers[0];
-            if (newHost) {
-                gameState.hostId = newHost.id;
-            }
+        // Transfer host to first remaining player if needed
+        if (wasHost && gameState.players.length > 0) {
+            gameState.hostId = gameState.players[0].id;
         }
 
         if (gameState.roundInProgress) {
@@ -491,7 +524,7 @@ io.on('connection', (socket) => {
             if (activePlayerIndex !== -1) {
                 const wasCurrentPlayer = activePlayerIndex === gameState.currentPlayerIndex;
                 gameState.activePlayersInRound.splice(activePlayerIndex, 1);
-                
+
                 if (gameState.activePlayersInRound.length <= 1) {
                     handleRoundOver(roomId);
                 } else if (wasCurrentPlayer) {

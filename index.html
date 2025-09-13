@@ -910,7 +910,7 @@
                 <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500" title="Profili değiştir">🎮</div>
             </div>
             <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 rounded-lg text-center focus:outline-none focus:ring-2 themed-input">
-            <button id="startGameButton" class="w-full game-button">🎮 Oyuna Başla</button>
+            <button id="startGameButton" class="w-full game-button">▶️ Devam Et</button>
         </div>
         <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
     </div>
@@ -1356,7 +1356,8 @@
             startGameButton.addEventListener('click', () => {
                 const username = entryUsername.value.trim();
                 if (!validateUsername(username)) return;
-                // Determine avatar robustly from entry-avatar preview (fallback to variables)
+                
+                // Determine avatar robustly from entry-avatar preview
                 let chosenAvatar = 1;
                 const entryAvatarEl = document.getElementById('entry-avatar');
                 if (entryAvatarEl) {
@@ -1373,17 +1374,20 @@
                     chosenAvatar = selectedAvatarId || selectedEntryAvatar || 1;
                 }
 
+                // Save user data and redirect to home
                 currentUser = { username: username, avatar: chosenAvatar };
-                // Update main menu avatar element immediately so it persists
-                const userAvatar = document.getElementById('user-avatar');
-                if (userAvatar) {
-                    const avatarData = getAvatarData(currentUser.avatar || 1);
-                    userAvatar.className = `avatar small ${avatarData.class}`;
-                    userAvatar.textContent = avatarData.emoji;
+                window.currentUser = currentUser;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Check if there's a redirect parameter
+                const params = new URLSearchParams(window.location.search);
+                const redirect = params.get('redirect');
+                
+                if (redirect) {
+                    window.location.href = redirect;
+                } else {
+                    window.location.href = '/home';
                 }
-                 window.currentUser = currentUser;
-                 showMainMenu(currentUser);
-                 showEntryMessage(`Hoş geldin ${username}!`, false);
              });
             entryUsername.addEventListener('keypress', (e) => { if (e.key === 'Enter') startGameButton.click(); });
             showJoinFormButton.addEventListener('click', () => {
