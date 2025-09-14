@@ -38,16 +38,25 @@ body {
     animation: pulse-white-to-red 1s ease-out forwards;
 }
 
-.gold { 
-    background-image: linear-gradient(to right, #fde047, #eab308); 
-    color: #422006; 
-    border-color: #fde047 !important;
+.gold {
+    background: #ffd700 !important;
+    color: #000000 !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
 }
 
-.silver { 
-    background-image: linear-gradient(to right, #e5e7eb, #a1a1aa); 
-    color: #1f2937; 
-    border-color: #e5e7eb !important;
+.silver {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    border-color: #c0c0c0 !important;
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.5) !important;
+}
+
+.bronze {
+    background: #cd7f32 !important;
+    color: #ffffff !important;
+    border-color: #cd7f32 !important;
+    box-shadow: 0 0 15px rgba(205, 127, 50, 0.5) !important;
 }
 
 .animated-bg {
@@ -811,15 +820,21 @@ body {
     z-index: 5;
 }
 
-.player-slot-circle.round-winner::after {
-    content: '👑';
+.player-slot-circle.round-winner .bubble-content {
+    opacity: 0;
+}
+
+.player-slot-circle.round-winner::before {
+    content: '+1';
     position: absolute;
-    top: -25px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     font-size: 24px;
+    font-weight: bold;
+    color: #22c55e;
     z-index: 10;
-    animation: crownBounce 1s ease-out forwards;
+    animation: scorePulse 0.5s ease-out;
 }
 
 @keyframes turnPulse {
@@ -877,6 +892,21 @@ body {
     }
     100% { 
         transform: translateX(-50%) translateY(0px) scale(1); 
+        opacity: 1; 
+    }
+}
+
+@keyframes scorePulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(0.8); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.2); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1); 
         opacity: 1; 
     }
 }
@@ -1112,4 +1142,20 @@ body {
 .theme-light .score-name,
 .theme-light .score-value {
     color: #000000 !important;
+}
+
+/* Host decision buttons styling */
+#host-decision-buttons {
+    animation: pulse 1s infinite;
+    border: 2px solid #fbbf24;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: rgba(31, 41, 55, 0.9);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }

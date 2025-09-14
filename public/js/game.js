@@ -60,21 +60,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize speech recognition
     function initializeSpeechRecognition() {
+        // Don't create recognition here, create it fresh each time
+    }
+
+    function createSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'tr-TR';
-            recognition.continuous = false;
-            
-            recognition.onresult = (event) => {
-                const word = event.results[0][0].transcript;
-                submitWord(word);
-            };
-            
-            recognition.onerror = (event) => {
-                console.error('Ses tanıma hatası:', event.error);
-            };
-        }
+        if (!SpeechRecognition) return null;
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = false;
+        
+        recognition.onresult = (event) => {
+            const word = event.results[0][0].transcript;
+            submitWord(word);
+        };
+        
+        recognition.onerror = (event) => {
+            console.error('Ses tanıma hatası:', event.error);
+        };
+
+        recognition.onend = () => {
+            // Recognition ended naturally
+        };
+
+        return recognition;
     }
 
     // Initialize page
@@ -353,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
             statusText.textContent = `'${wordInfo.word}' kelimesi DB'ye eklensin mi?`;
             hostDecisionButtons.classList.remove('hidden');
             countdownEl.textContent = '';
+            console.log('Host decision buttons shown for word:', wordInfo.word);
         });
 
         socket.on('hostDecisionTimeout', ({ word }) => {
@@ -520,13 +531,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Start button should always be visible for admins/hosts (not hidden during games)
         if (startButton) {
             startButton.classList.toggle('hidden', !showControls);
+            console.log(`Start button visibility: ${!showControls ? 'hidden' : 'visible'}, isHost: ${isHost}, isAdminMode: ${isAdminMode}`);
         }
 
         if (resetScoreButton) {
             resetScoreButton.classList.toggle('hidden', !showControls);
         }
 
-        console.log(`updateHostControls: isHost=${isHost}, isAdminMode=${isAdminMode}, showControls=${showControls}`);
+        console.log(`updateHostControls: isHost=${isHost}, isAdminMode=${isAdminMode}, showControls=${showControls}, currentHostId=${currentHostId}, myId=${myDetails?.id}`);
     }
 
     function updateScoreboard(scores = {}, isGameOver = false, players = []) {
@@ -543,6 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isGameOver) {
                     if (rank === 1) rankClass = 'gold';
                     else if (rank === 2) rankClass = 'silver';
+                    else if (rank === 3) rankClass = 'bronze';
                 }
                 const player = players.find(p => p && p.name === name);
                 const avatarId = player?.avatar || 1;
@@ -653,15 +666,22 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isMyTurn) {
             wordInput.focus();
+            // Create fresh recognition instance for each turn
+            recognition = createSpeechRecognition();
             if (recognition) {
                 try { 
                     recognition.start(); 
+                    console.log('Speech recognition started for turn');
                 } catch(e) { 
                     console.error("Ses tanıma başlatılamadı!", e); 
+                    recognition = null;
                 }
             }
         } else {
-            if (recognition) recognition.stop();
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
         }
     }
 
@@ -681,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     winnerSlot.classList.add('round-winner');
                     setTimeout(() => {
                         winnerSlot.classList.remove('round-winner');
-                    }, 3000);
+                    }, 1000);
                 }
             }
         }
@@ -695,7 +715,10 @@ document.addEventListener('DOMContentLoaded', function() {
             synth.triggerAttackRelease("E3", "8n");
         }
         
-        if (recognition) recognition.stop();
+        if (recognition) {
+            recognition.stop();
+            recognition = null;
+        }
         statusText.textContent = winner ? `${reason} | Turun galibi: ${winner}` : reason;
         countdownEl.textContent = '';
         document.querySelectorAll('.player-slot-circle').forEach(s => s.classList.remove('active', 'eliminated'));
@@ -706,7 +729,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleFinalWinner(winner, scores) {
         wordInputArea.classList.add('hidden');
-        if (recognition) recognition.stop();
+        if (recognition) {
+            recognition.stop();
+            recognition = null;
+        }
         updateScoreboard(scores, true, currentPlayers);
         countdownEl.textContent = '';
         statusText.innerHTML = `<div class="text-3xl">🏆 Oyun Bitti! Kazanan: <span class="gold font-black p-2 rounded-md">${winner}</span> 🏆</div>`;
@@ -721,7 +747,10 @@ document.addEventListener('DOMContentLoaded', function() {
             socket.emit('submitWord', word.trim());
             wordInput.value = '';
             wordInputArea.classList.add('hidden');
-            if (recognition) recognition.stop();
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
         }
     }
 

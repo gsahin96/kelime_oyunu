@@ -649,13 +649,13 @@ io.on('connection', (socket) => {
                 letter: gameState.currentLetter
             });
             
-            // Set timeout for host decision (10 seconds)
+            // Set timeout for host decision (5 seconds)
             gameState.hostDecisionTimeout = setTimeout(() => {
                 console.log(`Host decision timeout for room ${roomId} - auto-resuming game`);
                 // Notify all players that decision timed out
                 io.to(roomId).emit('hostDecisionTimeout', { word: spokenWord });
                 resumeGameAfterDecision(roomId);
-            }, 10000);
+            }, 5000);
         } else {
             setTimeout(() => resumeGameAfterDecision(roomId), 2500);
         }
