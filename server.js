@@ -128,6 +128,7 @@ const createInitialGameState = () => ({
     usedLettersThisGame: [],
     turnStartTime: null,
     currentTimeLeft: null,
+    hostDecisionTimeout: null, // Add timeout for host decision
 });
 
 const normalizeWord = (word) => {
@@ -385,6 +386,12 @@ io.on('connection', (socket) => {
         const gameState = rooms[roomId];
         if (!gameState || socket.id !== gameState.hostId) return;
 
+        // Clear the timeout since decision was made
+        if (gameState.hostDecisionTimeout) {
+            clearTimeout(gameState.hostDecisionTimeout);
+            gameState.hostDecisionTimeout = null;
+        }
+
         if (add) {
             try {
                 const normalizedLetter = wordInfo.letter.toLocaleLowerCase('tr-TR');
@@ -438,6 +445,7 @@ io.on('connection', (socket) => {
 
         const gameState = rooms[roomId];
         if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
+        if(gameState.hostDecisionTimeout) clearTimeout(gameState.hostDecisionTimeout);
 
         const leavingPlayer = gameState.players.find(p => p.id === socket.id);
         if (!leavingPlayer) return;
@@ -493,6 +501,7 @@ io.on('connection', (socket) => {
 
         const gameState = rooms[roomId];
         if(gameState.countdownInterval) clearInterval(gameState.countdownInterval);
+        if(gameState.hostDecisionTimeout) clearTimeout(gameState.hostDecisionTimeout);
 
         const disconnectedPlayer = gameState.players.find(p => p.id === socket.id);
         if (!disconnectedPlayer) return;
@@ -639,6 +648,14 @@ io.on('connection', (socket) => {
                 category: gameState.currentCategory,
                 letter: gameState.currentLetter
             });
+            
+            // Set timeout for host decision (10 seconds)
+            gameState.hostDecisionTimeout = setTimeout(() => {
+                console.log(`Host decision timeout for room ${roomId} - auto-resuming game`);
+                // Notify all players that decision timed out
+                io.to(roomId).emit('hostDecisionTimeout', { word: spokenWord });
+                resumeGameAfterDecision(roomId);
+            }, 10000);
         } else {
             setTimeout(() => resumeGameAfterDecision(roomId), 2500);
         }
@@ -649,6 +666,10 @@ io.on('connection', (socket) => {
         if (!gameState) return;
 
         clearInterval(gameState.countdownInterval);
+        if (gameState.hostDecisionTimeout) {
+            clearTimeout(gameState.hostDecisionTimeout);
+            gameState.hostDecisionTimeout = null;
+        }
         gameState.roundInProgress = false;
 
         const winner = gameState.activePlayersInRound.length === 1 ? gameState.activePlayersInRound[0] : null;
@@ -672,7 +693,9 @@ io.on('connection', (socket) => {
                 broadcastScoreUpdate(roomId, true);
                 gameState.gameInProgress = false;
             } else {
-                broadcastLobbyUpdate(roomId);
+                // No final winner yet, pause for next round
+                gameState.gameInProgress = false;
+                io.to(roomId).emit('roundEnded');
             }
         }, 3000);
     }

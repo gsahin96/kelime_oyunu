@@ -355,8 +355,19 @@ document.addEventListener('DOMContentLoaded', function() {
             countdownEl.textContent = '';
         });
 
+        socket.on('hostDecisionTimeout', ({ word }) => {
+            statusText.textContent = `'${word}' kelimesi için karar verilmedi - oyun devam ediyor...`;
+            hostDecisionButtons.classList.add('hidden');
+        });
+
         socket.on('roundOver', ({ reason, winner }) => {
             handleRoundOver(reason, winner);
+        });
+
+        socket.on('roundEnded', () => {
+            statusText.textContent = 'Tur bitti. Yeni tur için Başlat butonuna basın.';
+            gameStarted = false;
+            updateHostControls();
         });
 
         socket.on('finalWinner', ({ winner, scores }) => {
@@ -524,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortedScores = Object.entries(scores).sort(([,a],[,b]) => b-a);
         
         if (sortedScores.length === 0) {
-            scoreboardDiv.innerHTML = '<p class="text-gray-500 text-center">Henüz puan yok.</p>';
+            scoreboardDiv.innerHTML = '<p class="themed-text-muted text-center">Henüz puan yok.</p>';
         } else {
             sortedScores.forEach(([name, score], index) => {
                 const rank = index + 1;
@@ -537,8 +548,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const avatarId = player?.avatar || 1;
                 const avatarData = getAvatarData(avatarId);
                 const scoreEntry = document.createElement('div');
-                scoreEntry.className = `flex justify-between items-center p-2 rounded-md border-2 border-transparent bg-gray-700 ${rankClass}`;
-                scoreEntry.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-lg w-6 text-center">${rank}.</span><div class="avatar small ${avatarData.class}" style="margin-bottom: 0; width: 30px; height: 30px; font-size: 14px;">${avatarData.emoji}</div><span class="font-semibold">${name || 'Bilinmeyen'}</span></div><span class="font-bold text-xl">${score}</span>`;
+                scoreEntry.className = `flex justify-between items-center p-2 rounded-md border-2 border-transparent themed-bg-secondary ${rankClass}`;
+                scoreEntry.innerHTML = `<div class="flex items-center gap-2"><span class="font-bold text-lg w-6 text-center score-rank">${rank}.</span><div class="avatar small ${avatarData.class}" style="margin-bottom: 0; width: 30px; height: 30px; font-size: 14px;">${avatarData.emoji}</div><span class="font-semibold score-name">${name || 'Bilinmeyen'}</span></div><span class="font-bold text-xl score-value">${score}</span>`;
                 scoreboardDiv.appendChild(scoreEntry);
             });
         }
@@ -547,13 +558,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateUsedWords(usedWords = []) {
         if (!usedWordsList) return;
         if (usedWords.length === 0) {
-            usedWordsList.innerHTML = `<p class="text-gray-500 text-sm text-center">Henüz kelime girilmedi</p>`;
+            usedWordsList.innerHTML = `<p class="themed-text-muted text-sm text-center">Henüz kelime girilmedi</p>`;
         } else {
             usedWordsList.innerHTML = '';
             usedWords.forEach((word, index) => {
                 const wordElement = document.createElement('div');
-                wordElement.className = 'flex justify-between items-center py-1 px-2 mb-1 bg-gray-800 rounded text-sm';
-                wordElement.innerHTML = `<span class="text-white font-medium">${word}</span><span class="text-green-400 text-xs">#${index + 1}</span>`;
+                wordElement.className = 'flex justify-between items-center py-1 px-2 mb-1 themed-bg-secondary rounded text-sm';
+                wordElement.innerHTML = `<span class="themed-text font-medium">${word}</span><span class="text-green-400 text-xs">#${index + 1}</span>`;
                 usedWordsList.appendChild(wordElement);
             });
             usedWordsList.scrollTop = usedWordsList.scrollHeight;

@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const avatarConfirm = document.getElementById('avatar-confirm');
     const avatarCancel = document.getElementById('avatar-cancel');
 
-    let selectedEntryAvatar = 1;
     let socket = null;
 
     // Initialize page based on user state
@@ -38,8 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentUser) {
             showMainMenu(currentUser);
         } else {
-            // Redirect to root for profile creation
-            window.location.href = '/';
+            // Only redirect if we're not already on the home page
+            if (window.location.pathname !== '/') {
+                window.location.href = '/';
+            }
         }
     }
 
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset form
         entryUsername.value = '';
-        selectedEntryAvatar = 1;
+        selectedAvatarId = 1;
         updateEntryAvatar();
     }
 
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateEntryAvatar() {
-        updateAvatarDisplay('entry-avatar', selectedEntryAvatar);
+        updateAvatarDisplay('entry-avatar', selectedAvatarId);
     }
 
     function setupUsernameEdit() {
@@ -94,9 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
         populateAvatarGrid();
         
         // Select current entry avatar
-        selectedAvatarId = selectedEntryAvatar;
         document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected'));
-        const currentOption = document.querySelector(`[data-avatar-id="${selectedEntryAvatar}"]`);
+        const currentOption = document.querySelector(`[data-avatar-id="${selectedAvatarId}"]`);
         if (currentOption) {
             currentOption.classList.add('selected');
         }
@@ -120,9 +120,10 @@ document.addEventListener('DOMContentLoaded', function() {
             currentUser.avatar = selectedAvatarId;
             gameState.setCurrentUser(currentUser);
             updateAvatarDisplay('user-avatar', selectedAvatarId);
+            // Also update entry avatar in case we're still on auth screen
+            updateEntryAvatar();
         } else {
             // Update entry avatar
-            selectedEntryAvatar = selectedAvatarId;
             updateEntryAvatar();
         }
         
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create user object
         const user = {
             username: username,
-            avatar: selectedEntryAvatar
+            avatar: selectedAvatarId
         };
 
         gameState.setCurrentUser(user);

@@ -101,13 +101,13 @@ body {
 .theme-light {
     --theme-primary: #ffffff;
     --theme-secondary: #f8f9fa;
-    --theme-accent: #0f172a;
-    --theme-accent-hover: #1e293b;
-    --theme-text: #1e293b;
-    --theme-text-muted: #64748b;
+    --theme-accent: #6b7280; /* Light gray instead of dark */
+    --theme-accent-hover: #4b5563; /* Slightly darker light gray */
+    --theme-text: #1a1a1a;
+    --theme-text-muted: #374151;
     --theme-border: #cbd5e1;
     --theme-bg-overlay: rgba(255, 255, 255, 0.95);
-    --theme-glow: rgba(15, 23, 42, 0.2);
+    --theme-glow: rgba(107, 114, 128, 0.2); /* Light gray glow */
 }
 
 /* HAREKETLI ARKA PLANLAR */
@@ -249,7 +249,7 @@ body {
 
 .theme-btn-light {
     background-color: #ffffff;
-    color: #0f172a;
+    color: #6b7280; /* Light gray instead of dark */
     font-size: 18px;
     border: 1px solid #e6eef8;
     box-shadow: 0 2px 6px rgba(2,6,23,0.06);
@@ -459,7 +459,7 @@ body {
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 20px);
-        max-width: 400px;
+        max-width: 300px;
         z-index: 100;
         background: rgba(31, 41, 55, 0.95);
         -webkit-backdrop-filter: blur(10px);
@@ -469,25 +469,47 @@ body {
         border: 1px solid rgba(75, 85, 99, 0.3);
     }
     
+    #task-area {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 1 !important;
+        max-width: 280px;
+        max-height: 280px;
+        padding: 12px !important;
+        margin: 0 auto;
+    }
+    
     #center-game-panel {
-        margin-top: 120px;
-        height: calc(100vh - 140px);
+        margin-top: 300px;
+        height: calc(100vh - 320px);
+        max-width: 100%;
     }
     
     .slot-container {
-        height: 32px;
-        margin: 0 5px;
+        height: 28px;
+        margin: 2px 0;
+        max-width: 200px;
     }
     
     .slot-item {
-        height: 32px;
-        font-size: 1rem;
+        height: 28px;
+        font-size: 0.9rem;
+        padding: 0 8px;
     }
     
     #countdown-wrapper {
-        margin: 5px 0;
-        height: 32px;
-        width: 70px;
+        margin: 4px 0;
+        height: 28px;
+        width: 60px;
+        font-size: 1.2rem;
+    }
+    
+    #countdown {
+        font-size: 1.2rem !important;
+    }
+    
+    #countdown.placeholder {
+        font-size: 0.9rem !important;
     }
     
     #status-text {
@@ -504,6 +526,19 @@ body {
         border-radius: 8px;
         padding: 8px;
         z-index: 99;
+    }
+    
+    /* Ensure game control buttons are properly positioned on mobile */
+    #game-control-buttons {
+        position: relative !important;
+        bottom: auto !important;
+        margin-top: 20px;
+        padding: 0 20px;
+    }
+    
+    #game-control-buttons button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
     }
 }
 
@@ -882,13 +917,13 @@ body {
     font-size: 2.2rem; 
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; 
     font-weight: 700; 
-    color: #ffffff !important;
+    color: var(--theme-text) !important;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
 }
 
 #countdown.placeholder { 
     font-size: 1.15rem;
-    color: #9ca3af !important;
+    color: var(--theme-text) !important;
     font-weight: 900; 
 }
 
@@ -910,6 +945,10 @@ body {
 .themed-text-muted { color: var(--theme-text-muted); }
 .themed-accent { color: var(--theme-accent); }
 .themed-bg-secondary { background: var(--theme-secondary); }
+.themed-glow { 
+    box-shadow: 0 0 20px var(--theme-glow), 0 0 40px var(--theme-glow), 0 0 60px var(--theme-glow); 
+    border: 1px solid var(--theme-accent);
+}
 .themed-input {
     background-color: var(--theme-secondary);
     color: var(--theme-text);
@@ -1008,8 +1047,69 @@ body {
     box-shadow: 0 0 15px var(--theme-glow);
 }
 
-/* AVATAR STİLLERİ */
-.avatar { 
-    background-clip: padding-box !important;
-    box-sizing: border-box;
+/* Light theme specific button overrides */
+.theme-light .game-button {
+    background: linear-gradient(135deg, #ffffff, #ffffff);
+    border-color: #e6e6e6;
+    color: #0f172a;
+    box-shadow: 0 0 12px rgba(2,6,23,0.06);
+}
+.theme-light .game-button:hover {
+    box-shadow: 0 0 20px rgba(2,6,23,0.08);
+    transform: translateY(-2px);
+}
+
+.theme-light .confirm-btn {
+    background: #ffffff;
+    color: #dc2626;
+    border: 1px solid #f3f4f6;
+    box-shadow: none;
+}
+.theme-light .confirm-btn:hover {
+    background: #f8fafc;
+    box-shadow: 0 0 12px rgba(203,213,225,0.4);
+}
+
+.theme-light .cancel-btn:hover {
+    background: #ffffff;
+    box-shadow: 0 0 12px rgba(203,213,225,0.3);
+}
+
+/* Light theme button color overrides (normalize utility classes to white) */
+.theme-light button[class*="bg-blue-600"],
+.theme-light button[class*="bg-green-600"],
+.theme-light button[class*="bg-gray-600"],
+.theme-light button[class*="bg-red-600"],
+.theme-light button[class*="bg-yellow-600"] {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #e6eef8 !important;
+    box-shadow: none !important;
+}
+
+.theme-light button[class*="bg-blue-600"]:hover,
+.theme-light button[class*="bg-green-600"]:hover,
+.theme-light button[class*="bg-gray-600"]:hover,
+.theme-light button[class*="bg-red-600"]:hover,
+.theme-light button[class*="bg-yellow-600"]:hover {
+    background-color: #f8fafc !important;
+    box-shadow: 0 0 10px rgba(203,213,225,0.4) !important;
+}
+
+/* Light theme specific text color overrides for target/duration labels and values */
+.theme-light .target-label,
+.theme-light .duration-label {
+    color: #000000 !important;
+}
+
+.theme-light .target-value,
+.theme-light .duration-value {
+    color: #000000 !important;
+}
+
+/* Light theme specific text color overrides for scoreboard elements */
+.theme-light .score-rank,
+.theme-light .score-name,
+.theme-light .score-value {
+    color: #000000 !important;
 }
