@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Oyunu - Ana Sayfa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-2 theme-dark">
+    <div id="animated-background" class="animated-bg"></div>
+    
+    <!-- Theme Controls -->
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn" id="toggle-howto">Nasıl Oynanır</button>
+    </div>
+
+    <!-- How to Play Panel -->
+    <div id="howto-panel" class="hidden" aria-hidden="true">
+        <button class="close-howto" id="close-howto">✕</button>
+        <h3 class="text-lg font-bold text-indigo-300 mb-2">Nasıl Oynanır?</h3>
+        <ul class="list-disc pl-5 text-sm text-gray-300">
+            <li>Profil fotoğrafı ve kullanıcı adı seçerek giriş yapın.</li>
+            <li>Oda oluşturabilir, odaya katılabilir veya profilinizi görüntüleyebilirsiniz.</li>
+            <li>Her turda verilen harf ve kategoriye uygun kelimeyi hızlıca yazın veya söyleyin.</li>
+            <li>Hedef puana ulaşan kazanır!</li>
+        </ul>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
+            <div class="avatar-grid" id="avatar-grid"></div>
+            <div class="flex gap-4 mt-6">
+                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
+                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Entry Screen -->
+    <div id="auth-screen" class="w-full max-w-md relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <div class="text-center mb-6">
+                <img src="/logo.png" alt="Logo" class="w-48 h-auto mx-auto">
+            </div>
+            <div class="mb-6 text-center">
+                <p class="text-sm mb-3 themed-text-muted">Profil fotoğrafını seç:</p>
+                <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500" title="Profili değiştir">🎮</div>
+            </div>
+            <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 rounded-lg text-center focus:outline-none focus:ring-2 themed-input">
+            <button id="startGameButton" class="w-full game-button">🎮 Oyuna Başla</button>
+        </div>
+        <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
+    </div>
+
+    <!-- Main Menu Screen -->
+    <div id="initial-screen" class="hidden w-full max-w-sm relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <div class="text-center mb-6">
+                <img src="/logo.png" alt="Logo" class="w-40 h-auto mx-auto">
+            </div>
+            <div id="join-options">
+                <div class="mb-4 p-3 rounded-lg themed-bg-secondary">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div id="user-avatar" class="avatar small avatar-1">🎮</div>
+                        <div>
+                            <p class="text-sm themed-text-muted">Hoş geldin,</p>
+                            <p class="font-bold themed-accent" id="welcomeUsername">Oyuncu</p>
+                        </div>
+                    </div>
+                    <button id="choose-avatar-btn" class="w-full text-xs bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded-lg transition">🎭 Avatar Değiştir</button>
+                    <button id="edit-username-btn" class="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition mt-2">✏️ İsim Değiştir</button>
+                </div>
+                <button id="createRoomButton" class="w-full game-button mb-2">🏠 Oda Oluştur</button>
+                <button id="showJoinFormButton" class="w-full game-button mb-2">🚪 Odaya Katıl</button>
+                <button id="showStatsButton" class="w-full game-button mb-2">👤 Profilim</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/home.js"></script>
+</body>
+</html>

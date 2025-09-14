@@ -1,8 +1,0 @@
-{
-	"appId": "com.yeti.kelimeoyunu",
-	"appName": "YETI Kelime Oyunu",
-	"webDir": "www",
-	"server": {
-		"androidScheme": "http"
-	}
-}

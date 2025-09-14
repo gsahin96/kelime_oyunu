@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Oyunu - Oyun Odası</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-2 theme-dark">
+    <div id="animated-background" class="animated-bg"></div>
+    
+    <!-- Logo in top-left corner -->
+    <div class="fixed top-4 left-4 z-50">
+        <img src="/logo.png" alt="Logo" class="w-20 h-auto">
+    </div>
+    
+    <!-- Theme Controls -->
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn home-btn show" id="leave-room-btn">🚪 Odadan Ayrıl</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container" class="w-full max-w-screen-2xl mx-auto flex-col relative z-10 p-2">
+        <!-- Mobile Layout: Center panel first, then right panel, then left panel -->
+        <div class="flex flex-col md:flex-row gap-4 w-full">
+            <!-- Center Panel - First on mobile, middle on desktop -->
+            <div id="center-panel" class="w-full md:w-3/5 flex-grow flex flex-col justify-center items-center p-4 game-panel rounded-2xl shadow-2xl min-h-[600px] relative order-1 md:order-2">
+                <div id="center-game-panel">
+                    <div id="center-task-area">
+                         <div id="task-area" class="mb-4 p-4 themed-bg-secondary themed-glow rounded-full aspect-square flex flex-col items-center justify-center gap-2">
+                            <div id="letter-slot-container" class="slot-container w-3/4">
+                                <div class="slot-reel"><div class="slot-item">HARF</div></div>
+                            </div>
+                            <div id="category-slot-container" class="slot-container w-full">
+                                <div class="slot-reel"><div class="slot-item">KATEGORİ</div></div>
+                            </div>
+                            <div id="countdown-wrapper">
+                                <div id="countdown" class="placeholder">SÜRE</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="circular-player-container" class="w-full h-full"></div>
+                </div>
+                 
+                <!-- Game Control Buttons positioned in corners -->
+                <div id="game-control-buttons" class="absolute bottom-4 left-0 right-0 flex justify-between px-4">
+                    <button id="resetScoreButton" class="hidden bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">SIFIRLA</button>
+                    <button id="startButton" class="game-button">BAŞLAT</button>
+                </div>
+                 
+                 <p id="status-text" class="text-lg themed-text-muted mt-4 h-8 flex items-center justify-center text-center"></p>
+                 <div id="word-input-area" class="hidden mt-4">
+                    <form id="word-form" class="flex justify-center space-x-2">
+                        <input type="text" id="wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
+                        <button type="submit" id="sendWordButton" class="game-button">Gönder</button>
+                    </form>
+                </div>
+                 <div id="host-decision-buttons" class="hidden space-x-4 h-14 mt-4">
+                     <button id="addWordYes" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👍 Evet, Ekle</button>
+                     <button id="addWordNo" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👎 Hayır</button>
+                </div>
+            </div>
+    
+            <!-- Right Panel (Scoreboard) - Second on mobile, third on desktop -->
+            <div id="right-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col order-2 md:order-3">
+                <h3 class="text-xl font-bold mb-1 text-center themed-title">🏆 Skor Tablosu</h3>
+                <div class="text-center themed-bg-secondary py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4 text-sm">
+                    <div><span class="target-label">Hedef:</span> <span id="score-goal-display" class="font-bold text-lg target-value">10</span></div>
+                    <div><span class="duration-label">Süre:</span> <span id="turn-duration-display" class="font-bold text-lg duration-value">5</span>sn</div>
+                </div>
+                <div id="scoreboard" class="space-y-2 mt-4 flex-grow"></div>
+                <div class="confirmation-popup hidden" id="reset-confirmation">
+                    <div class="popup-overlay"></div>
+                    <div class="popup-content">
+                        <h3>Sıfırlama Onayı</h3>
+                        <p>Tüm skorları sıfırlamak istediğinizden emin misiniz?</p>
+                        <div class="popup-buttons">
+                            <button id="confirm-reset" class="confirm-btn">Evet, Sıfırla</button>
+                            <button id="cancel-reset" class="cancel-btn">İptal</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Left Panel (Settings) - Third on mobile, first on desktop -->
+            <div id="left-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col order-3 md:order-1">
+                <h3 class="text-xl font-bold mb-4 text-center themed-title">Tüm Ayarlar</h3>
+                <div id="invite-link-ingame" class="mb-4">
+                     <p class="text-sm themed-text-muted mb-2">Arkadaşlarını Davet et:</p>
+                     <div class="flex items-center space-x-2">
+                        <input id="roomLinkInput" type="text" readonly class="w-full p-2 themed-input rounded-lg text-center font-mono select-all text-sm" title="Oda bağlantısı" placeholder="Oda bağlantısı">
+                        <button id="copyLinkButton" class="game-button text-sm p-2">Kopyala</button>
+                     </div>
+                </div>
+                <div id="host-options" class="hidden space-y-4 mb-4">
+                     <div>
+                        <label for="scoreGoalSelect" class="block mb-2 text-sm themed-text-muted">Hedef Skoru Değiştir:</label>
+                        <select id="scoreGoalSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
+                            <option value="5">5 Puan</option>
+                            <option value="10" selected>10 Puan</option>
+                            <option value="15">15 Puan</option>
+                            <option value="20">20 Puan</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label for="turnDurationSelect" class="block mb-2 text-sm themed-text-muted">Tur Süresini Değiştir:</label>
+                        <select id="turnDurationSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
+                            <option value="5" selected>5 Saniye</option>
+                            <option value="10">10 Saniye</option>
+                            <option value="15">15 Saniye</option>
+                        </select>
+                     </div>
+                </div>
+                <div id="used-words-section" class="mt-auto flex-grow min-h-[150px]">
+                    <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Son Kelimeler</h4>
+                    <div id="used-words-list" class="themed-bg-secondary rounded-lg p-3 max-h-40 overflow-y-auto"></div>
+                </div>
+                <button id="saveSettingsButton" class="hidden w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">KAYDET</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Setup Modal -->
+    <div id="user-setup-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎮 Oyuna Başlamadan Önce</h3>
+            <div class="mb-4">
+                <label for="setupUsernameInput" class="block text-sm text-gray-300 mb-2">Kullanıcı Adı:</label>
+                <input id="setupUsernameInput" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-blue-500">
+            </div>
+            <div class="mb-6">
+                <p class="text-sm text-gray-300 mb-3">Avatar:</p>
+                <div id="setup-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform" title="Avatar değiştir">🎮</div>
+            </div>
+            <div class="flex gap-4">
+                <button id="setup-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">🚀 Odaya Katıl</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
+            <div class="avatar-grid" id="avatar-grid"></div>
+            <div class="flex gap-4 mt-6">
+                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
+                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Check if this is admin panel view
+        window.isAdminView = window.location.pathname.includes('/admin');
+    </script>
+    <script src="/js/game.js"></script>
+</body>
+</html>

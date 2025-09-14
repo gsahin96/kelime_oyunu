@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Oyunu - Odaya Katıl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-2 theme-dark flex items-center justify-center">
+    <div id="animated-background" class="animated-bg"></div>
+    
+    <!-- Logo in top-left corner -->
+    <div class="fixed top-4 left-4 z-50">
+        <img src="/logo.png" alt="Logo" class="w-20 h-auto">
+    </div>
+    
+    <!-- Theme Controls -->
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn home-btn show" onclick="window.location.href='/'">🏠 Ana Sayfa</button>
+    </div>
+
+    <!-- Avatar Selection Modal -->
+    <div id="avatar-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
+            <div class="avatar-grid" id="avatar-grid"></div>
+            <div class="flex gap-4 mt-6">
+                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
+                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Room Screen -->
+    <div class="w-full max-w-md relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl">
+            <h1 class="text-3xl font-black mb-6 text-center game-title themed-title">🚪 Odaya Katıl</h1>
+            
+            <!-- Error Messages -->
+            <div id="error-message" class="hidden mb-4 p-3 rounded-lg bg-red-600 text-white text-center text-sm"></div>
+            
+            <!-- User Info -->
+            <div class="mb-6 p-3 rounded-lg themed-bg-secondary">
+                <div class="flex items-center gap-3 mb-2">
+                    <div id="user-avatar" class="avatar small avatar-1">🎮</div>
+                    <div>
+                        <p class="text-sm themed-text-muted">Oyuncu:</p>
+                        <p class="font-bold themed-accent" id="username-display">Misafir</p>
+                    </div>
+                </div>
+                <button id="change-user-btn" class="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition">👤 Kullanıcı Değiştir</button>
+            </div>
+
+            <!-- Room Code Input -->
+            <div class="mb-4">
+                <label for="roomCodeInput" class="block text-sm themed-text-muted mb-2">Oda Kodu:</label>
+                <input id="roomCodeInput" type="text" placeholder="Örnek: ABC123" maxlength="6" class="w-full p-3 rounded-lg themed-input uppercase text-center text-lg font-mono tracking-widest">
+            </div>
+
+            <!-- Join Button -->
+            <button id="joinRoomBtn" class="w-full game-button mb-4">🚪 Odaya Katıl</button>
+            
+            <!-- Back Button -->
+            <button onclick="window.location.href='/'" class="w-full text-gray-400 hover:text-white transition text-center">← Anasayfaya Dön</button>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div id="username-modal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-6 text-white">👤 Kullanıcı Bilgileri</h3>
+            <div class="mb-4">
+                <label for="usernameInput" class="block text-sm text-gray-300 mb-2">Kullanıcı Adı:</label>
+                <input id="usernameInput" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-blue-500">
+            </div>
+            <div class="mb-6">
+                <p class="text-sm text-gray-300 mb-3">Avatar:</p>
+                <div id="selected-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform" title="Avatar değiştir">🎮</div>
+            </div>
+            <div class="flex gap-4">
+                <button id="username-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Kaydet</button>
+                <button id="username-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/join.js"></script>
+</body>
+</html>

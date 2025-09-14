@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Oyunu - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-2 theme-dark">
+    <div id="animated-background" class="animated-bg"></div>
+    
+    <!-- Logo in top-left corner -->
+    <div class="fixed top-4 left-4 z-50">
+        <img src="/logo.png" alt="Logo" class="w-20 h-auto">
+    </div>
+    
+    <!-- Theme Controls -->
+    <div class="bg-controls" id="bg-controls-fixed">
+        <div class="theme-selector">
+            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
+            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
+            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        </div>
+        <button class="bg-btn home-btn show" onclick="window.location.href='/'">🏠 Ana Sayfa</button>
+        <button class="bg-btn home-btn show" id="back-to-room-btn">🎮 Oyuna Dön</button>
+    </div>
+
+    <!-- Admin Panel Container -->
+    <div id="admin-container" class="w-full max-w-4xl mx-auto relative z-10 p-4">
+        <div class="game-panel rounded-2xl shadow-2xl p-6">
+            <h1 class="text-3xl font-black mb-6 text-center game-title themed-title">
+                🛠️ Admin Panel
+            </h1>
+            
+            <!-- Room Info Section -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Oda Bilgileri</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm themed-text-muted mb-2">Oda Kodu:</label>
+                        <div class="flex items-center space-x-2">
+                            <input id="roomCodeDisplay" type="text" readonly class="flex-1 p-3 themed-input rounded-lg text-center font-mono font-bold text-xl" value="" placeholder="Oda kodu" title="Oda kodu">
+                            <button id="copyRoomCode" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">📋</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm themed-text-muted mb-2">Davet Bağlantısı:</label>
+                        <div class="flex items-center space-x-2">
+                            <input id="inviteLink" type="text" readonly class="flex-1 p-3 themed-input rounded-lg text-center font-mono text-sm" value="" title="Davet bağlantısı" placeholder="Davet bağlantısı">
+                            <button id="copyInviteLink" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">📋</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Settings Section -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Oyun Ayarları</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="adminScoreGoal" class="block mb-2 text-sm themed-text-muted">Hedef Skor:</label>
+                        <select id="adminScoreGoal" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="5">5 Puan</option>
+                            <option value="10" selected>10 Puan</option>
+                            <option value="15">15 Puan</option>
+                            <option value="20">20 Puan</option>
+                            <option value="25">25 Puan</option>
+                            <option value="30">30 Puan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="adminTurnDuration" class="block mb-2 text-sm themed-text-muted">Tur Süresi:</label>
+                        <select id="adminTurnDuration" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="5" selected>5 Saniye</option>
+                            <option value="10">10 Saniye</option>
+                            <option value="15">15 Saniye</option>
+                            <option value="20">20 Saniye</option>
+                            <option value="30">30 Saniye</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="saveSettings" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                    💾 Ayarları Kaydet
+                </button>
+            </div>
+
+            <!-- Game Control Section -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Oyun Kontrolü</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button id="adminStartGame" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                        🚀 Oyunu Başlat
+                    </button>
+                    <button id="adminNewGame" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                        🔄 Yeni Oyun
+                    </button>
+                    <button id="adminResetScores" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                        🗑️ Skorları Sıfırla
+                    </button>
+                </div>
+            </div>
+
+            <!-- Players Management Section -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Oyuncu Yönetimi</h2>
+                <div id="adminPlayersList" class="space-y-2 mb-4">
+                    <!-- Players will be populated here -->
+                </div>
+                <div class="text-sm themed-text-muted text-center">
+                    Oyuncular otomatik olarak güncellenecektir
+                </div>
+            </div>
+
+            <!-- Current Game Status -->
+            <div class="mb-6 p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Mevcut Oyun Durumu</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm themed-text-muted mb-2">Oyun Durumu:</label>
+                        <div id="gameStatus" class="p-3 bg-gray-700 rounded-lg font-bold text-center">
+                            Bekleniyor...
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm themed-text-muted mb-2">Aktif Oyuncu Sayısı:</label>
+                        <div id="activePlayerCount" class="p-3 bg-gray-700 rounded-lg font-bold text-center">
+                            0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scoreboard Section -->
+            <div class="p-4 themed-bg-secondary rounded-lg">
+                <h2 class="text-xl font-bold mb-3 themed-accent">Skor Tablosu</h2>
+                <div id="adminScoreboard" class="space-y-2">
+                    <!-- Scoreboard will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="admin-loading" class="w-full max-w-md relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl text-center">
+            <h1 class="text-3xl font-black mb-6 game-title themed-title">Admin Panel Yükleniyor...</h1>
+            <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+            <p class="themed-text-muted">Yetki kontrolü yapılıyor...</p>
+        </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="admin-error" class="hidden w-full max-w-md relative z-10">
+        <div class="p-8 game-panel rounded-2xl shadow-2xl text-center">
+            <h1 class="text-3xl font-black mb-6 game-title themed-title text-red-500">Erişim Reddedildi</h1>
+            <p class="themed-text-muted mb-4">Bu admin paneline erişim yetkiniz bulunmamaktadır.</p>
+            <p class="text-sm themed-text-muted mb-6">Sadece oda oluşturan kişi admin panelini kullanabilir.</p>
+            <button onclick="window.location.href='/'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                🏠 Ana Sayfaya Dön
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="avatar-modal hidden">
+        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
+            <h3 class="text-2xl font-bold text-center mb-4 text-white">Onay Gerekli</h3>
+            <p id="confirmMessage" class="text-center mb-6 themed-text-muted"></p>
+            <div class="flex gap-4">
+                <button id="confirmYes" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition">Evet</button>
+                <button id="confirmNo" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>
