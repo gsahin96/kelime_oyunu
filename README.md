@@ -1,8 +1,6 @@
 # Kelime Oyunu 🎮
 
-Türkçe kelime oyunu - Socket.io ile gerçek zamanlı çok oyunculu eğlence!
-
-İlk projenin günahı olmaz :) Osman ile Kelime Oyununu geliştirirken aynı zamanda VS Code ve GitHub öğreniyoruz.
+Türkçe Kelime Oyunu - Socket.io ile gerçek zamanlı çok oyunculu eğlence!
 
 ## 📋 Proje Açıklaması
 
@@ -103,8 +101,8 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 ## 👥 Geliştiriciler
 
-- **Osman** - Geliştirici
-- **Gökhan Şahin** - Proje sahibi
+- **Osman Karatay** - Geliştirici
+- **Görkem Şahin** - Proje sahibi
 
 ---
 
