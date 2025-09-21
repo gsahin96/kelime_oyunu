@@ -5,223 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelime Oyunu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="./public/css/styles.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-2">
+<body class="theme-dark bg-gray-900 text-white min-h-screen p-4 relative overflow-x-hidden">
     <div id="animated-background" class="animated-bg"></div>
-    <!-- Theme Controls (single instance) -->
+
     <div class="bg-controls" id="bg-controls-fixed">
-        <div class="theme-selector">
-            <div class="theme-btn theme-btn-void" onclick="changeTheme('void')" title="Void Theme">🌀</div>
-            <div class="theme-btn theme-btn-dark active" onclick="changeTheme('dark')" title="Dark Theme">🌙</div>
-            <div class="theme-btn theme-btn-light" onclick="changeTheme('light')" title="Light Theme">🔆</div>
+        <div class="theme-selector" role="group" aria-label="Tema secimleri">
+            <button type="button" class="theme-btn theme-btn-void" data-theme="void">Void</button>
+            <button type="button" class="theme-btn theme-btn-dark active" data-theme="dark">Koyu</button>
+            <button type="button" class="theme-btn theme-btn-light" data-theme="light">Acik</button>
         </div>
-        <button class="bg-btn" id="toggle-howto">Nasıl Oynanır</button>
-        <button class="bg-btn home-btn" id="go-home" onclick="goToMainMenu()">🏠 Anasayfa</button>
+        <button class="bg-btn" id="toggle-howto" type="button">Nasil Oynanir</button>
     </div>
 
     <div id="howto-panel" class="hidden" aria-hidden="true">
-        <button class="close-howto" id="close-howto">✕</button>
-        <h3 class="text-lg font-bold text-indigo-300 mb-2">Nasıl Oynanır?</h3>
+        <button class="close-howto" id="close-howto" type="button">X</button>
+        <h3 class="text-lg font-bold text-indigo-300 mb-2">Nasil Oynanir?</h3>
         <ul class="list-disc pl-5 text-sm text-gray-300">
-            <li>Profil fotoğrafı ve kullanıcı adı seçerek giriş yapın.</li>
-            <li>Oda oluşturabilir, odaya katılabilir veya tek başınıza oynayabilirsiniz.</li>
-            <li>Her turda verilen harf ve kategoriye uygun kelimeyi hızlıca yazın veya söyleyin.</li>
-            <li>Hedef puana ulaşan kazanır!</li>
+            <li>Oyuncu isimlerini girin ve siralamayi belirleyin.</li>
+            <li>Tek klavyede sirayla tahmin yapin.</li>
+            <li>Verilen harf ve kategoriye uygun kelimeyi sure dolmadan yazin.</li>
+            <li>Daha once kullanilan kelimeleri tekrar etmeyin.</li>
+            <li>Hedef puana ulasan oyuncu oyunu kazanir.</li>
         </ul>
     </div>
 
-    <!-- Avatar Modal (single instance) -->
-    <div id="avatar-modal" class="avatar-modal hidden">
-        <div class="bg-gray-800/95 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700/50 p-8 max-w-md mx-4">
-            <h3 class="text-2xl font-bold text-center mb-6 text-white">🎭 Avatar Seç</h3>
-            <div class="avatar-grid" id="avatar-grid"></div>
-            <div class="flex gap-4 mt-6">
-                <button id="avatar-confirm" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition">✅ Seç</button>
-                <button id="avatar-cancel" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition">❌ İptal</button>
+    <main class="relative z-10 w-full max-w-6xl mx-auto flex flex-col gap-8">
+        <section id="player-setup-screen" class="w-full">
+            <div class="game-panel rounded-2xl shadow-2xl p-8 text-center">
+                <img src="./public/logo.png" alt="Kelime Oyunu" class="w-40 h-auto mx-auto mb-6">
+                <h1 class="text-3xl font-extrabold mb-2">Kelime Oyunu</h1>
+                <p class="text-sm text-gray-300 max-w-xl mx-auto">
+                    Arkadaslarinizla ayni klavyeyi paylasin, sirayla kelimeler bulun ve hedef puana ilk ulasan olun.
+                </p>
+                <div class="mt-8 space-y-3" id="players-list"></div>
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+                    <button id="add-player-btn" class="bg-btn" type="button">Oyuncu Ekle</button>
+                    <button id="start-game-btn" class="game-button" type="button">Oyuna Basla</button>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div id="auth-screen" class="w-full max-w-md relative z-10">
-        <div class="p-8 game-panel rounded-2xl shadow-2xl">
-            <div class="text-center mb-6">
-                <img src="/logo.png" alt="Logo" class="w-48 h-auto mx-auto">
-            </div>
-            <div class="mb-6 text-center">
-                <p class="text-sm mb-3 themed-text-muted">Profil fotoğrafını seç:</p>
-                <div id="entry-avatar" class="avatar large avatar-1 mx-auto cursor-pointer hover:scale-110 transition-transform border-4 border-indigo-500" title="Profili değiştir">🎮</div>
-            </div>
-            <input id="entryUsername" type="text" placeholder="Kullanıcı adını gir" maxlength="20" class="w-full p-3 mb-4 rounded-lg text-center focus:outline-none focus:ring-2 themed-input">
-            <button id="startGameButton" class="w-full game-button">▶️ Devam Et</button>
-        </div>
-        <div id="entryMessage" class="hidden mt-4 p-3 rounded-lg text-center text-sm"></div>
-    </div>
-
-    <div id="initial-screen" class="hidden w-full max-w-sm relative z-10">
-        <div class="p-8 game-panel rounded-2xl shadow-2xl">
-            <div class="text-center mb-6">
-                <img src="/logo.png" alt="Logo" class="w-40 h-auto mx-auto">
-            </div>
-            <div id="join-options">
-                <div class="mb-4 p-3 rounded-lg themed-bg-secondary">
-                    <div class="flex items-center gap-3 mb-2">
-                        <div id="user-avatar" class="avatar small avatar-1">🎮</div>
-                        <div>
-                            <p class="text-sm themed-text-muted">Hoş geldin,</p>
-                            <p class="font-bold themed-accent" id="welcomeUsername">Oyuncu</p>
-                        </div>
-                    </div>
-                    <button id="choose-avatar-btn" class="w-full text-xs bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded-lg transition">🎭 Avatar Değiştir</button>
-                    <button id="edit-username-btn" class="w-full text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition mt-2">✏️ İsim Değiştir</button>
-                </div>
-                <button id="createRoomButton" class="w-full game-button mb-2">✚ Oda Oluştur</button>
-                <button id="showJoinFormButton" class="w-full game-button mb-2">➤ Odaya Katıl</button>
-                <button id="showStatsButton" class="w-full game-button mb-2">၊|၊ İstatistiklerim</button>
-            </div>
-            <div id="join-form" class="hidden">
-                <input id="roomInput" type="text" placeholder="Oda Kodunu Gir" maxlength="6" class="w-full p-3 mb-4 rounded-lg themed-input uppercase">
-                <button id="joinRoomButton" class="w-full game-button">Katıl</button>
-                <button id="backToOptionsButton" class="w-full mt-2 text-gray-400 hover:text-white transition">Geri</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="stats-screen" class="hidden w-full max-w-4xl relative z-10">
-        <div class="p-8 game-panel rounded-2xl shadow-2xl">
-            <h2 class="text-3xl font-bold text-center mb-6 text-yellow-400">📊 Oyuncu İstatistikleri</h2>
-            <div id="stats-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="themed-bg-secondary p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 themed-accent">🎮 Oyun İstatistikleri</h3>
-                    <div class="space-y-2">
-                        <p>Toplam Oyun: <span id="stat-games-played" class="font-bold">0</span></p>
-                        <p>Kazanılan Oyun: <span id="stat-games-won" class="font-bold">0</span></p>
-                        <p>Kazanma Oranı: %<span id="stat-win-rate" class="font-bold">0</span></p>
-                        <p>En Uzun Kazanma Serisi: <span id="stat-longest-streak" class="font-bold">0</span></p>
-                        <p>Mevcut Kazanma Serisi: <span id="stat-current-streak" class="font-bold">0</span></p>
-                        <p>Son Oyun: <span id="stat-last-played" class="font-bold">Hiç</span></p>
-                    </div>
-                </div>
-                <div class="themed-bg-secondary p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">📝 Kelime İstatistikleri</h3>
-                    <div class="space-y-2">
-                        <p>Toplam Doğru Kelime: <span id="stat-total-words" class="font-bold">0</span></p>
-                        <p>Ortalama Yanıt Süresi: <span id="stat-avg-time" class="font-bold">0</span>sn</p>
-                        <p>Favori Kategori: <span id="stat-fav-category" class="font-bold">Henüz yok</span></p>
-                    </div>
-                </div>
-                <div class="themed-bg-secondary p-6 rounded-lg md:col-span-2">
-                    <h3 class="text-xl font-bold mb-4 text-orange-400">🔤 En Çok Kullanılan Kelimeler</h3>
-                    <div id="most-used-words" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
-                </div>
-            </div>
-            <div class="mt-6 text-center">
-                <button id="closeStatsButton" class="game-button">Geri Dön</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="game-container" class="hidden w-full max-w-screen-2xl mx-auto flex-col relative z-10 p-2">
-        <div class="flex flex-col md:flex-row gap-4 w-full">
-    
-            <div id="left-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col">
-                <h3 class="text-xl font-bold mb-4 text-center themed-title">Tüm Ayarlar</h3>
-                <div id="invite-link-ingame" class="mb-4">
-                     <label for="roomLinkInput" class="text-sm themed-text-muted mb-2">Arkadaşlarını Davet et:</label>
-                     <div class="flex items-center space-x-2">
-                        <input id="roomLinkInput" type="text" readonly class="w-full p-2 themed-input rounded-lg text-center font-mono select-all text-sm">
-                        <button id="copyLinkButton" class="game-button text-sm p-2">Kopyala</button>
-                     </div>
-                </div>
-                <div id="host-options" class="hidden space-y-4 mb-4">
-                     <div>
-                        <label for="scoreGoalSelect" class="block mb-2 text-sm themed-text-muted">Hedef Skoru Değiştir:</label>
+        <section id="game-screen" class="hidden w-full">
+            <div class="grid gap-6 md:grid-cols-3">
+                <div id="left-panel" class="game-panel rounded-2xl shadow-2xl p-4 flex flex-col gap-4">
+                    <h3 class="text-xl font-bold text-center text-indigo-300">Oyun Ayarlari</h3>
+                    <div>
+                        <label for="scoreGoalSelect" class="block mb-2 text-sm text-gray-300">Hedef Skor</label>
                         <select id="scoreGoalSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
                             <option value="5">5 Puan</option>
                             <option value="10" selected>10 Puan</option>
                             <option value="15">15 Puan</option>
                             <option value="20">20 Puan</option>
                         </select>
-                     </div>
-                     <div>
-                        <label for="turnDurationSelect" class="block mb-2 text-sm themed-text-muted">Tur Süresini Değiştir:</label>
+                    </div>
+                    <div>
+                        <label for="turnDurationSelect" class="block mb-2 text-sm text-gray-300">Tur Suresi</label>
                         <select id="turnDurationSelect" class="w-full p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
                             <option value="5" selected>5 Saniye</option>
                             <option value="10">10 Saniye</option>
                             <option value="15">15 Saniye</option>
                         </select>
-                     </div>
-                </div>
-                <div id="used-words-section" class="mt-auto flex-grow min-h-[150px]">
-                    <h4 class="text-lg font-bold mb-2 text-center text-green-400">✅ Son Kelimeler</h4>
-                    <div id="used-words-list" class="themed-bg-secondary rounded-lg p-3 max-h-40 overflow-y-auto"></div>
-                </div>
-                <button id="saveSettingsButton" class="hidden w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">KAYDET</button>
-                <button id="resetScoreButton" class="hidden w-full mt-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition">SIFIRLA</button>
-            </div>
-    
-            <div id="center-panel" class="w-full md:w-3/5 flex-grow flex flex-col justify-center items-center p-4 game-panel rounded-2xl shadow-2xl min-h-[600px]">
-                <div id="center-game-panel">
-                    <div id="center-task-area">
-                         <div id="task-area" class="mb-4 p-4 themed-bg-secondary rounded-xl flex flex-col items-center gap-2">
-                            <div id="letter-slot-container" class="slot-container w-full">
-                                <div class="slot-reel"><div class="slot-item">HARF</div></div>
-                            </div>
-                            <div id="category-slot-container" class="slot-container w-full">
-                                <div class="slot-reel"><div class="slot-item">KATEGORİ</div></div>
-                            </div>
-                            <div id="countdown-wrapper">
-                                <div id="countdown" class="placeholder">SÜRE</div>
-                            </div>
-                        </div>
                     </div>
-                    <div id="circular-player-container" class="w-full h-full"></div>
-                </div>
-                 <p id="status-text" class="text-lg themed-text-muted mt-4 h-8 flex items-center justify-center text-center"></p>
-                 <div id="word-input-area" class="hidden mt-4">
-                    <form id="word-form" class="flex justify-center space-x-2">
-                        <input type="text" id="wordInput" placeholder="Kelimeyi buraya yazın..." class="w-full max-w-xs p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
-                        <button type="submit" id="sendWordButton" class="game-button">Gönder</button>
-                    </form>
-                </div>
-                 <div id="host-decision-buttons" class="hidden space-x-4 h-14 mt-4">
-                     <button id="addWordYes" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👍 Evet, Ekle</button>
-                     <button id="addWordNo" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition text-xl">👎 Hayır</button>
-                </div>
-            </div>
-    
-            <div id="right-panel" class="w-full md:w-1/5 p-4 game-panel rounded-2xl shadow-2xl flex flex-col">
-                <h3 class="text-xl font-bold mb-1 text-center themed-title">🏆 Skor Tablosu</h3>
-                <div class="text-center themed-bg-secondary py-2 px-4 rounded-lg mb-4 grid grid-cols-2 gap-4 text-sm">
-                    <div>Hedef: <span id="score-goal-display" class="font-bold text-lg text-yellow-300">10</span></div>
-                    <div>Süre: <span id="turn-duration-display" class="font-bold text-lg text-yellow-300">5</span>sn</div>
-                </div>
-                <div id="scoreboard" class="space-y-2 mt-4 flex-grow"></div>
-                <div id="game-buttons" class="h-14 flex items-center justify-center space-x-4 mt-6">
-                    <button id="startButton" class="hidden game-button">BAŞLAT</button>
-                    <button id="newGameButton" class="hidden game-button">Yeni Oyun Başlat</button>
-                </div>
-                <div class="confirmation-popup hidden" id="reset-confirmation">
-                    <div class="popup-overlay"></div>
-                    <div class="popup-content">
-                        <h3>Sıfırlama Onayı</h3>
-                        <p>Tüm skorları sıfırlamak istediğinizden emin misiniz?</p>
-                        <div class="popup-buttons">
-                            <button id="confirm-reset" class="confirm-btn">Evet, Sıfırla</button>
-                            <button id="cancel-reset" class="cancel-btn">İptal</button>
-                        </div>
+                    <div class="flex-1 flex flex-col">
+                        <h4 class="text-lg font-bold mb-2 text-center text-green-400">Son Kelimeler</h4>
+                        <div id="used-words-list" class="themed-bg-secondary rounded-lg p-3 max-h-60 overflow-y-auto flex-1"></div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Removed single-player-container: feature deprecated -->
-    
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script src="/js/common.js"></script>
-    <script src="/js/home.js"></script>
-    <script src="/js/game.js"></script>
+                <div id="center-panel" class="game-panel rounded-2xl shadow-2xl p-6 flex flex-col items-center gap-6 md:col-span-1">
+                    <div id="task-area" class="task-orb">
+                        <div id="letter-slot-container" class="slot-container">
+                            <div class="slot-reel"><div class="slot-item">HARF</div></div>
+                        </div>
+                        <div id="category-slot-container" class="slot-container">
+                            <div class="slot-reel"><div class="slot-item">KATEGORI</div></div>
+                        </div>
+                        <div id="countdown-wrapper">
+                            <div id="countdown" class="placeholder">SURE</div>
+                        </div>
+                    </div>
+                    <div id="player-turn-row" class="turn-row"></div>
+                    <p id="status-text" class="status-text text-center h-8 flex items-center justify-center"></p>
+                    <div id="word-input-area" class="hidden w-full">
+                        <form id="word-form" class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <input type="text" id="wordInput" placeholder="Kelimeyi yazin" class="flex-1 p-3 themed-input rounded-lg focus:outline-none focus:ring-2">
+                            <button type="submit" id="sendWordButton" class="game-button">Gonder</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="right-panel" class="game-panel rounded-2xl shadow-2xl p-4 flex flex-col gap-4">
+                    <h3 class="text-xl font-bold text-center text-indigo-300">Skor Tablosu</h3>
+                    <div class="text-center themed-bg-secondary py-2 px-4 rounded-lg grid grid-cols-2 gap-4 text-sm">
+                        <div>Hedef: <span id="score-goal-display" class="font-bold text-lg text-yellow-300">10</span></div>
+                        <div>Sure: <span id="turn-duration-display" class="font-bold text-lg text-yellow-300">5</span> sn</div>
+                    </div>
+                    <div id="scoreboard" class="scoreboard-list flex-1 overflow-y-auto"></div>
+                    <button id="startButton" class="game-button" type="button">Turu Baslat</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="./public/js/database.js"></script>
+    <script src="./public/js/game.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            const themes = ['theme-void', 'theme-dark', 'theme-light'];
+
+            const setTheme = (theme) => {
+                body.classList.remove(...themes);
+                body.classList.add(`theme-${theme}`);
+                themeButtons.forEach((btn) => {
+                    btn.classList.toggle('active', btn.dataset.theme === theme);
+                });
+                localStorage.setItem('kelime-theme', theme);
+            };
+
+            const storedTheme = localStorage.getItem('kelime-theme');
+            if (storedTheme) {
+                setTheme(storedTheme);
+            }
+
+            themeButtons.forEach((button) => {
+                button.addEventListener('click', () => setTheme(button.dataset.theme));
+            });
+
+            const scoreGoalSelect = document.getElementById('scoreGoalSelect');
+            const turnDurationSelect = document.getElementById('turnDurationSelect');
+            const scoreGoalDisplay = document.getElementById('score-goal-display');
+            const turnDurationDisplay = document.getElementById('turn-duration-display');
+
+            const syncSettings = () => {
+                if (scoreGoalDisplay && scoreGoalSelect) {
+                    scoreGoalDisplay.textContent = scoreGoalSelect.value;
+                }
+                if (turnDurationDisplay && turnDurationSelect) {
+                    turnDurationDisplay.textContent = turnDurationSelect.value;
+                }
+            };
+
+            scoreGoalSelect?.addEventListener('change', syncSettings);
+            turnDurationSelect?.addEventListener('change', syncSettings);
+            syncSettings();
+
+            const howtoPanel = document.getElementById('howto-panel');
+            const toggleHowto = document.getElementById('toggle-howto');
+            const closeHowto = document.getElementById('close-howto');
+
+            const setHowtoVisibility = (visible) => {
+                howtoPanel.classList.toggle('hidden', !visible);
+                howtoPanel.setAttribute('aria-hidden', (!visible).toString());
+            };
+
+            toggleHowto?.addEventListener('click', () => setHowtoVisibility(true));
+            closeHowto?.addEventListener('click', () => setHowtoVisibility(false));
+        });
+    </script>
 </body>
 </html>
+
+
+

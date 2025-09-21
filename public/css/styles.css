@@ -61,7 +61,7 @@ body {
     background: var(--theme-primary);
 }
 
-/* TEMA SİSTEMİ */
+/* TEMA S??STEM?? */
 :root {
     --theme-primary: #1f2937;
     --theme-secondary: #374151;
@@ -433,7 +433,7 @@ body {
     100% { background-position: -200% center; } 
 }
 
-/* YENİ OYUN LOBİSİ STİLLERİ */
+/* YEN?? OYUN LOB??S?? ST??LLER?? */
 #center-game-panel { 
     position: relative; 
     width: 100%; 
@@ -451,6 +451,269 @@ body {
     width: 200px;
 }
 
+/* Local multiplayer visual refresh */
+#task-area {
+    position: relative;
+    width: min(320px, 100%);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(160% 160% at 50% 40%, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.75) 58%, rgba(17, 24, 39, 0.95) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.65), inset 0 0 28px rgba(99, 102, 241, 0.24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    padding: 2.75rem 1.75rem;
+}
+
+#task-area::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background: radial-gradient(120% 120% at 50% 30%, rgba(99, 102, 241, 0.28) 0%, rgba(99, 102, 241, 0) 65%);
+    filter: blur(14px);
+    opacity: 0.7;
+    z-index: 0;
+}
+
+#task-area .slot-container {
+    position: relative;
+    width: 80%;
+    height: auto;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.35);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    padding: 0.3rem 0.6rem;
+    overflow: hidden;
+    z-index: 1;
+}
+
+#task-area .slot-reel {
+    position: relative;
+    left: auto;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 450ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+#task-area .slot-item {
+    height: auto;
+    padding: 0.35rem 0.75rem;
+    background: transparent;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+#countdown-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#countdown {
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    color: var(--theme-accent);
+    text-transform: uppercase;
+}
+
+#player-turn-row {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.turn-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.1rem;
+    border-radius: 999px;
+    background: var(--chip-bg, rgba(255, 255, 255, 0.06));
+    border: 1px solid transparent;
+    min-width: 170px;
+    transition: all 180ms ease;
+}
+
+.turn-chip.active {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 32px var(--chip-glow, rgba(99, 102, 241, 0.4));
+    border-color: var(--chip-glow, rgba(99, 102, 241, 0.45));
+}
+
+.turn-chip.eliminated {
+    opacity: 0.4;
+    filter: saturate(0.4);
+}
+
+.turn-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--avatar-bg, linear-gradient(135deg, #64748b, #334155));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #f8fafc;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.55);
+}
+
+.turn-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.turn-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.turn-status {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted);
+}
+
+.turn-chip.active .turn-status {
+    color: var(--theme-accent);
+}
+
+.turn-placeholder {
+    font-size: 0.85rem;
+    color: var(--theme-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.scoreboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    background: var(--chip-bg, rgba(255, 255, 255, 0.06));
+    border: 1px solid transparent;
+    transition: all 180ms ease;
+}
+
+.score-row.active {
+    box-shadow: 0 12px 28px var(--chip-glow, rgba(99, 102, 241, 0.35));
+    border-color: var(--chip-glow, rgba(99, 102, 241, 0.4));
+    transform: translateY(-2px);
+}
+
+.score-row.eliminated {
+    opacity: 0.45;
+    filter: saturate(0.5);
+}
+
+.score-player {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.score-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--avatar-bg, linear-gradient(135deg, #64748b, #334155));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #f8fafc;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.4);
+}
+
+.score-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.score-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.score-status {
+    font-size: 0.7rem;
+    letter-spacing: 0.075em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted);
+}
+
+.score-value {
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted);
+}
+
+.status-text.status-active {
+    color: var(--theme-accent);
+}
+
+.player-setup-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.player-setup-row .setup-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--avatar-bg, linear-gradient(135deg, #64748b, #334155));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #f8fafc;
+    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.35);
+}
+
+.player-setup-row input {
+    flex: 1;
+}
+
+.player-theme-1 { --avatar-bg: linear-gradient(135deg, #6366f1, #8b5cf6); --chip-bg: rgba(99, 102, 241, 0.16); --chip-glow: rgba(99, 102, 241, 0.45); }
+.player-theme-2 { --avatar-bg: linear-gradient(135deg, #f472b6, #ec4899); --chip-bg: rgba(244, 114, 182, 0.15); --chip-glow: rgba(236, 72, 153, 0.42); }
+.player-theme-3 { --avatar-bg: linear-gradient(135deg, #f59e0b, #f97316); --chip-bg: rgba(245, 158, 11, 0.18); --chip-glow: rgba(249, 115, 22, 0.38); }
+.player-theme-4 { --avatar-bg: linear-gradient(135deg, #14b8a6, #0ea5e9); --chip-bg: rgba(14, 165, 233, 0.18); --chip-glow: rgba(14, 165, 233, 0.4); }
+.player-theme-5 { --avatar-bg: linear-gradient(135deg, #34d399, #10b981); --chip-bg: rgba(52, 211, 153, 0.18); --chip-glow: rgba(16, 185, 129, 0.4); }
+.player-theme-6 { --avatar-bg: linear-gradient(135deg, #f87171, #fb7185); --chip-bg: rgba(248, 113, 113, 0.18); --chip-glow: rgba(248, 113, 113, 0.4); }
+.player-theme-7 { --avatar-bg: linear-gradient(135deg, #818cf8, #4f46e5); --chip-bg: rgba(129, 140, 248, 0.16); --chip-glow: rgba(79, 70, 229, 0.45); }
+.player-theme-8 { --avatar-bg: linear-gradient(135deg, #38bdf8, #0ea5e9); --chip-bg: rgba(14, 165, 233, 0.16); --chip-glow: rgba(56, 189, 248, 0.42); }
 /* Mobile optimizations */
 @media (max-width: 768px) {
     #center-task-area {
@@ -749,7 +1012,7 @@ body {
     animation: none;
 }
 
-/* SÜZÜLME ANİMASYONU */
+/* S??Z??LME AN??MASYONU */
 @keyframes slotFloat {
     0%, 100% { transform: translate(-50%, -50%) translateY(0px) rotate(0deg); }
     25% { transform: translate(-50%, -50%) translateY(-3px) rotate(1deg); }
@@ -812,7 +1075,7 @@ body {
 }
 
 .player-slot-circle.round-winner::after {
-    content: '👑';
+    content: '????';
     position: absolute;
     top: -25px;
     left: 50%;
@@ -881,7 +1144,7 @@ body {
     }
 }
 
-/* BUTON STİLLERİ VE GLOW EFEKTİ */
+/* BUTON ST??LLER?? VE GLOW EFEKT?? */
 .game-button {
     background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-hover));
     border: 2px solid var(--theme-accent);
@@ -898,7 +1161,7 @@ body {
     transform: translateY(-2px);
 }
 
-/* SÜRE GÖSTERGESI */
+/* S??RE G??STERGESI */
 #countdown-wrapper { 
     margin-top: 8px; 
     height: 44px;
@@ -932,7 +1195,7 @@ body {
     animation: pulse 1s infinite;
 }
 
-/* PANEL STİLLERİ */
+/* PANEL ST??LLER?? */
 .game-panel {
     background: var(--theme-bg-overlay);
     border: 1px solid var(--theme-border);
@@ -940,7 +1203,7 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* TEMA STİLLERİ */
+/* TEMA ST??LLER?? */
 .themed-title { color: var(--theme-accent); }
 .themed-text-muted { color: var(--theme-text-muted); }
 .themed-accent { color: var(--theme-accent); }
@@ -964,7 +1227,7 @@ body {
 .home-btn { display: none; }
 .home-btn.show { display: inline-flex; align-items: center; }
 
-/* POPUP STİLLERİ */
+/* POPUP ST??LLER?? */
 .confirmation-popup {
     position: fixed;
     top: 0;
