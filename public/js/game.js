@@ -48,6 +48,128 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastRoundWinner = null;
     let playerProfiles = [];
 
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let audioContext = null;
+
+    const ensureAudioContext = () => {
+        if (!AudioContextClass) {
+            return null;
+        }
+        if (!audioContext) {
+            audioContext = new AudioContextClass();
+        }
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
+        }
+        return audioContext;
+    };
+
+    const registerAudioUnlock = () => {
+        const unlockHandler = () => {
+            ensureAudioContext();
+        };
+        document.addEventListener('pointerdown', unlockHandler, { once: true });
+        document.addEventListener('keydown', unlockHandler, { once: true });
+    };
+
+    if (AudioContextClass) {
+        registerAudioUnlock();
+    }
+
+    const playTone = (frequency, duration, options = {}) => {
+        const context = ensureAudioContext();
+        if (!context) {
+            return;
+        }
+
+        const {
+            type = 'sine',
+            volume = 0.25,
+            attack = 0.02
+        } = options;
+
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const now = context.currentTime;
+        const safeDuration = Math.max(duration, 0.05);
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, now);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume, now + attack);
+        gain.gain.linearRampToValueAtTime(0.0001, now + safeDuration);
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+
+        oscillator.start(now);
+        oscillator.stop(now + safeDuration + 0.02);
+    };
+
+    const playSweep = (startFrequency, endFrequency, duration, options = {}) => {
+        const context = ensureAudioContext();
+        if (!context) {
+            return;
+        }
+
+        const {
+            type = 'sine',
+            volume = 0.25,
+            attack = 0.02
+        } = options;
+
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        const now = context.currentTime;
+        const safeDuration = Math.max(duration, 0.05);
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(startFrequency, now);
+        oscillator.frequency.linearRampToValueAtTime(endFrequency, now + safeDuration);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(volume, now + attack);
+        gain.gain.linearRampToValueAtTime(0.0001, now + safeDuration);
+
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+
+        oscillator.start(now);
+        oscillator.stop(now + safeDuration + 0.02);
+    };
+
+    const soundEngine = {
+        playRoundStart: () => {
+            playSweep(330, 560, 0.35, { type: 'triangle', volume: 0.28 });
+        },
+        playTurnStart: () => {
+            playTone(660, 0.18, { type: 'sine', volume: 0.22 });
+        },
+        playSuccess: () => {
+            playSweep(620, 920, 0.28, { type: 'sine', volume: 0.3 });
+        },
+        playElimination: () => {
+            playSweep(420, 180, 0.4, { type: 'sawtooth', volume: 0.22 });
+        },
+        playRoundWin: () => {
+            playTone(660, 0.18, { type: 'triangle', volume: 0.26 });
+            setTimeout(() => {
+                playTone(880, 0.2, { type: 'triangle', volume: 0.24 });
+            }, 130);
+        },
+        playVictory: () => {
+            playSweep(440, 880, 0.35, { type: 'triangle', volume: 0.3 });
+            setTimeout(() => {
+                playTone(1047, 0.28, { type: 'sine', volume: 0.26 });
+            }, 220);
+        },
+        playCountdownTick: (timeLeft) => {
+            const frequency = timeLeft === 1 ? 900 : 720;
+            playTone(frequency, 0.12, { type: 'square', volume: 0.18 });
+        }
+    };
+
     const isFileProtocol = window.location.protocol === 'file:';
 
     const ensureDatabaseLoaded = () => {
@@ -315,6 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (gameInProgress) {
             return;
         }
+        ensureAudioContext();
         if (!ensureDatabaseLoaded()) {
             statusText.textContent = 'Veri yukleniyor. Lutfen tekrar deneyin.';
             return;
@@ -380,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             currentPlayerIndex = Math.floor(Math.random() * activePlayers.length);
+            soundEngine.playRoundStart();
             startTurn();
         }, 800);
     };
@@ -394,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
             wordInputArea.classList.remove('hidden');
         }
         wordInput.focus();
+        soundEngine.playTurnStart();
 
         let timeLeft = parseInt(document.getElementById('turnDurationSelect').value, 10);
         if (Number.isNaN(timeLeft) || timeLeft <= 0) {
@@ -405,6 +530,9 @@ document.addEventListener('DOMContentLoaded', () => {
         countdownInterval = setInterval(() => {
             timeLeft -= 1;
             countdownElement.textContent = timeLeft;
+            if (timeLeft > 0 && timeLeft <= 3) {
+                soundEngine.playCountdownTick(timeLeft);
+            }
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 handlePlayerElimination(currentPlayer, 'Sure doldu');
@@ -438,6 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ) {
                 usedWords.push(submittedWord);
                 updateUsedWords();
+                soundEngine.playSuccess();
                 nextTurn();
             } else {
                 handlePlayerElimination(currentPlayer, 'Yanlis veya tekrar eden kelime');
@@ -465,6 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
         statusText.classList.remove('status-active');
         statusText.textContent = `${player} elendi. Sebep: ${reason}.`;
         turnInProgress = false;
+
+        soundEngine.playElimination();
 
         updateScoreboard();
         renderTurnRow();
@@ -502,9 +633,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const scoreGoal = parseInt(document.getElementById('scoreGoalSelect').value, 10);
             if (scores[winner] >= scoreGoal) {
                 statusText.textContent = `${winner} oyunu kazandi!`;
+                soundEngine.playVictory();
                 prepareForRestart();
             } else {
                 promptNextRound(`Turu ${winner} kazandi. Yeni tur icin "Turu Baslat" butonuna basin.`);
+                soundEngine.playRoundWin();
             }
         } else {
             lastRoundWinner = null;
